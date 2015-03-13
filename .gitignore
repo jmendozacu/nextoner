@@ -36,8 +36,5 @@ RELEASE_NOTES.txt
 
 .buildpath
 
-
 media/wysiwyg/.thumbs/
 .project
-
-app/etc/local.xml

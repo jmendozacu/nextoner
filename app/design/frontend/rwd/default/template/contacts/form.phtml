@@ -29,8 +29,23 @@
     <h1><?php echo Mage::helper('contacts')->__('Contact Us') ?></h1>
 </div>
 <form action="<?php echo $this->getFormAction(); ?>" id="contactForm" method="post" class="scaffold-form">
-    <div class="fieldset">
-        <h2 class="legend"><?php echo Mage::helper('contacts')->__('Contact Information') ?></h2>
+	<div class="fieldset">
+		<h3 class="legend">Office Hours &amp; Customer Support</h3>
+		<p>9am-5pm Sydney Time Monday-Friday</p>
+		<p>
+			<b>Phone</b>: <?php echo Mage::getStoreConfig('general/store_information/phone'); ?><br/>
+			<b>Email</b></u> sales@nextoner.com.au
+		</p>
+		<h3 class="legend">Postal address</h3>
+		<p>
+			<address>
+				Nextoner.com.au<br/>
+				1/79 Station Road<br/>
+				Seven Hills NSW 2147<br/>
+				ABN: 42 602 386 872	
+			</address>
+		</p>
+        <h3 class="legend">Contact Form</h3>
         <p class="required"><?php echo Mage::helper('contacts')->__('* Required Fields') ?></p>
         <ul class="form-list">
             <li class="fields">

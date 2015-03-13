@@ -217,7 +217,7 @@
             </depends>
         </Mage_PaypalUk>
         <Mage_GoogleCheckout>
-            <active>true</active>
+            <active>false</active>
             <codePool>core</codePool>
             <depends>
                 <Mage_Sales/>
@@ -241,7 +241,7 @@
             </depends>
         </Mage_Backup>
         <Mage_Poll>
-            <active>true</active>
+            <active>false</active>
             <codePool>core</codePool>
             <depends>
                 <Mage_Core/>
@@ -253,7 +253,7 @@
             <codePool>core</codePool>
             <depends>
                 <Mage_Core/>
-        <Mage_Review/>
+        		<Mage_Review/>
             </depends>
         </Mage_Rating>
         <Mage_Review>
@@ -289,7 +289,7 @@
             </depends>
         </Mage_Reports>
         <Mage_Newsletter>
-            <active>true</active>
+            <active>false</active>
             <codePool>core</codePool>
             <depends>
                 <Mage_Core/>
@@ -337,7 +337,7 @@
              </depends>
         </Mage_GiftMessage>
         <Mage_Sendfriend>
-            <active>true</active>
+            <active>false</active>
             <codePool>core</codePool>
              <depends>
                 <Mage_Catalog/>
