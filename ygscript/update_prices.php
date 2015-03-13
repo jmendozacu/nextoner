@@ -64,7 +64,7 @@ function _checkIfSkuExists($sku){
 function _updatePrices($data){
     $connection     = _getConnection('core_write');
     $sku            = $data[0];
-    $newPrice       = $data[1];
+    $newPrice       = $data[2];
     $productId      = _getIdFromSku($sku);
     $attributeId    = _getAttributeId();
  
@@ -73,6 +73,20 @@ function _updatePrices($data){
             WHERE  cped.attribute_id = ?
             AND cped.entity_id = ?";
     $connection->query($sql, array($newPrice, $attributeId, $productId));
+}
+
+function _updateCost($data){
+    $connection     = _getConnection('core_write');
+    $sku            = $data[0];
+    $newCost		= $data[1];
+    $productId      = _getIdFromSku($sku);
+    $attributeId    = _getAttributeId('cost');
+ 
+    $sql = "UPDATE " . _getTableName('catalog_product_entity_decimal') . " cped
+                SET  cped.value = ?
+            WHERE  cped.attribute_id = ?
+            AND cped.entity_id = ?";
+    $connection->query($sql, array($newCost, $attributeId, $productId));
 }
 /***************** UTILITY FUNCTIONS ********************/
  
@@ -86,10 +100,11 @@ foreach($data as $_data){
     if(_checkIfSkuExists($_data[0])){
         try{
             _updatePrices($_data);
-            $message .= $count . '> Success:: While Updating Price (' . $_data[1] . ') of Sku (' . $_data[0] . '). <br />';
+            _updateCost($_data);
+            $message .= $count . '> Success:: While Updating Price (' . $_data[2] . '), Cost ('.$_data[1].') of Sku (' . $_data[0] . '). <br />';
  
         }catch(Exception $e){
-            $message .=  $count .'> Error:: While Upating  Price (' . $_data[1] . ') of Sku (' . $_data[0] . ') => '.$e->getMessage().'<br />';
+            $message .=  $count .'> Error:: While Upating  Price (' . $_data[2] . '), Cost ('.$_data[1].') of Sku (' . $_data[0] . ') => '.$e->getMessage().'<br />';
         }
     }else{
         $message .=  $count .'> Error:: Product with Sku (' . $_data[0] . ') does\'t exist.<br />';
