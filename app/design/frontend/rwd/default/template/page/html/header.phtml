@@ -28,17 +28,6 @@
  */
 ?>
 
-<div class="header-language-background">
-    <div class="header-language-container">
-        <div class="store-language-container">
-            <?php echo $this->getChildHtml('store_language') ?>
-        </div>
-
-        <?php echo $this->getChildHtml('currency_switcher') ?>
-
-        <p class="welcome-msg"><?php echo $this->getChildHtml('welcome') ?> <?php echo $this->getAdditionalHtml() ?></p>
-    </div>
-</div>
 
 <header id="header" class="page-header">
     <div class="page-header-container">
@@ -46,7 +35,7 @@
             <img src="<?php echo $this->getLogoSrc() ?>" alt="<?php echo $this->getLogoAlt() ?>" class="large" />
             <img src="<?php echo $this->getLogoSrcSmall() ?>" alt="<?php echo $this->getLogoAlt() ?>" class="small" />
         </a>
-
+		<div class="header-contact"><small>Call our experts on </small>1300 85 61 62</div>
         <?php // In order for the language switcher to display next to logo on smaller viewports, it will be moved here.
               // See app.js for details ?>
         <div class="store-language-container"></div>
@@ -86,11 +75,7 @@
             <?php echo $this->getChildHtml('topMenu') ?>
         </div>
 
-        <!-- Search -->
 
-        <div id="header-search" class="skip-content">
-            <?php echo $this->getChildHtml('topSearch') ?>
-        </div>
 
         <!-- Account -->
 
@@ -100,5 +85,10 @@
     </div>
 </header>
 
+<!-- Search -->
+
+<div id="header-search" class="skip-content header-search">
+   <?php echo $this->getChildHtml('topSearch') ?>
+</div>
 
 <?php echo $this->getChildHtml('topContainer'); ?>

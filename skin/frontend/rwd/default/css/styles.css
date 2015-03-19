@@ -3459,8 +3459,6 @@ a.skip-link {
 @media only screen and (min-width: 771px) {
   #header-nav {
     display: block;
-    /* Force visibility */
-    border-bottom: 1px solid #ededed;
   }
 }
 /* ============================================ *
@@ -3469,7 +3467,6 @@ a.skip-link {
 @media only screen and (min-width: 771px) {
   .nav-primary {
     display: block;
-    margin-top: 15px;
   }
 }
 /* ============================================ *
@@ -3654,16 +3651,19 @@ a.skip-link {
   padding: 20px;
 }
 
+
+
 @media only screen and (min-width: 771px) {
   #header-search {
     display: block;
-    position: absolute;
-    top: 55px;
-    right: 0;
-    width: 25%;
-    height: 50px;
-    padding: 0;
+    width: 100%;
+    padding: 10px 30px;
+  	background-color: #EDEDED;
   }
+  
+  .header-contact { font-size: 25px; position: absolute; right: 10px; top: 40px; }
+  .header-contact  small {font-size: 15px;}
+  .header-search {}
 }
 /* ============================================ *
  * Search Input
