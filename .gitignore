@@ -38,3 +38,4 @@ RELEASE_NOTES.txt
 
 media/wysiwyg/.thumbs/
 .project
+app/etc/local.xml
