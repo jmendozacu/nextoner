@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns:typens="urn:{{var wsdl.name}}" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns="http://schemas.xmlsoap.org/wsdl/"
+    name="{{var wsdl.name}}" targetNamespace="urn:{{var wsdl.name}}">
+    <types>
+        <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:Magento">
+            <import namespace="http://schemas.xmlsoap.org/soap/encoding/" schemaLocation="http://schemas.xmlsoap.org/soap/encoding/" />
+                        <complexType name="sniipsyncEntity">
+                <all>
+                    <element name="product_id" type="xsd:integer" minOccurs="0"/>
+                    <element name="product_name" type="xsd:string" minOccurs="0"/>
+                    <element name="sku" type="xsd:string" minOccurs="0"/>
+                    <element name="short_description" type="xsd:string" minOccurs="0"/>
+                    <element name="description" type="xsd:string" minOccurs="0"/>
+                    <element name="type_id" type="xsd:string" minOccurs="0"/>
+                    <element name="price" type="xsd:decimal" minOccurs="0"/>
+                    <element name="special_price" type="xsd:decimal" minOccurs="0"/>
+                    <element name="special_from_date" type="xsd:string" minOccurs="0"/>
+                    <element name="special_to_date" type="xsd:string" minOccurs="0"/>
+                    <element name="tax_class_id" type="xsd:integer" minOccurs="0"/>
+                    <element name="tier_price" type="typens:catalogProductTierPriceEntityArray" minOccurs="0"/>
+                    <element name="weight" type="xsd:decimal" minOccurs="0"/>
+                    <element name="product_url" type="xsd:string" minOccurs="0"/>
+                    <element name="visibility" type="xsd:integer" minOccurs="0"/>
+                    <element name="status" type="xsd:integer" minOccurs="0"/>
+                    <element name="categories" type="typens:ArrayOfString" minOccurs="0"/>
+                    <element name="websites" type="typens:ArrayOfString" minOccurs="0"/>
+                    <element name="totalRecords" type="xsd:string" minOccurs="0"/>
+                    <element name="quantity" type="xsd:integer" minOccurs="0"/>
+                    <element name="product_images" type="typens:Array" minOccurs="0"/>
+                    <element name="children" type="typens:Array" minOccurs="0"/>
+                    <element name="created_at" type="xsd:string" minOccurs="0"/>
+                    <element name="updated_at" type="xsd:string" minOccurs="0"/>
+                </all>
+            </complexType>
+
+            <complexType name="sniipsyncEntityArray">
+                <complexContent>
+                    <restriction base="soapenc:Array">
+                        <attribute ref="soapenc:arrayType" wsdl:arrayType="typens:sniipsyncEntity[]" />
+                    </restriction>
+                </complexContent>
+            </complexType>
+            <complexType name="sniipsyncCartCustomerEntity">
+                <all>
+                    <element name="mode" type="xsd:string" minOccurs="0"/>
+                    <element name="customer_id" type="xsd:int" minOccurs="0"/>
+                    <element name="email" type="xsd:string" minOccurs="0"/>
+                    <element name="firstname" type="xsd:string" minOccurs="0"/>
+                    <element name="lastname" type="xsd:string" minOccurs="0"/>
+                    <element name="password" type="xsd:string" minOccurs="0"/>
+                    <element name="confirmation" type="xsd:string" minOccurs="0"/>
+                    <element name="website_id" type="xsd:int" minOccurs="0"/>
+                    <element name="store_id" type="xsd:int" minOccurs="0"/>
+                    <element name="group_id" type="xsd:int" minOccurs="0"/>
+                </all>
+            </complexType>
+            <complexType name="sniipsyncCartCustomerAddressEntity">
+                <all>
+                    <element name="mode" type="xsd:string" minOccurs="0"/>
+                    <element name="address_id" type="xsd:string" minOccurs="0"/>
+                    <element name="firstname" type="xsd:string" minOccurs="0"/>
+                    <element name="lastname" type="xsd:string" minOccurs="0"/>
+                    <element name="company" type="xsd:string" minOccurs="0"/>
+                    <element name="street" type="xsd:string" minOccurs="0"/>
+                    <element name="city" type="xsd:string" minOccurs="0"/>
+                    <element name="region" type="xsd:string" minOccurs="0"/>
+                    <element name="region_id" type="xsd:string" minOccurs="0"/>
+                    <element name="postcode" type="xsd:string" minOccurs="0"/>
+                    <element name="country_id" type="xsd:string" minOccurs="0"/>
+                    <element name="telephone" type="xsd:string" minOccurs="0"/>
+                    <element name="fax" type="xsd:string" minOccurs="0"/>
+                    <element name="is_default_billing" type="xsd:int" minOccurs="0"/>
+                    <element name="is_default_shipping" type="xsd:int" minOccurs="0"/>
+                </all>
+            </complexType>
+            <complexType name="sniipsyncCartCustomerAddressEntityArray">
+                <complexContent>
+                    <restriction base="soapenc:Array">
+                        <attribute ref="soapenc:arrayType" wsdl:arrayType="typens:sniipsyncCartCustomerAddressEntity[]"/>
+                    </restriction>
+                </complexContent>
+            </complexType>
+
+            <complexType name="sniipsyncCartProductEntity">
+                <all>
+                    <element name="product_id" type="xsd:string" minOccurs="0"/>
+                    <element name="sku" type="xsd:string" minOccurs="0"/>
+                    <element name="qty" type="xsd:double" minOccurs="0"/>
+                    <element name="options" type="typens:associativeArray" minOccurs="0"/>
+                    <element name="bundle_option" type="typens:associativeArray" minOccurs="0"/>
+                    <element name="bundle_option_qty" type="typens:associativeArray" minOccurs="0"/>
+                    <element name="links" type="typens:ArrayOfString" minOccurs="0"/>
+                </all>
+            </complexType>
+            <complexType name="sniipsyncCartProductEntityArray">
+                <complexContent>
+                    <restriction base="soapenc:Array">
+                        <attribute ref="soapenc:arrayType" wsdl:arrayType="typens:sniipsyncCartProductEntity[]"/>
+                    </restriction>
+                </complexContent>
+            </complexType>
+            <complexType name="sniipsyncCategoryEntity">
+                <all>
+                    <element name="category_id" type="xsd:integer" minOccurs="0"/>
+                    <element name="product_count" type="xsd:integer" minOccurs="0"/>
+                    <element name="url" type="xsd:string" minOccurs="0"/>
+                    <element name="name" type="xsd:string" minOccurs="0"/>
+                    <element name="level" type="xsd:integer" minOccurs="0"/>
+                    <element name="image" type="xsd:string" minOccurs="0"/>
+                    <element name="isActive" type="xsd:integer" minOccurs="0"/>
+                    <element name="product_collection" type="typens:catalogProductEntityArray" minOccurs="0"/>
+                    <element name="parent_id" type="xsd:integer" minOccurs="0"/>
+                    <element name="all_children" type="typens:ArrayOfString" minOccurs="0"/>
+                    <element name="children" type="xsd:integer" minOccurs="0"/>
+                    <element name="children_count" type="xsd:integer" minOccurs="0"/>
+                    <element name="available_sort_by" type="typens:ArrayOfString" minOccurs="0"/>
+                    <element name="default_sort_by" type="xsd:string" minOccurs="0"/>
+                    <element name="position" type="xsd:integer" minOccurs="0"/>
+                    <element name="created_at" type="xsd:string" minOccurs="0"/>
+                    <element name="updated_at" type="xsd:string" minOccurs="0"/>
+                </all>
+            </complexType>
+            <complexType name="sniipsyncCategoryEntityArray">
+                <complexContent>
+                    <restriction base="soapenc:Array">
+                        <attribute ref="soapenc:arrayType" wsdl:arrayType="typens:sniipsyncCategoryEntity[]" />
+                    </restriction>
+                </complexContent>
+            </complexType>
+            <complexType name="sniipsyncPageInfoEntity">
+                <all>
+                    <element name="limit" type="xsd:integer" minOccurs="0"/>
+                    <element name="page" type="xsd:integer" minOccurs="0"/>
+                    <element name="totalPage" type="xsd:integer" minOccurs="0"/>
+                    <element name="totalItems" type="xsd:integer" minOccurs="0"/>
+                </all>
+            </complexType>
+
+
+            <complexType name="sniipsyncAttrProductArray">
+                <all>
+                    <element name="group_id" type="xsd:integer" minOccurs="0"/>
+                    <element name="group_name" type="xsd:string" minOccurs="0"/>
+                    <element name="product_id" type="xsd:integer" minOccurs="0"/>
+                    <element name="items" type="typens:ArrayOfString" minOccurs="0"/>
+                </all>
+            </complexType>
+
+            <complexType name="sniipsyncAttrAllProductArray">
+                <all>
+                    <element name="array" type="typens:ArrayOfString" minOccurs="0"/>
+                </all>
+            </complexType>
+
+        </schema>
+    </types>
+    <message name="sniipsyncCartInfoRequest">
+        <part name="sessionId" type="xsd:string"/>
+        <part name="productsData" type="typens:sniipsyncCartProductEntityArray"/>
+        <part name="customerData" type="typens:sniipsyncCartCustomerEntity"/>
+        <part name="customerAddressData" type="typens:sniipsyncCartCustomerAddressEntityArray"/>
+        <part name="quoteId" type="xsd:int"/>
+        <part name="storeId" type="xsd:string"/>
+    </message>
+    <message name="sniipsyncCartInfoResponse">
+        <part name="result" type="xsd:string"/>
+    </message>
+
+    <message name="sniipsyncListRequest">
+        <part name="sessionId" type="xsd:string" />
+        <part name="pageSize" type="xsd:integer" />
+        <part name="curPage" type="xsd:integer" />
+    </message>
+    <message name="sniipsyncListResponse">
+        <part name="storeView" type="typens:sniipsyncEntityArray" />
+    </message>
+    <message name="sniipsyncCategoryRequest">
+        <part name="sessionId" type="xsd:string" />
+        <part name="pageSize" type="xsd:integer" />
+        <part name="curPage" type="xsd:integer" />
+    </message>
+    <message name="sniipsyncCategoryResponse">
+        <part name="storeView" type="typens:sniipsyncCategoryEntityArray" />
+    </message>
+
+    <message name="sniipsyncInfoRequest">
+        <part name="sessionId" type="xsd:string" />
+    </message>
+    <message name="sniipsyncInfoResponse">
+        <part name="storeView" type="xsd:string" />
+    </message>
+
+    <message name="sniipsyncPageInfoRequest">
+        <part name="sessionId" type="xsd:string" />
+        <part name="pageSize" type="xsd:integer" />
+        <part name="mode" type="xsd:integer" />
+    </message>
+    <message name="sniipsyncPageInfoResponse">
+        <part name="storeView" type="typens:sniipsyncPageInfoEntity" />
+    </message>
+
+    <message name="sniipsyncAttrProductRequest">
+        <part name="sessionId" type="xsd:string" />
+        <part name="productId" type="xsd:string" />
+    </message>
+    <message name="sniipsyncAttrProductResponse">
+        <part name="storeView" type="xsd:sniipsyncAttrProductArray" />
+    </message>
+
+
+
+    <message name="sniipsyncAttrAllProductRequest">
+        <part name="sessionId" type="xsd:string" />
+        <part name="pageSize" type="xsd:integer" />
+        <part name="mode" type="xsd:integer" />
+    </message>
+    <message name="sniipsyncAttrAllProductResponse">
+        <part name="storeView" type="xsd:sniipsyncAttrAllProductArray" />
+    </message>
+
+     <portType name="{{var wsdl.handler}}PortType">
+         <operation name="sniipsyncCartInfo">
+             <documentation>Retrieve information about shopping cart</documentation>
+             <input message="typens:sniipsyncCartInfoRequest"/>
+             <output message="typens:sniipsyncCartInfoResponse"/>
+         </operation>
+
+        <operation name="sniipsyncList">
+            <documentation>Retrieve CustomApi Data</documentation>
+            <input message="typens:sniipsyncListRequest" />
+            <output message="typens:sniipsyncListResponse" />
+        </operation>
+         <operation name="sniipsyncCategory">
+             <documentation>Retrieve Category Data</documentation>
+             <input message="typens:sniipsyncCategoryRequest" />
+             <output message="typens:sniipsyncCategoryResponse" />
+         </operation>
+         <operation name="sniipsyncInfo">
+             <documentation>Retrieve Info Data</documentation>
+             <input message="typens:sniipsyncInfoRequest" />
+             <output message="typens:sniipsyncInfoResponse" />
+         </operation>
+         <operation name="sniipsyncPageInfo">
+             <documentation>Retrieve Info Data</documentation>
+             <input message="typens:sniipsyncPageInfoRequest" />
+             <output message="typens:sniipsyncPageInfoResponse" />
+         </operation>
+         <operation name="sniipsyncAttrProduct">
+             <documentation>Retrieve Attr Product</documentation>
+             <input message="typens:sniipsyncAttrProductRequest" />
+             <output message="typens:sniipsyncAttrProductResponse" />
+         </operation>
+
+         <operation name="sniipsyncAttrAllProduct">
+             <documentation>Retrieve Attr All Product</documentation>
+             <input message="typens:sniipsyncAttrAllProductRequest" />
+             <output message="typens:sniipsyncAttrAllProductResponse" />
+         </operation>
+    </portType>
+    <binding name="{{var wsdl.handler}}Binding" type="typens:{{var wsdl.handler}}PortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http" />
+        <operation name="sniipsyncCartInfo">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action"/>
+            <input>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded"
+                           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </input>
+            <output>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded"
+                           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </output>
+        </operation>
+
+        <operation name="sniipsyncList">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
+            <input>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </input>
+            <output>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </output>
+        </operation>
+        <operation name="sniipsyncCategory">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
+            <input>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </input>
+            <output>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </output>
+        </operation>
+        <operation name="sniipsyncInfo">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
+            <input>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </input>
+            <output>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </output>
+        </operation>
+        <operation name="sniipsyncPageInfo">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
+            <input>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </input>
+            <output>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </output>
+        </operation>
+        <operation name="sniipsyncAttrProduct">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
+            <input>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </input>
+            <output>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </output>
+        </operation>
+
+        <operation name="sniipsyncAttrAllProduct">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
+            <input>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </input>
+            <output>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </output>
+        </operation>
+    </binding>
+</definitions>
