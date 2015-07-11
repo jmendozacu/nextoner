@@ -4,8 +4,6 @@
 
 app/etc/local.xml
 
-downloader/
-
 # media folder
 
 media/import/
@@ -23,14 +21,7 @@ var/
 
 yogee_feeds/
 
-
-LICENSE_AFL.txt
-LICENSE.html
-LICENSE.txt
-
-
 php.ini.sample
-RELEASE_NOTES.txt
 
 .DS_Store
 
