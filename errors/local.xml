@@ -1,4 +1,5 @@
-<?php
+<?xml version="1.0"?>
+<!--
 /**
  * Magento
  *
@@ -18,15 +19,33 @@
  * versions in the future. If you wish to customize Magento for your
  * needs please refer to http://www.magento.com for more information.
  *
- * @category    design
- * @package     base_default
+ * @category    Mage
+ * @package     Errors
  * @copyright   Copyright (c) 2006-2014 X.commerce, Inc. (http://www.magento.com)
  * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
-?>
-<div class="page-title">
-    <h1><?php echo $this->__('An error occurred in the process of payment') ?></h1>
-</div>
-<?php if ($this->getRealOrderId()) : ?><p><?php echo $this->__('Order #') . $this->getRealOrderId() ?></p><?php endif ?>
-<?php if ($error = $this->getErrorMessage()) : ?><p><?php echo $error ?></p><?php endif ?>
-<p><?php echo $this->__('Click <a href="%s">here</a> to continue shopping.', $this->getContinueShoppingUrl()) ?></p>
+-->
+<config>
+    <skin>default</skin>
+    <report>
+        <!--
+            "action" can be set to "print" to show exception on screen and "email"
+            to send exception on specified email
+        -->
+        <action>email</action>
+        <!--
+            in "subject" you can set subject of email
+        -->
+        <subject>Store Debug Information</subject>
+        <!--
+            "email_address" admin email address
+        -->
+        <email_address>chew@yogee.com.au</email_address>
+        <!--
+            "trash" is handle about trace info
+            value "leave" is for store on disk
+            value "delete" is for cleaning
+        -->
+        <trash>leave</trash>
+    </report>
+</config>
