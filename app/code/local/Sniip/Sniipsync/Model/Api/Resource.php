@@ -2,6 +2,19 @@
 class Sniip_Sniipsync_Model_Api_Resource extends Mage_Api_Model_Resource_Abstract
 {
     /**
+     * Customer address types
+     */
+    const ADDRESS_BILLING    = Mage_Sales_Model_Quote_Address::TYPE_BILLING;
+    const ADDRESS_SHIPPING   = Mage_Sales_Model_Quote_Address::TYPE_SHIPPING;
+
+    /**
+     * Customer checkout types
+     */
+    const MODE_CUSTOMER = Mage_Checkout_Model_Type_Onepage::METHOD_CUSTOMER;
+    const MODE_REGISTER = Mage_Checkout_Model_Type_Onepage::METHOD_REGISTER;
+    const MODE_GUEST    = Mage_Checkout_Model_Type_Onepage::METHOD_GUEST;
+
+    /**
      * Attributes map array per entity type
      *
      * @var array
@@ -51,6 +64,30 @@ class Sniip_Sniipsync_Model_Api_Resource extends Mage_Api_Model_Resource_Abstrac
         return false;
     }
 
+    protected function _prepareProductsData($data)
+    {
+        return is_array($data) ? $data : null;
+    }
+    protected function _prepareCustomerData($data)
+    {
+        foreach ($this->_attributesMap['quote_customer'] as $attributeAlias=>$attributeCode) {
+            if(isset($data[$attributeAlias]))
+            {
+                $data[$attributeCode] = $data[$attributeAlias];
+                unset($data[$attributeAlias]);
+            }
+        }
+        return $data;
+    }
+
+    protected function _getProductInfo($productId, $store = null, $identifierType = null)
+    {
+        $product = Mage::helper('catalog/product')->getProduct($productId,
+            $this->_getStoreId($store),
+            $identifierType
+        );
+        return $product;
+    }
     /**
      * Retrieves store id from store code, if no store id specified,
      * it use set session or admin store
@@ -201,6 +238,141 @@ class Sniip_Sniipsync_Model_Api_Resource extends Mage_Api_Model_Resource_Abstrac
         }
 
         return true;
+    }
+    /**
+     * Get QuoteItem by Product and request info
+     *
+     * @param Mage_Sales_Model_Quote $quote
+     * @param Mage_Catalog_Model_Product $product
+     * @param Varien_Object $requestInfo
+     * @return Mage_Sales_Model_Quote_Item
+     * @throw Mage_Core_Exception
+     */
+    protected function _getQuoteItemByProduct(Mage_Sales_Model_Quote $quote,
+                                              Mage_Catalog_Model_Product $product,
+                                              Varien_Object $requestInfo)
+    {
+        $cartCandidates = $product->getTypeInstance(true)
+            ->prepareForCartAdvanced($requestInfo,
+                $product,
+                Mage_Catalog_Model_Product_Type_Abstract::PROCESS_MODE_FULL
+            );
+
+        /**
+         * Error message
+         */
+        if (is_string($cartCandidates)) {
+//            throw Mage::throwException($cartCandidates);
+        }
+
+        /**
+         * If prepare process return one object
+         */
+        if (!is_array($cartCandidates)) {
+            $cartCandidates = array($cartCandidates);
+        }
+
+        /** @var $item Mage_Sales_Model_Quote_Item */
+        $item = null;
+        foreach ($cartCandidates as $candidate) {
+            if ($candidate->getParentProductId()) {
+                continue;
+            }
+            $item = $quote->getItemByProduct($candidate);
+        }
+        if (is_null($item)) {
+            $item = Mage::getModel("sales/quote_item");
+        }
+
+        return $item;
+    }
+    /**
+     * Get request for product add to cart procedure
+     *
+     * @param   mixed $requestInfo
+     * @return  Varien_Object
+     */
+    protected function _getProductRequest($requestInfo)
+    {
+        if ($requestInfo instanceof Varien_Object) {
+            $request = $requestInfo;
+        } elseif (is_numeric($requestInfo)) {
+            $request = new Varien_Object();
+            $request->setQty($requestInfo);
+        } else {
+            $request = new Varien_Object($requestInfo);
+        }
+
+        if (!$request->hasQty()) {
+            $request->setQty(1);
+        }
+        return $request;
+    }
+    /**
+     *
+     */
+    protected function _getCustomer($customerId)
+    {
+        /** @var $customer Mage_Customer_Model_Customer */
+        $customer = Mage::getModel('customer/customer')
+            ->load($customerId);
+        if (!$customer->getId()) {
+            $this->_fault('customer_not_exists');
+        }
+
+        return $customer;
+    }
+    protected function _prepareCustomerAddressData($data)
+    {
+        if (!is_array($data) || !is_array($data[0])) {
+            return null;
+        }
+
+        $dataAddresses = array();
+        foreach($data as $addressItem) {
+            foreach ($this->_attributesMap['quote_address'] as $attributeAlias=>$attributeCode) {
+                if(isset($addressItem[$attributeAlias]))
+                {
+                    $addressItem[$attributeCode] = $addressItem[$attributeAlias];
+                    unset($addressItem[$attributeAlias]);
+                }
+            }
+            $dataAddresses[] = $addressItem;
+        }
+        return $dataAddresses;
+    }
+    /**
+     * Get customer address by identifier
+     *
+     * @param   int $addressId
+     * @return  Mage_Customer_Model_Address
+     */
+    protected function _getCustomerAddress($addressId)
+    {
+        $address = Mage::getModel('customer/address')->load((int)$addressId);
+        if (is_null($address->getId())) {
+            $this->_fault('invalid_address_id');
+        }
+
+        $address->explodeStreetAddress();
+        if ($address->getRegionId()) {
+            $address->setRegion($address->getRegionId());
+        }
+        return $address;
+    }
+    protected function _setErrorLog($domain,$method,$error){
+        $service_url = 'http://'.$domain.'/api/v1/trackingLogs';
+        $curl = curl_init($service_url);
+        $curl_post_data = array(
+            "hosting" => Mage::getBaseUrl (),
+            "method" => $method,
+            "error" => $error,
+        );
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_, true);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_post_data);
+        curl_exec($curl);
+        curl_close($curl);
     }
 }
 

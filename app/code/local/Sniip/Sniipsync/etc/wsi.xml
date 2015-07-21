@@ -8,76 +8,6 @@
              targetNamespace="urn:{{var wsdl.name}}">
     <wsdl:types>
         <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:{{var wsdl.name}}">
-           <xsd:complexType name="sniipsyncEntityArray">
-                <xsd:sequence>
-                    <xsd:element maxOccurs="unbounded" name="complexObjectArray" type="typens:sniipsyncListEntity" />
-                </xsd:sequence>
-            </xsd:complexType>
-            <xsd:complexType name="sniipsyncCategoryEntityArray">
-                <xsd:sequence>
-                    <xsd:element maxOccurs="unbounded" name="complexObjectArray" type="typens:sniipsyncCategoryEntity" />
-                </xsd:sequence>
-            </xsd:complexType>
-
-            <xsd:complexType name="sniipsyncPageInfoEntity">
-                <xsd:sequence>
-                    <xsd:element name="limit" type="xsd:integer" />
-                    <xsd:element name="page" type="xsd:integer" />
-                    <xsd:element name="totalPage" type="xsd:integer" />
-                    <xsd:element name="totalItems" type="xsd:integer" />
-                </xsd:sequence>
-            </xsd:complexType>
-
-            <xsd:complexType name="sniipsyncListEntity">
-                <xsd:sequence>
-                    <xsd:element name="product_id" type="xsd:integer" />
-                    <xsd:element name="product_name" type="xsd:string" />
-                    <xsd:element name="sku" type="xsd:string" />
-                    <xsd:element name="short_description" type="xsd:string" />
-                    <xsd:element name="description" type="xsd:string" />
-                    <xsd:element name="type_id" type="xsd:string" />
-                    <xsd:element name="price" type="xsd:decimal" />
-                    <xsd:element name="special_price" type="xsd:decimal" />
-                    <xsd:element name="special_from_date" type="xsd:string" />
-                    <xsd:element name="special_to_date" type="xsd:string" />
-                    <xsd:element name="tax_class_id" type="xsd:integer" />
-                    <xsd:element name="tier_price" type="typens:ArrayOfString" />
-                    <xsd:element name="weight" type="xsd:decimal" />
-                    <xsd:element name="product_url" type="xsd:string" />
-                    <xsd:element name="visibility" type="xsd:integer" />
-                    <xsd:element name="status" type="xsd:integer" />
-                    <xsd:element name="categories" type="typens:ArrayOfString" />
-                    <xsd:element name="websites" type="typens:ArrayOfString" />
-                    <xsd:element name="totalRecords" type="xsd:string" />
-                    <xsd:element name="quantity" type="xsd:integer" />
-                    <xsd:element name="product_images" type="typens:ArrayOfString" />
-                    <xsd:element name="children" type="typens:ArrayOfString" />
-                    <xsd:element name="created_at" type="xsd:string" />
-                    <xsd:element name="updated_at" type="xsd:string" />
-                </xsd:sequence>
-            </xsd:complexType>
-            <xsd:complexType name="sniipsyncCategoryEntity">
-                <xsd:sequence>
-                    <xsd:element name="category_id" type="xsd:integer" />
-                    <xsd:element name="product_count" type="xsd:integer" />
-                    <xsd:element name="url" type="xsd:string" />
-                    <xsd:element name="name" type="xsd:string" />
-                    <xsd:element name="level" type="xsd:integer" />
-                    <xsd:element name="image" type="xsd:string" />
-                    <xsd:element name="isActive" type="xsd:integer" />
-                    <xsd:element name="product_collection" type="typens:catalogProductEntityArray" />
-                    <xsd:element name="parent_id" type="xsd:integer" />
-                    <xsd:element name="all_children" type="typens:ArrayOfString" />
-                    <xsd:element name="children" type="xsd:integer" />
-                    <xsd:element name="children_count" type="xsd:integer" />
-                    <xsd:element name="available_sort_by" type="typens:ArrayOfString" />
-                    <xsd:element name="default_sort_by" type="xsd:string" />
-                    <xsd:element name="position" type="xsd:integer" />
-                    <xsd:element name="created_at" type="xsd:string" />
-                    <xsd:element name="updated_at" type="xsd:string" />
-                </xsd:sequence>
-            </xsd:complexType>
-
             <xsd:complexType name="sniipsyncCartProductEntity">
                 <xsd:sequence>
                     <xsd:element name="product_id" type="xsd:string" minOccurs="0"/>
@@ -133,6 +63,8 @@
                 </xsd:sequence>
             </xsd:complexType>
 
+
+
             <xsd:element name="sniipsyncCartInfoRequestParam">
                 <xsd:complexType>
                     <xsd:sequence>
@@ -152,11 +84,7 @@
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
-
-
-
-
-            <xsd:element name="sniipsyncListRequestParam">
+            <xsd:element name="sniipsyncProductListRequestParam">
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element minOccurs="1" maxOccurs="1" name="sessionId" type="xsd:string" />
@@ -165,14 +93,14 @@
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
-            <xsd:element name="sniipsyncListResponseParam">
+            <xsd:element name="sniipsyncProductListResponseParam">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element minOccurs="1" maxOccurs="1" name="result" type="typens:sniipsyncEntityArray" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="result" type="xsd:string" />
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
-            <xsd:element name="sniipsyncCategoryRequestParam">
+            <xsd:element name="sniipsyncCategoryListRequestParam">
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element minOccurs="1" maxOccurs="1" name="sessionId" type="xsd:string" />
@@ -181,10 +109,10 @@
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
-            <xsd:element name="sniipsyncCategoryResponseParam">
+            <xsd:element name="sniipsyncCategoryListResponseParam">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element minOccurs="1" maxOccurs="1" name="result" type="typens:sniipsyncCategoryEntityArray" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="result" type="xsd:string" />
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
@@ -202,7 +130,6 @@
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
-
             <xsd:element name="sniipsyncPageInfoRequestParam">
                 <xsd:complexType>
                     <xsd:sequence>
@@ -215,7 +142,7 @@
             <xsd:element name="sniipsyncPageInfoResponseParam">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element minOccurs="1" maxOccurs="1" name="storeView" type="typens:sniipsyncPageInfoEntity" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="result" type="xsd:string" />
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
@@ -230,22 +157,10 @@
             <xsd:element name="sniipsyncAttrProductResponseParam">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element maxOccurs="unbounded" name="complexObjectArray" type="typens:sniipsyncAttrProductArray" />
+                        <xsd:element minOccurs="1" maxOccurs="1"  name="result" type="xsd:string" />
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
-
-            <xsd:complexType name="sniipsyncAttrProductArray">
-                <xsd:sequence>
-                    <xsd:element name="group_id" type="xsd:integer" />
-                    <xsd:element name="group_name" type="xsd:string" />
-                    <xsd:element name="product_id" type="xsd:integer" />
-                    <xsd:element name="items" type="typens:ArrayOfString" />
-                </xsd:sequence>
-            </xsd:complexType>
-
-
-
             <xsd:element name="sniipsyncAttrAllProductRequestParam">
                 <xsd:complexType>
                     <xsd:sequence>
@@ -258,11 +173,10 @@
             <xsd:element name="sniipsyncAttrAllProductResponseParam">
                 <xsd:complexType>
                     <xsd:sequence>
-                        <xsd:element name="array" type="typens:ArrayOfString" />
+                        <xsd:element minOccurs="1" maxOccurs="1"  name="result" type="xsd:string" />
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
-
         </xsd:schema>
     </wsdl:types>
     <wsdl:message name="sniipsyncCartInfoRequest">
@@ -271,18 +185,17 @@
     <wsdl:message name="sniipsyncCartInfoResponse">
         <wsdl:part name="parameters" element="typens:sniipsyncCartInfoResponseParam" />
     </wsdl:message>
-
-    <wsdl:message name="sniipsyncListRequest">
-        <wsdl:part name="parameters" element="typens:sniipsyncListRequestParam" />
+    <wsdl:message name="sniipsyncProductListRequest">
+        <wsdl:part name="parameters" element="typens:sniipsyncProductListRequestParam" />
     </wsdl:message>
-    <wsdl:message name="sniipsyncListResponse">
-        <wsdl:part name="parameters" element="typens:sniipsyncListResponseParam" />
+    <wsdl:message name="sniipsyncProductListResponse">
+        <wsdl:part name="parameters" element="typens:sniipsyncProductListResponseParam" />
     </wsdl:message>
-    <wsdl:message name="sniipsyncCategoryRequest">
-        <wsdl:part name="parameters" element="typens:sniipsyncCategoryRequestParam" />
+    <wsdl:message name="sniipsyncCategoryListRequest">
+        <wsdl:part name="parameters" element="typens:sniipsyncCategoryListRequestParam" />
     </wsdl:message>
-    <wsdl:message name="sniipsyncCategoryResponse">
-        <wsdl:part name="parameters" element="typens:sniipsyncCategoryResponseParam" />
+    <wsdl:message name="sniipsyncCategoryListResponse">
+        <wsdl:part name="parameters" element="typens:sniipsyncCategoryListResponseParam" />
     </wsdl:message>
 
 
@@ -292,29 +205,24 @@
     <wsdl:message name="sniipsyncInfoResponse">
         <wsdl:part name="parameters" element="typens:sniipsyncInfoResponseParam" />
     </wsdl:message>
-
     <wsdl:message name="sniipsyncPageInfoRequest">
         <wsdl:part name="parameters" element="typens:sniipsyncPageInfoRequestParam" />
     </wsdl:message>
     <wsdl:message name="sniipsyncPageInfoResponse">
         <wsdl:part name="parameters" element="typens:sniipsyncPageInfoResponseParam" />
     </wsdl:message>
-
     <wsdl:message name="sniipsyncAttrProductRequest">
         <wsdl:part name="parameters" element="typens:sniipsyncAttrProductRequestParam" />
     </wsdl:message>
     <wsdl:message name="sniipsyncAttrProductResponse">
         <wsdl:part name="parameters" element="typens:sniipsyncAttrProductResponseParam" />
     </wsdl:message>
-
     <wsdl:message name="sniipsyncAttrAllProductRequest">
         <wsdl:part name="parameters" element="typens:sniipsyncAttrAllProductRequestParam" />
     </wsdl:message>
     <wsdl:message name="sniipsyncAttrAllProductResponse">
         <wsdl:part name="parameters" element="typens:sniipsyncAttrAllProductResponseParam" />
     </wsdl:message>
-
-
     <wsdl:portType name="{{var wsdl.handler}}PortType">
         <wsdl:operation name="sniipsyncCartInfo">
             <wsdl:documentation>Retrieve information about shopping cart</wsdl:documentation>
@@ -322,15 +230,15 @@
             <wsdl:output message="typens:sniipsyncCartInfoResponse"/>
         </wsdl:operation>
 
-        <wsdl:operation name="sniipsyncList">
+        <wsdl:operation name="sniipsyncProductList">
             <wsdl:documentation>Retrieve CustomApi Data</wsdl:documentation>
-            <wsdl:input message="typens:sniipsyncListRequest" />
-            <wsdl:output message="typens:sniipsyncListResponse" />
+            <wsdl:input message="typens:sniipsyncProductListRequest" />
+            <wsdl:output message="typens:sniipsyncProductListResponse" />
         </wsdl:operation>
-        <wsdl:operation name="sniipsyncCategory">
+        <wsdl:operation name="sniipsyncCategoryList">
             <wsdl:documentation>Retrieve Category Data</wsdl:documentation>
-            <wsdl:input message="typens:sniipsyncCategoryRequest" />
-            <wsdl:output message="typens:sniipsyncCategoryResponse" />
+            <wsdl:input message="typens:sniipsyncCategoryListRequest" />
+            <wsdl:output message="typens:sniipsyncCategoryListResponse" />
         </wsdl:operation>
 
         <wsdl:operation name="sniipsyncInfo">
@@ -338,11 +246,13 @@
             <wsdl:input message="typens:sniipsyncInfoResponse" />
             <wsdl:output message="typens:sniipsyncInfoResponse" />
         </wsdl:operation>
+
         <wsdl:operation name="sniipsyncPageInfo">
-            <wsdl:documentation>Retrieve Page Info</wsdl:documentation>
+            <wsdl:documentation>Retrieve Category Data</wsdl:documentation>
             <wsdl:input message="typens:sniipsyncPageInfoResponse" />
             <wsdl:output message="typens:sniipsyncPageInfoResponse" />
         </wsdl:operation>
+
         <wsdl:operation name="sniipsyncAttrProduct">
             <wsdl:documentation>Retrieve Attr Product</wsdl:documentation>
             <wsdl:input message="typens:sniipsyncAttrProductRequest" />
@@ -366,7 +276,7 @@
             </wsdl:output>
         </wsdl:operation>
 
-        <wsdl:operation name="sniipsyncList">
+        <wsdl:operation name="sniipsyncProductList">
             <soap:operation soapAction="" />
             <wsdl:input>
                 <soap:body use="literal" />
@@ -375,7 +285,7 @@
                 <soap:body use="literal" />
             </wsdl:output>
         </wsdl:operation>
-        <wsdl:operation name="sniipsyncCategory">
+        <wsdl:operation name="sniipsyncCategoryList">
             <soap:operation soapAction="" />
             <wsdl:input>
                 <soap:body use="literal" />

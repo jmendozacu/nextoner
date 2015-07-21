@@ -7,16 +7,16 @@
                 <title>Sniipsync API</title>
                 <acl>sniipsync</acl>
                 <methods>
-                    <list translate="title" module="sniipsync">
-                        <title>Retrieve Sniipsync Data</title>
+                    <productList translate="title" module="sniipsync">
+                        <title>Retrieve Product Data</title>
                         <method>items</method>
-                        <acl>sniipsync/list</acl>
-                    </list>
-                    <category translate="title" module="sniipsync">
+                        <acl>sniipsync/productList</acl>
+                    </productList>
+                    <categoryList translate="title" module="sniipsync">
                         <title>Retrieve Category Data</title>
-                        <method>category</method>
-                        <acl>sniipsync/category</acl>
-                    </category>
+                        <method>categoryList</method>
+                        <acl>sniipsync/categoryList</acl>
+                    </categoryList>
                     <info translate="title" module="sniipsync">
                         <title>Retrieve info Data</title>
                         <method>info</method>
@@ -24,7 +24,7 @@
                     </info>
                     <pageInfo translate="title" module="sniipsync">
                         <title>Retrieve Page Info</title>
-                        <method>getPageInfo</method>
+                        <method>pageInfo</method>
                         <acl>sniipsync/pageInfo</acl>
                     </pageInfo>
                     <cartInfo translate="title" module="sniipsync">
@@ -73,12 +73,12 @@
                 <sniipsync translate="title" module="sniipsync">
                      <title>Sniipsync</title>
                      <sort_order>3</sort_order>
-					<list translate="title" module="sniipsync">
+					<productList translate="title" module="sniipsync">
 						<title>View All Data</title>
-					</list>
-                    <category translate="title" module="sniipsync">
+					</productList>
+                    <categoryList translate="title" module="sniipsync">
                         <title>View Category Data</title>
-                    </category>
+                    </categoryList>
                     <pageInfo translate="title" module="sniipsync">
                         <title>View Page Info</title>
                     </pageInfo>
