@@ -103,13 +103,11 @@ class Sniip_Sniipsync_Model_Sniipsync_Api extends Sniip_Sniipsync_Model_Api_Reso
         if (is_null($customerAddressData)) {
             $this->_fault('customer_address_data_empty');
         }
-
         foreach ($customerAddressData as $addressItem) {
             /** @var $address Mage_Sales_Model_Quote_Address */
             $address = Mage::getModel("sales/quote_address");
             $addressMode = $addressItem['mode'];
             unset($addressItem['mode']);
-
             if (!empty($addressItem['entity_id'])) {
                 $customerAddress = $this->_getCustomerAddress($addressItem['entity_id']);
                 if ($customerAddress->getCustomerId() != $quote->getCustomerId()) {
@@ -120,17 +118,14 @@ class Sniip_Sniipsync_Model_Sniipsync_Api extends Sniip_Sniipsync_Model_Api_Reso
             } else {
                 $address->setData($addressItem);
             }
-
             $address->implodeStreetAddress();
 
             if (($validateRes = $address->validate())!==true) {
                 $this->_fault('customer_address_invalid', implode(PHP_EOL, $validateRes));
             }
-
             switch($addressMode) {
                 case self::ADDRESS_BILLING:
-                    $address->setEmail($quote->getCustomer()->getEmail());
-
+//                    $address->setEmail($addressItem['email']);
                     if (!$quote->isVirtual()) {
                         $usingCase = isset($addressItem['use_for_shipping']) ? (int)$addressItem['use_for_shipping'] : 0;
                         switch($usingCase) {
@@ -141,7 +136,6 @@ class Sniip_Sniipsync_Model_Sniipsync_Api extends Sniip_Sniipsync_Model_Api_Reso
                             case 1:
                                 $billingAddress = clone $address;
                                 $billingAddress->unsAddressId()->unsAddressType();
-
                                 $shippingAddress = $quote->getShippingAddress();
                                 $shippingMethod = $shippingAddress->getShippingMethod();
                                 $shippingAddress->addData($billingAddress->getData())
@@ -237,6 +231,7 @@ class Sniip_Sniipsync_Model_Sniipsync_Api extends Sniip_Sniipsync_Model_Api_Reso
             );
         }
         $result = $this->_getAttributes($quote, 'quote');
+
         $result['quote_id'] = $quoteId;
         $result['shipping_address'] = $this->_getAttributes($quote->getShippingAddress(), 'quote_address');
         $result['billing_address'] = $this->_getAttributes($quote->getBillingAddress(), 'quote_address');
@@ -254,11 +249,6 @@ class Sniip_Sniipsync_Model_Sniipsync_Api extends Sniip_Sniipsync_Model_Api_Reso
         $result['shippingMethod'] = $ratesResult;
         return $result;
     }
-
-
-
-
-
 
 
     public function items($pageSize = 100 ,$curPage = 1)
@@ -426,7 +416,8 @@ class Sniip_Sniipsync_Model_Sniipsync_Api extends Sniip_Sniipsync_Model_Api_Reso
             // How to get store configs: http://alanstorm.com/magento_loading_config_variables
             'address'         => Mage::getStoreConfig('general/store_information/address', $store->getId()),
             'locale_code'         => Mage::getStoreConfig('general/locale/code', $store->getId()),
-            'copyright'           => Mage::getStoreConfig('design/footer/copyright', $store->getId())
+            'copyright'           => Mage::getStoreConfig('design/footer/copyright', $store->getId()),
+            'version'             => '1.0.7'
             // note: some more settings available
         );
     }
