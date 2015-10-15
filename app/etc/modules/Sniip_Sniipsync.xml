@@ -3,8 +3,7 @@
 	<modules>
 		<Sniip_Sniipsync>
 			<active>true</active>
-			<codePool>local</codePool>
-			<version>1.0.0</version>
+			<codePool>community</codePool>
 		</Sniip_Sniipsync>
 	</modules>
 </config>

@@ -50,6 +50,8 @@
                     <xsd:element name="city" type="xsd:string" minOccurs="0"/>
                     <xsd:element name="region" type="xsd:string" minOccurs="0"/>
                     <xsd:element name="region_id" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="use_for_shipping" type="xsd:int" minOccurs="0"/>
+                    <xsd:element name="save_in_address_book" type="xsd:int" minOccurs="0"/>
                     <xsd:element name="postcode" type="xsd:string" minOccurs="0"/>
                     <xsd:element name="country_id" type="xsd:string" minOccurs="0"/>
                     <xsd:element name="telephone" type="xsd:string" minOccurs="0"/>
@@ -58,12 +60,34 @@
                     <xsd:element name="is_default_shipping" type="xsd:int" minOccurs="0"/>
                 </xsd:sequence>
             </xsd:complexType>
+            <xsd:complexType name="sniipsyncSetPaymentMethodEntity">
+                <xsd:sequence>
+                    <xsd:element name="po_number" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="method" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="cc_cid" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="cc_owner" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="cc_number" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="cc_type" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="cc_exp_year" type="xsd:string" minOccurs="0"/>
+                    <xsd:element name="cc_exp_month" type="xsd:string" minOccurs="0"/>
+                </xsd:sequence>
+            </xsd:complexType>
             <xsd:complexType name="sniipsyncCartCustomerAddressEntityArray">
                 <xsd:sequence>
                     <xsd:element minOccurs="0" maxOccurs="unbounded" name="complexObjectArray" type="typens:shoppingCartCustomerAddressEntity" />
                 </xsd:sequence>
             </xsd:complexType>
-
+            <xsd:complexType name="orderItemIdQty">
+                <xsd:sequence>
+                    <xsd:element name="order_item_id" type="xsd:int" />
+                    <xsd:element name="qty" type="xsd:double" />
+                </xsd:sequence>
+            </xsd:complexType>
+            <xsd:complexType name="orderItemIdQtyArray">
+                <xsd:sequence>
+                    <xsd:element minOccurs="0" maxOccurs="unbounded" name="complexObjectArray" type="typens:orderItemIdQty" />
+                </xsd:sequence>
+            </xsd:complexType>
 
 
             <xsd:element name="sniipsyncCartInfoRequestParam">
@@ -91,6 +115,7 @@
                         <xsd:element minOccurs="1" maxOccurs="1" name="sessionId" type="xsd:string" />
                         <xsd:element minOccurs="1" maxOccurs="1" name="pageSize" type="xsd:integer" />
                         <xsd:element minOccurs="1" maxOccurs="1" name="curPage" type="xsd:integer" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="fromDate" type="xsd:string" />
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
@@ -107,6 +132,7 @@
                         <xsd:element minOccurs="1" maxOccurs="1" name="sessionId" type="xsd:string" />
                         <xsd:element minOccurs="1" maxOccurs="1" name="pageSize" type="xsd:integer" />
                         <xsd:element minOccurs="1" maxOccurs="1" name="curPage" type="xsd:integer" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="fromDate" type="xsd:string" />
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
@@ -131,12 +157,30 @@
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
+
+            <xsd:element name="sniipsyncPaymentListRequestParam">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="1" maxOccurs="1" name="sessionId" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="sniipsyncPaymentListResponseParam">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="1" maxOccurs="1" name="result" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+
             <xsd:element name="sniipsyncPageInfoRequestParam">
                 <xsd:complexType>
                     <xsd:sequence>
                         <xsd:element minOccurs="1" maxOccurs="1" name="sessionId" type="xsd:string" />
                         <xsd:element minOccurs="1" maxOccurs="1" name="pageSize" type="xsd:integer" />
                         <xsd:element minOccurs="1" maxOccurs="1" name="mode" type="xsd:integer" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="fromDate" type="xsd:string" />
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
@@ -178,6 +222,44 @@
                     </xsd:sequence>
                 </xsd:complexType>
             </xsd:element>
+            <xsd:element name="sniipsyncCreateInvoiceRequestParam">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="1" maxOccurs="1" name="sessionId" type="xsd:string" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="invoiceIncrementId" type="xsd:string" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="itemsQty" type="typens:orderItemIdQtyArray" />
+                        <xsd:element minOccurs="0" maxOccurs="1" name="comment" type="xsd:string" />
+                        <xsd:element minOccurs="0" maxOccurs="1" name="email" type="xsd:string" />
+                        <xsd:element minOccurs="0" maxOccurs="1" name="includeComment" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="sniipsyncCreateInvoiceResponseParam">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="1" maxOccurs="1" name="result" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
+            <xsd:element name="sniipsyncSetPaymentMethodRequestParam">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="1" maxOccurs="1" name="sessionId" type="xsd:string" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="quoteId" type="xsd:int" />
+                        <xsd:element minOccurs="1" maxOccurs="1" name="paymentData" type="typens:sniipsyncSetPaymentMethodEntity" />
+                        <xsd:element minOccurs="0" maxOccurs="1" name="store" type="xsd:string" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="sniipsyncSetPaymentMethodResponseParam">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element minOccurs="1" maxOccurs="1" name="result" type="xsd:boolean" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+
         </xsd:schema>
     </wsdl:types>
     <wsdl:message name="sniipsyncCartInfoRequest">
@@ -198,7 +280,12 @@
     <wsdl:message name="sniipsyncCategoryListResponse">
         <wsdl:part name="parameters" element="typens:sniipsyncCategoryListResponseParam" />
     </wsdl:message>
-
+    <wsdl:message name="sniipsyncCreateInvoiceRequest">
+        <wsdl:part name="parameters" element="typens:sniipsyncCreateInvoiceRequestParam" />
+    </wsdl:message>
+    <wsdl:message name="sniipsyncCreateInvoiceResponse">
+        <wsdl:part name="parameters" element="typens:sniipsyncCreateInvoiceResponseParam" />
+    </wsdl:message>
 
     <wsdl:message name="sniipsyncInfoRequest">
         <wsdl:part name="parameters" element="typens:sniipsyncInfoRequestParam" />
@@ -206,6 +293,15 @@
     <wsdl:message name="sniipsyncInfoResponse">
         <wsdl:part name="parameters" element="typens:sniipsyncInfoResponseParam" />
     </wsdl:message>
+
+    <wsdl:message name="sniipsyncPaymentListRequest">
+        <wsdl:part name="parameters" element="typens:sniipsyncPaymentListRequestParam" />
+    </wsdl:message>
+    <wsdl:message name="sniipsyncPaymentListResponse">
+        <wsdl:part name="parameters" element="typens:sniipsyncPaymentListResponseParam" />
+    </wsdl:message>
+
+
     <wsdl:message name="sniipsyncPageInfoRequest">
         <wsdl:part name="parameters" element="typens:sniipsyncPageInfoRequestParam" />
     </wsdl:message>
@@ -224,6 +320,14 @@
     <wsdl:message name="sniipsyncAttrAllProductResponse">
         <wsdl:part name="parameters" element="typens:sniipsyncAttrAllProductResponseParam" />
     </wsdl:message>
+
+    <wsdl:message name="sniipsyncSetPaymentMethodRequest">
+        <wsdl:part name="parameters" element="typens:sniipsyncSetPaymentMethodRequestParam" />
+    </wsdl:message>
+    <wsdl:message name="sniipsyncSetPaymentMethodResponse">
+        <wsdl:part name="parameters" element="typens:sniipsyncSetPaymentMethodResponseParam" />
+    </wsdl:message>
+
     <wsdl:portType name="{{var wsdl.handler}}PortType">
         <wsdl:operation name="sniipsyncCartInfo">
             <wsdl:documentation>Retrieve information about shopping cart</wsdl:documentation>
@@ -243,9 +347,15 @@
         </wsdl:operation>
 
         <wsdl:operation name="sniipsyncInfo">
-            <wsdl:documentation>Retrieve Category Data</wsdl:documentation>
+            <wsdl:documentation>Retrieve Info Data</wsdl:documentation>
             <wsdl:input message="typens:sniipsyncInfoResponse" />
             <wsdl:output message="typens:sniipsyncInfoResponse" />
+        </wsdl:operation>
+
+        <wsdl:operation name="sniipsyncPaymentList">
+            <wsdl:documentation>Retrieve Payment Data</wsdl:documentation>
+            <wsdl:input message="typens:sniipsyncPaymentListResponse" />
+            <wsdl:output message="typens:sniipsyncPaymentListResponse" />
         </wsdl:operation>
 
         <wsdl:operation name="sniipsyncPageInfo">
@@ -264,6 +374,18 @@
             <wsdl:input message="typens:sniipsyncAttrAllProductRequest" />
             <wsdl:output message="typens:sniipsyncAttrAllProductResponse" />
         </wsdl:operation>
+        <wsdl:operation name="sniipsyncCreateInvoice">
+            <wsdl:documentation>Create new invoice for order</wsdl:documentation>
+            <wsdl:input message="typens:sniipsyncCreateInvoiceRequest" />
+            <wsdl:output message="typens:sniipsyncCreateInvoiceResponse" />
+        </wsdl:operation>
+
+        <wsdl:operation name="sniipsyncSetPaymentMethod">
+            <wsdl:documentation>Set payment method</wsdl:documentation>
+            <wsdl:input message="typens:sniipsyncSetPaymentMethodRequest"/>
+            <wsdl:output message="typens:sniipsyncSetPaymentMethodResponse"/>
+        </wsdl:operation>
+
     </wsdl:portType>
     <wsdl:binding name="{{var wsdl.handler}}Binding" type="typens:{{var wsdl.handler}}PortType">
         <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
@@ -304,6 +426,15 @@
                 <soap:body use="literal" />
             </wsdl:output>
         </wsdl:operation>
+        <wsdl:operation name="sniipsyncPaymentList">
+            <soap:operation soapAction="" />
+            <wsdl:input>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
         <wsdl:operation name="sniipsyncPageInfo">
             <soap:operation soapAction="" />
             <wsdl:input>
@@ -331,6 +462,26 @@
                 <soap:body use="literal" />
             </wsdl:output>
         </wsdl:operation>
+        <wsdl:operation name="sniipsyncCreateInvoice">
+            <soap:operation soapAction="" />
+            <wsdl:input>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+
+        <wsdl:operation name="sniipsyncSetPaymentMethod">
+            <soap:operation soapAction=""/>
+            <wsdl:input>
+                <soap:body use="literal" />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal" />
+            </wsdl:output>
+        </wsdl:operation>
+
     </wsdl:binding>
 	<!--
     <wsdl:service name="{{var wsdl.name}}Service">

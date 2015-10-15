@@ -31,6 +31,7 @@
                     <element name="city" type="xsd:string" minOccurs="0"/>
                     <element name="region" type="xsd:string" minOccurs="0"/>
                     <element name="region_id" type="xsd:string" minOccurs="0"/>
+                    <element name="use_for_shipping" type="xsd:int" minOccurs="0"/>
                     <element name="postcode" type="xsd:string" minOccurs="0"/>
                     <element name="country_id" type="xsd:string" minOccurs="0"/>
                     <element name="telephone" type="xsd:string" minOccurs="0"/>
@@ -42,7 +43,7 @@
             <complexType name="sniipsyncCartCustomerAddressEntityArray">
                 <complexContent>
                     <restriction base="soapenc:Array">
-                        <attribute ref="soapenc:arrayType" wsdl:arrayType="typens:sniipsyncCartCustomerAddressEntity[]"/>
+                        <attribute ref="soapenc:arrayType" wsdl:arrayTypeF="typens:sniipsyncCartCustomerAddressEntity[]"/>
                     </restriction>
                 </complexContent>
             </complexType>
@@ -64,6 +65,31 @@
                     </restriction>
                 </complexContent>
             </complexType>
+            <complexType name="orderItemIdQty">
+                <all>
+                    <element name="order_item_id" type="xsd:int" />
+                    <element name="qty" type="xsd:double" />
+                </all>
+            </complexType>
+            <complexType name="orderItemIdQtyArray">
+                <complexContent>
+                    <restriction base="soapenc:Array">
+                        <attribute ref="soapenc:arrayType" wsdl:arrayType="typens:orderItemIdQty[]" />
+                    </restriction>
+                </complexContent>
+            </complexType>
+            <complexType name="sniipsyncSetPaymentMethodEntity">
+                <all>
+                    <element name="po_number" type="xsd:string" minOccurs="0"/>
+                    <element name="method" type="xsd:string" minOccurs="0"/>
+                    <element name="cc_cid" type="xsd:string" minOccurs="0"/>
+                    <element name="cc_owner" type="xsd:string" minOccurs="0"/>
+                    <element name="cc_number" type="xsd:string" minOccurs="0"/>
+                    <element name="cc_type" type="xsd:string" minOccurs="0"/>
+                    <element name="cc_exp_year" type="xsd:string" minOccurs="0"/>
+                    <element name="cc_exp_month" type="xsd:string" minOccurs="0"/>
+                </all>
+            </complexType>
         </schema>
     </types>
     <message name="sniipsyncCartInfoRequest">
@@ -82,6 +108,7 @@
         <part name="sessionId" type="xsd:string" />
         <part name="pageSize" type="xsd:integer" />
         <part name="curPage" type="xsd:integer" />
+        <part name="fromDate" type="xsd:string" />
     </message>
     <message name="sniipsyncProductListResponse">
         <part name="storeView" type="xsd:string" />
@@ -90,6 +117,7 @@
         <part name="sessionId" type="xsd:string" />
         <part name="pageSize" type="xsd:integer" />
         <part name="curPage" type="xsd:integer" />
+        <part name="fromDate" type="xsd:string" />
     </message>
     <message name="sniipsyncCategoryListResponse">
         <part name="storeView" type="xsd:string" />
@@ -102,13 +130,36 @@
         <part name="storeView" type="xsd:string" />
     </message>
 
+    <message name="sniipsyncPaymentListRequest">
+        <part name="sessionId" type="xsd:string" />
+    </message>
+    <message name="sniipsyncPaymentListResponse">
+        <part name="storeView" type="xsd:string" />
+    </message>
+
+
+
     <message name="sniipsyncPageInfoRequest">
         <part name="sessionId" type="xsd:string" />
         <part name="pageSize" type="xsd:integer" />
         <part name="mode" type="xsd:integer" />
+        <part name="fromDate" type="xsd:string" />
     </message>
     <message name="sniipsyncPageInfoResponse">
         <part name="storeView" type="xsd:string" />
+    </message>
+
+
+    <message name="sniipsyncCreateInvoiceRequest">
+        <part name="sessionId" type="xsd:string" />
+        <part name="invoiceIncrementId" type="xsd:string" />
+        <part name="itemsQty" type="typens:orderItemIdQtyArray" />
+        <part name="comment" type="xsd:string" />
+        <part name="email" type="xsd:string" />
+        <part name="includeComment" type="xsd:string" />
+    </message>
+    <message name="sniipsyncCreateInvoiceResponse">
+        <part name="result" type="xsd:string" />
     </message>
 
     <message name="sniipsyncAttrProductRequest">
@@ -129,14 +180,21 @@
     <message name="sniipsyncAttrAllProductResponse">
         <part name="storeView" type="xsd:string" />
     </message>
-
+    <message name="sniipsyncSetPaymentMethodRequest">
+        <part name="sessionId" type="xsd:string"/>
+        <part name="quoteId" type="xsd:int"/>
+        <part name="method" type="typens:sniipsyncSetPaymentMethodEntity"/>
+        <part name="storeId" type="xsd:string"/>
+    </message>
+    <message name="sniipsyncSetPaymentMethodResponse">
+        <part name="result" type="xsd:boolean"/>
+    </message>
      <portType name="{{var wsdl.handler}}PortType">
          <operation name="sniipsyncCartInfo">
              <documentation>Retrieve information about shopping cart</documentation>
              <input message="typens:sniipsyncCartInfoRequest"/>
              <output message="typens:sniipsyncCartInfoResponse"/>
          </operation>
-
         <operation name="sniipsyncProductList">
             <documentation>Retrieve CustomApi Data</documentation>
             <input message="typens:sniipsyncProductListRequest" />
@@ -152,6 +210,11 @@
              <input message="typens:sniipsyncInfoRequest" />
              <output message="typens:sniipsyncInfoResponse" />
          </operation>
+         <operation name="sniipsyncPaymentList">
+             <documentation>Retrieve Payment Data</documentation>
+             <input message="typens:sniipsyncPaymentListRequest" />
+             <output message="typens:sniipsyncPaymentListResponse" />
+         </operation>
          <operation name="sniipsyncPageInfo">
              <documentation>Retrieve Info Data</documentation>
              <input message="typens:sniipsyncPageInfoRequest" />
@@ -162,11 +225,20 @@
              <input message="typens:sniipsyncAttrProductRequest" />
              <output message="typens:sniipsyncAttrProductResponse" />
          </operation>
-
          <operation name="sniipsyncAttrAllProduct">
              <documentation>Retrieve Attr All Product</documentation>
              <input message="typens:sniipsyncAttrAllProductRequest" />
              <output message="typens:sniipsyncAttrAllProductResponse" />
+         </operation>
+         <operation name="sniipsyncCreateInvoice">
+             <documentation>Create new invoice for order</documentation>
+             <input message="typens:sniipsyncCreateInvoiceRequest" />
+             <output message="typens:sniipsyncCreateInvoiceResponse" />
+         </operation>
+         <operation name="sniipsyncSetPaymentMethod">
+             <documentation>Set payment method</documentation>
+             <input message="typens:sniipsyncSetPaymentMethodRequest"/>
+             <output message="typens:sniipsyncSetPaymentMethodResponse"/>
          </operation>
     </portType>
     <binding name="{{var wsdl.handler}}Binding" type="typens:{{var wsdl.handler}}PortType">
@@ -182,7 +254,6 @@
                            encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
             </output>
         </operation>
-
         <operation name="sniipsyncProductList">
             <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
             <input>
@@ -210,6 +281,16 @@
                 <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
             </output>
         </operation>
+        <operation name="sniipsyncPaymentList">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
+            <input>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </input>
+            <output>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </output>
+        </operation>
+
         <operation name="sniipsyncPageInfo">
             <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
             <input>
@@ -228,7 +309,6 @@
                 <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
             </output>
         </operation>
-
         <operation name="sniipsyncAttrAllProduct">
             <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
             <input>
@@ -236,6 +316,26 @@
             </input>
             <output>
                 <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </output>
+        </operation>
+        <operation name="sniipsyncCreateInvoice">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action" />
+            <input>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </input>
+            <output>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+            </output>
+        </operation>
+        <operation name="sniipsyncSetPaymentMethod">
+            <soap:operation soapAction="urn:{{var wsdl.handler}}Action"/>
+            <input>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded"
+                           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </input>
+            <output>
+                <soap:body namespace="urn:{{var wsdl.name}}" use="encoded"
+                           encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
             </output>
         </operation>
     </binding>

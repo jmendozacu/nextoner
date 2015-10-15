@@ -1,4 +1,10 @@
 <?php
+/**
+ * Sniip
+ *
+ * @package     Sniip_Sniipsync
+ * @author      Sniip Magento Team <cliff.viegas@sniip.com>
+ */
 class Sniip_Sniipsync_Model_Api_Resource extends Mage_Api_Model_Resource_Abstract
 {
     /**
@@ -39,6 +45,8 @@ class Sniip_Sniipsync_Model_Api_Resource extends Mage_Api_Model_Resource_Abstrac
     protected $_storeIdSessionField   = 'store_id';
 
 
+
+
     /**
      * Check if quote already exist with provided quoteId for creating
      *
@@ -63,7 +71,12 @@ class Sniip_Sniipsync_Model_Api_Resource extends Mage_Api_Model_Resource_Abstrac
 
         return false;
     }
-
+    /**
+     * Base preparation of product data
+     *
+     * @param mixed $data
+     * @return null|array
+     */
     protected function _prepareProductsData($data)
     {
         return is_array($data) ? $data : null;
@@ -79,7 +92,6 @@ class Sniip_Sniipsync_Model_Api_Resource extends Mage_Api_Model_Resource_Abstrac
         }
         return $data;
     }
-
     protected function _getProductInfo($productId, $store = null, $identifierType = null)
     {
         $product = Mage::helper('catalog/product')->getProduct($productId,
@@ -111,29 +123,31 @@ class Sniip_Sniipsync_Model_Api_Resource extends Mage_Api_Model_Resource_Abstrac
 
         return $storeId;
     }
-
     /**
      * Retrieves quote by quote identifier and store code or by quote identifier
      *
+     * @param int|string $storeId
      * @param int $quoteId
-     * @param string|int $store
      * @return Mage_Sales_Model_Quote
      */
-    protected function _getQuote($quoteId, $store = null)
+    protected function _getQuote($storeId =null,$quoteId = null)
     {
         /** @var $quote Mage_Sales_Model_Quote */
-        $quote = Mage::getModel("sales/quote");
-
-        if (!(is_string($store) || is_integer($store))) {
-            $quote->loadByIdWithoutStore($quoteId);
-        } else {
-            $storeId = $this->_getStoreId($store);
-
-            $quote->setStoreId($storeId)
-                ->load($quoteId);
-        }
-        if (is_null($quote->getId())) {
-            $this->_fault('quote_not_exists');
+        if($quoteId){
+            $quote = Mage::getModel("sales/quote");
+            if (!(is_string($storeId) || is_integer($storeId))) {
+                $quote->loadByIdWithoutStore($quoteId);
+            } else {
+                $storeId = $this->_getStoreId($storeId);
+                $quote->setStoreId($storeId)
+                    ->load($quoteId);
+            }
+            if (is_null($quote->getId())) {
+                $this->_fault('quote_not_exists');
+            }
+        }else{
+            $quote = Mage::getSingleton('checkout/session')->getQuote();
+            $quote->setStoreId($storeId);
         }
 
         return $quote;
@@ -153,7 +167,6 @@ class Sniip_Sniipsync_Model_Api_Resource extends Mage_Api_Model_Resource_Abstrac
 
         return $quote->getStoreId();
     }
-
     /**
      * Update attributes for entity
      *
@@ -373,6 +386,66 @@ class Sniip_Sniipsync_Model_Api_Resource extends Mage_Api_Model_Resource_Abstrac
         curl_setopt($curl, CURLOPT_POSTFIELDS, $curl_post_data);
         curl_exec($curl);
         curl_close($curl);
+    }
+    public function getLinkSamlpeUrl($link)
+    {
+        return $this->getUrl('downloadable/download/linkSample', array('link_id' => $link->getId()));
+    }
+    public function getSampleUrl($sample)
+    {
+        return $this->getUrl('downloadable/download/sample', array('sample_id' => $sample->getId()));
+    }
+    /**
+     * Generate url by route and parameters
+     *
+     * @param   string $route
+     * @param   array $params
+     * @return  string
+     */
+    public function getUrl($route = '', $params = array())
+    {
+        return $this->_getUrlModel()->getUrl($route, $params);
+    }
+    /**
+     * Create and return url object
+     *
+     * @return Mage_Core_Model_Url
+     */
+    protected function _getUrlModel()
+    {
+        return Mage::getModel($this->_getUrlModelClass());
+    }
+    /**
+     * Returns url model class name
+     *
+     * @return string
+     */
+    protected function _getUrlModelClass()
+    {
+        return 'core/url';
+    }
+    /**
+     * Return formated price with two digits after decimal point
+     *
+     * @param decimal $value
+     * @return decimal
+     */
+    public function getPriceValue($value)
+    {
+        return number_format($value, 2, null, '');
+    }
+    /**
+     * Return true if price in website scope
+     *
+     * @return bool
+     */
+    public function getIsPriceWebsiteScope()
+    {
+        $scope =  (int) Mage::app()->getStore()->getConfig(Mage_Core_Model_Store::XML_PATH_PRICE_SCOPE);
+        if ($scope == Mage_Core_Model_Store::PRICE_SCOPE_WEBSITE) {
+            return true;
+        }
+        return false;
     }
 }
 

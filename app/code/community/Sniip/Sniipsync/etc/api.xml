@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<config>
+    <api>
+        <resources>
+            <sniipsync translate="title" module="sniipsync">
+                <model>sniipsync/sniipsync_api</model>
+                <title>Sniipsync API</title>
+                <acl>sniipsync</acl>
+                <methods>
+                    <productlist translate="title" module="sniipsync">
+                        <title>Retrieve Product Data</title>
+                        <method>items</method>
+                        <acl>sniipsync/productlist</acl>
+                    </productlist>
+                    <categorylist translate="title" module="sniipsync">
+                        <title>Retrieve Category Data</title>
+                        <method>categoryList</method>
+                        <acl>sniipsync/categorylist</acl>
+                    </categorylist>
+                    <info translate="title" module="sniipsync">
+                        <title>Retrieve info Data</title>
+                        <method>info</method>
+                        <acl>sniipsync/info</acl>
+                    </info>
+                    <paymentlist translate="title" module="sniipsync">
+                        <title>Retrieve Payment Data</title>
+                        <method>getListGatewayActive</method>
+                        <acl>sniipsync/paymentlist</acl>
+                    </paymentlist>
+                    <pageinfo translate="title" module="sniipsync">
+                        <title>Retrieve Page Info</title>
+                        <method>pageInfo</method>
+                        <acl>sniipsync/pageinfo</acl>
+                    </pageinfo>
+                    <cartinfo translate="title" module="sniipsync">
+                        <title>Retrieve Cart Info</title>
+                        <method>getCartInfo</method>
+                        <acl>sniipsync/cartinfo</acl>
+                    </cartinfo>
+                    <attrproduct translate="title" module="sniipsync">
+                        <title>Retrieve Attr Product</title>
+                        <method>getAttrProduct</method>
+                        <acl>sniipsync/attrproduct</acl>
+                    </attrproduct>
+                    <attrallproduct translate="title" module="sniipsync">
+                        <title>Retrieve Attr All Product</title>
+                        <method>getAttrAllProduct</method>
+                        <acl>sniipsync/attrallproduct</acl>
+                    </attrallproduct>
+                    <createinvoice translate="title" module="sniipsync">
+                        <title>Create new invoice for order</title>
+                        <method>createInvoice</method>
+                        <acl>sniipsync/createinvoice</acl>
+                    </createinvoice>
+                    <setpaymentmethod translate="title" module="sniipsync">
+                        <title>Set payment method</title>
+                        <method>setPaymentMethod</method>
+                        <acl>sniipsync/setpaymentmethod</acl>
+                    </setpaymentmethod>
+                </methods>
+                <faults module="sniipsync">
+                    <data_invalid>
+                        <code>100</code>
+                        <message>Invalid Sniipsync data. Details in error message.</message>
+                    </data_invalid>
+                    <filters_invalid>
+                        <code>101</code>
+                        <message>Invalid filters specified. Details in error message.</message>
+                    </filters_invalid>
+                    <not_exists>
+                        <code>102</code>
+                        <message>Sniipsync not exists.</message>
+                    </not_exists>
+                    <not_deleted>
+                        <code>103</code>
+                        <message>Sniipsync not deleted. Details in error message.</message>
+                    </not_deleted>
+                </faults>
+            </sniipsync>
+        </resources>
+        <v2>
+            <resources_function_prefix>
+                <sniipsync>sniipsync</sniipsync>
+            </resources_function_prefix>
+        </v2>
+        <acl>
+            <resources>
+                <sniipsync translate="title" module="sniipsync">
+                     <title>Sniipsync</title>
+                     <sort_order>3</sort_order>
+					<productlist translate="title" module="sniipsync">
+						<title>Retrieve All Product Data</title>
+					</productlist>
+                    <categorylist translate="title" module="sniipsync">
+                        <title>Retrieve All Category Data</title>
+                    </categorylist>
+                    <pageinfo translate="title" module="sniipsync">
+                        <title>Retrieve Page Info</title>
+                    </pageinfo>
+                    <cartinfo translate="title" module="sniipsync">
+                        <title>Retrieve Cart Info</title>
+                    </cartinfo>
+                    <info translate="title" module="sniipsync">
+                        <title>Retrieve System Data</title>
+                    </info>
+                    <paymentlist translate="title" module="sniipsync">
+                        <title>Retrieve Payment Gateway Info</title>
+                    </paymentlist>
+                    <attrproduct translate="title" module="sniipsync">
+                        <title>Get Full Infomation About Attribute Of Product</title>
+                    </attrproduct>
+                    <attrallproduct translate="title" module="sniipsync">
+                        <title>Retrieve All Attribute Of Product</title>
+                    </attrallproduct>
+                    <createinvoice translate="title" module="sniipsync">
+                        <title>Create New Invoice For Order</title>
+                    </createinvoice>
+                    <setpaymentmethod translate="title" module="sniipsync">
+                        <title>Set Payment Method</title>
+                    </setpaymentmethod>
+                </sniipsync>
+            </resources>
+        </acl>
+    </api>
+</config>
