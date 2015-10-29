@@ -1,13 +1,15 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Adminhtml_Common_Buy_Listing_OtherController
     extends Ess_M2ePro_Controller_Adminhtml_Common_MainController
 {
-    //#############################################
+    //########################################
 
     protected function _initAction()
     {
@@ -37,6 +39,8 @@ class Ess_M2ePro_Adminhtml_Common_Buy_Listing_OtherController
 
         $this->_initPopUp();
 
+        $this->setPageHelpLink(Ess_M2ePro_Helper_Component_Buy::NICK, '3rd+Party+Listings');
+
         return $this;
     }
 
@@ -45,7 +49,7 @@ class Ess_M2ePro_Adminhtml_Common_Buy_Listing_OtherController
         return Mage::getSingleton('admin/session')->isAllowed('m2epro_common/listings');
     }
 
-    //#############################################
+    //########################################
 
     public function indexAction()
     {
@@ -67,7 +71,7 @@ class Ess_M2ePro_Adminhtml_Common_Buy_Listing_OtherController
         $this->getResponse()->setBody($response);
     }
 
-    //#############################################
+    //########################################
 
     public function viewAction()
     {
@@ -76,5 +80,5 @@ class Ess_M2ePro_Adminhtml_Common_Buy_Listing_OtherController
         $this->_initAction()->_addContent($block)->renderLayout();
     }
 
-    //#############################################
+    //########################################
 }

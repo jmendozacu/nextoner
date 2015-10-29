@@ -1,18 +1,20 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2014 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2EPro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Parent_Processor_Sub_Options
     extends Ess_M2ePro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Parent_Processor_Sub_Abstract
 {
-    // ##########################################################
+    //########################################
 
     /** @var Ess_M2ePro_Model_Amazon_Listing_Product_Variation_Matcher_Option $optionMatcher */
     private $optionMatcher = null;
 
-    // ##########################################################
+    //########################################
 
     protected function check()
     {
@@ -84,10 +86,12 @@ class Ess_M2EPro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Pa
             $this->createNewProductChildren();
         }
 
-        $this->setMatchedAttributesToChildren();
+        if ($this->getProcessor()->getTypeModel()->hasMatchedAttributes()) {
+            $this->setMatchedAttributesToChildren();
+        }
     }
 
-    // ##########################################################
+    //########################################
 
     private function matchExistingChildren()
     {
@@ -217,9 +221,9 @@ class Ess_M2EPro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Pa
             $amazonChildListingProduct = $childListingProduct->getChildObject();
             $childTypeModel = $amazonChildListingProduct->getVariationManager()->getTypeModel();
 
-            if ($childTypeModel->isActualMatchedAttributes() &&
-                !is_null($childTypeModel->getCorrectMatchedAttributes())
-            ) {
+            $correctMatchedAttributes = $childTypeModel->getCorrectMatchedAttributes();
+
+            if ($childTypeModel->isActualMatchedAttributes() && !empty($correctMatchedAttributes)) {
                 continue;
             }
 
@@ -229,7 +233,7 @@ class Ess_M2EPro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Pa
         }
     }
 
-    // ##########################################################
+    //########################################
 
     private function matchEmptyProductOptionsChild(Ess_M2ePro_Model_Listing_Product $listingProduct)
     {
@@ -307,7 +311,7 @@ class Ess_M2EPro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Pa
         $typeModel->setChannelVariation($channelOptions[$generalId]);
     }
 
-    // ##########################################################
+    //########################################
 
     private function findChildByProductOptions(array $productOptions)
     {
@@ -345,7 +349,7 @@ class Ess_M2EPro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Pa
         return null;
     }
 
-    // ##########################################################
+    //########################################
 
     private function getOptionMatcher()
     {
@@ -360,5 +364,5 @@ class Ess_M2EPro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Pa
         return $this->optionMatcher;
     }
 
-    // ##########################################################
+    //########################################
 }

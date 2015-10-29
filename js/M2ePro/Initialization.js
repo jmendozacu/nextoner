@@ -1,5 +1,5 @@
 // Create main objects
-// ----------------------------------
+// ---------------------------------------
 CommonHandlerObj = new CommonHandler();
 
 MagentoMessageObj = new MagentoMessage();
@@ -9,7 +9,36 @@ ModuleNoticeObj = new BlockNotice('Module');
 ServerNoticeObj = new BlockNotice('Server');
 
 MagentoFieldTipObj = new MagentoFieldTip();
-// ----------------------------------
+// ---------------------------------------
+
+function setPageHelpLink(url)
+{
+    if (!url) {
+        return;
+    }
+
+    var heplLink = $('page-help-link');
+
+    if (heplLink) {
+        heplLink.href = url;
+        heplLink.target = '_blank'
+    }
+}
+
+function initializationCustomAttributeInputs()
+{
+    $$('select.M2ePro-custom-attribute-can-be-created').each(function(selectObj){
+
+        var handlerObj = window['AttributeCreator_' + selectObj.id + '_Obj'] = new AttributeCreator();
+        handlerObj.setSelectObj(selectObj);
+
+        if (handlerObj.alreadyHaveAddedOption()) {
+            return true;
+        }
+
+        handlerObj.injectAddOption();
+    });
+}
 
 function initializationMagentoBlocks()
 {
@@ -114,27 +143,28 @@ function prepareFloatingToolbarContent()
 }
 
 // Set main observers
-// ----------------------------------
+// ---------------------------------------
 Event.observe(window, 'load', function() {
 
     initializationMagentoBlocks();
+    initializationCustomAttributeInputs();
 
     var ajaxHandler = {
         onComplete: function(transport) {
             if (Ajax.activeRequestCount == 0) {
                 initializationMagentoBlocks();
+                initializationCustomAttributeInputs();
             }
         }
-
     };
 
     prepareFloatingToolbarContent();
 
     Ajax.Responders.register(ajaxHandler);
 });
-// ----------------------------------
+// ---------------------------------------
 
-// ----------------------------------
+// ---------------------------------------
 (function(window) {
 
     var setLoc = setLocation;
@@ -147,4 +177,4 @@ Event.observe(window, 'load', function() {
     };
 
 })(window);
-// ----------------------------------
+// ---------------------------------------

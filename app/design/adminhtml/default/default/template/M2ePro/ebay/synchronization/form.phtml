@@ -164,6 +164,8 @@ $translations = json_encode($translations);
 
     </div>
 
+    <?php if (!Mage::helper('M2ePro/View_Ebay')->isSimpleMode()) { ?>
+
     <div class="entry-edit" id="magento_block_ebay_synchronization_templates_text">
 
         <div class="entry-edit-head">
@@ -185,8 +187,8 @@ $translations = json_encode($translations);
                     More detailed information you can find <a href="%url2%" target="_blank">here</a><br/><br/>
 
                     It is <strong>strongly recommended</strong> to use on these two options described above to decrease the impact on M2E Pro Performance.',
-                        Mage::helper('M2ePro/Module_Support')->getDocumentationUrl(NULL, 'BestPractice/Programmatic+Possibilities+to+work+with+Extension'),
-                        Mage::helper('M2ePro/Module_Support')->getDocumentationUrl(NULL, 'BestPractice/Plugin+for+Magmi+Import+Tool')
+                        Mage::helper('M2ePro/Module_Support')->getDocumentationUrl(NULL, NULL, 'x/xYQVAQ'),
+                        Mage::helper('M2ePro/Module_Support')->getDocumentationUrl(NULL, NULL, 'x/yIQVAQ')
                     ); ?>
                 </div>
 
@@ -209,6 +211,8 @@ $translations = json_encode($translations);
         </div>
 
     </div>
+
+    <?php } ?>
 
 </div>
 

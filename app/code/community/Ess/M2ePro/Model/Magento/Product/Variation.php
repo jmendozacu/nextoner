@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2014 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Magento_Product_Variation
@@ -9,33 +11,42 @@ class Ess_M2ePro_Model_Magento_Product_Variation
     const GROUPED_PRODUCT_ATTRIBUTE_LABEL = 'Option';
 
     /** @var Ess_M2ePro_Model_Magento_Product $magentoProduct */
-    private $magentoProduct;
+    protected $magentoProduct = null;
 
-    // ##########################################################
+    //########################################
 
+    /**
+     * @return Ess_M2ePro_Model_Magento_Product
+     */
     public function getMagentoProduct()
     {
         return $this->magentoProduct;
     }
 
+    /**
+     * @param Ess_M2ePro_Model_Magento_Product $magentoProduct
+     * @return $this
+     */
     public function setMagentoProduct(Ess_M2ePro_Model_Magento_Product $magentoProduct)
     {
         $this->magentoProduct = $magentoProduct;
         return $this;
     }
 
-    // ##########################################################
+    //########################################
 
     public function getVariationTypeStandard(array $options)
     {
         $variations = $this->getVariationsTypeStandard();
+
         foreach ($variations['variations'] as $variation) {
+
             $tempOption = array();
             foreach ($variation as $variationOption) {
                 $tempOption[$variationOption['attribute']] = $variationOption['option'];
             }
 
-            if (count(array_diff($options, $tempOption)) <= 0) {
+            if ($options == $tempOption) {
                 return $variation;
             }
         }
@@ -43,18 +54,23 @@ class Ess_M2ePro_Model_Magento_Product_Variation
         return null;
     }
 
-    // ------------------------------------------------------------
+    // ---------------------------------------
 
+    /**
+     * @return array
+     */
     public function getVariationsTypeStandard()
     {
         $variations = array();
         $variationsSet = array();
+        $additional = array();
 
         if ($this->getMagentoProduct()->isConfigurableType()) {
 
             $tempInfo = $this->getConfigurableVariationsTypeStandard();
             isset($tempInfo['set']) && $variationsSet = $tempInfo['set'];
             isset($tempInfo['variations']) && $variations = $tempInfo['variations'];
+            isset($tempInfo['additional']) && $additional = $tempInfo['additional'];
 
         } else {
 
@@ -92,12 +108,29 @@ class Ess_M2ePro_Model_Magento_Product_Variation
             }
         }
 
+        if ($this->getMagentoProduct()->getVariationVirtualAttributes() &&
+            !$this->getMagentoProduct()->isIgnoreVariationVirtualAttributes()
+        ) {
+            $this->injectVirtualAttributesTypeStandard($variations, $variationsSet);
+        }
+
+        if ($this->getMagentoProduct()->getVariationFilterAttributes() &&
+            !$this->getMagentoProduct()->isIgnoreVariationFilterAttributes()
+        ) {
+            $this->filterByAttributesTypeStandard($variations, $variationsSet);
+        }
+
         return array(
             'set'        => $variationsSet,
             'variations' => $variations,
+            'additional' => $additional
         );
     }
 
+    /**
+     * @return array
+     * @throws Ess_M2ePro_Model_Exception
+     */
     protected function getSimpleVariationsTypeStandard()
     {
         if (!$this->getMagentoProduct()->isSimpleType()) {
@@ -148,6 +181,10 @@ class Ess_M2ePro_Model_Magento_Product_Variation
         );
     }
 
+    /**
+     * @return array
+     * @throws Ess_M2ePro_Model_Exception
+     */
     protected function getConfigurableVariationsTypeStandard()
     {
         if (!$this->getMagentoProduct()->isConfigurableType()) {
@@ -244,10 +281,17 @@ class Ess_M2ePro_Model_Magento_Product_Variation
 
         return array(
             'set'        => $resultSet,
-            'variations' => $variations
+            'variations' => $variations,
+            'additional' => array(
+                'attributes' => $attributes
+            )
         );
     }
 
+    /**
+     * @return array
+     * @throws Ess_M2ePro_Model_Exception
+     */
     protected function getGroupedVariationsTypeStandard()
     {
         if (!$this->getMagentoProduct()->isGroupedType()) {
@@ -282,6 +326,10 @@ class Ess_M2ePro_Model_Magento_Product_Variation
         );
     }
 
+    /**
+     * @return array
+     * @throws Ess_M2ePro_Model_Exception
+     */
     protected function getBundleVariationsTypeStandard()
     {
         if (!$this->getMagentoProduct()->isBundleType()) {
@@ -404,7 +452,7 @@ class Ess_M2ePro_Model_Magento_Product_Variation
         $sortedOptions = array();
         foreach ($optionCollection as $option) {
             if (!in_array($option->getValue(), $options) ||
-                in_array($option->getValue(), $sortedOptions)) {
+                in_array($option->getValue(), $sortedOptions, true)) {
                 continue;
             }
 
@@ -414,7 +462,76 @@ class Ess_M2ePro_Model_Magento_Product_Variation
         return $sortedOptions;
     }
 
-    // ----------------------------------------------------------
+    protected function injectVirtualAttributesTypeStandard(&$variations, &$set)
+    {
+        $virtualAttributes = $this->getMagentoProduct()->getVariationVirtualAttributes();
+        if (empty($virtualAttributes)) {
+            return;
+        }
+
+        foreach ($variations as $variationKey => $variation) {
+            foreach ($virtualAttributes as $virtualAttribute => $virtualValue) {
+                $existOption = reset($variation);
+
+                $virtualOption = array(
+                    'product_id'   => null,
+                    'product_type' => $existOption['product_type'],
+                    'attribute'    => $virtualAttribute,
+                    'option'       => $virtualValue,
+                );
+
+                $variations[$variationKey][] = $virtualOption;
+            }
+        }
+
+        foreach ($virtualAttributes as $virtualAttribute => $virtualValue) {
+            $set[$virtualAttribute] = array($virtualValue);
+        }
+    }
+
+    protected function filterByAttributesTypeStandard(&$variations, &$set)
+    {
+        $filterAttributes = $this->getMagentoProduct()->getVariationFilterAttributes();
+        if (empty($filterAttributes)) {
+            return;
+        }
+
+        foreach ($variations as $variationKey => $variation) {
+
+            foreach ($variation as $optionKey => $option) {
+
+                if (!isset($filterAttributes[$option['attribute']])) {
+                    continue;
+                }
+
+                $filterValue = $filterAttributes[$option['attribute']];
+                if ($option['option'] == $filterValue) {
+                    continue;
+                }
+
+                unset($variations[$variationKey]);
+                break;
+            }
+        }
+
+        $variations = array_values($variations);
+
+        foreach ($set as $attribute => $values) {
+            if (!isset($filterAttributes[$attribute])) {
+                continue;
+            }
+
+            $filterValue = $filterAttributes[$attribute];
+            if (!in_array($filterValue, $values)) {
+                $set[$attribute] = array();
+                continue;
+            }
+
+            $set[$attribute] = array($filterValue);
+        }
+    }
+
+    // ---------------------------------------
 
     public function getVariationsTypeRaw()
     {
@@ -643,7 +760,7 @@ class Ess_M2ePro_Model_Magento_Product_Variation
         return $mergedOptions;
     }
 
-    // ----------------------------------------------------------
+    // ---------------------------------------
 
     public function getTitlesVariationSet()
     {
@@ -960,12 +1077,12 @@ class Ess_M2ePro_Model_Magento_Product_Variation
         return $resultTitles;
     }
 
-    // ##########################################################
+    //########################################
 
     protected function getCustomOptionsAllowedTypes()
     {
         return array('drop_down', 'radio', 'multiple', 'checkbox');
     }
 
-    // ##########################################################
+    //########################################
 }

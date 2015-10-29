@@ -1,13 +1,15 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Adminhtml_Development_Module_IntegrationController
     extends Ess_M2ePro_Controller_Adminhtml_Development_CommandController
 {
-    //#############################################
+    //########################################
 
     /**
      * @title "Revise Total"
@@ -117,7 +119,7 @@ HTML;
         $this->_redirect('*/*/reviseTotal');
     }
 
-    //#############################################
+    //########################################
 
     /**
      * @title "Reset eBay 3rd Party"
@@ -243,7 +245,7 @@ HTML;
         return $this->_redirectUrl(Mage::helper('M2ePro/View_Development')->getPageModuleTabUrl());
     }
 
-    //#############################################
+    //########################################
 
     /**
      * @title "Show eBay Nonexistent Templates"
@@ -282,16 +284,22 @@ HTML;
 
         $tableContent = <<<HTML
 <tr>
-    <th>Policy Code</th>
-    <th>Listing Product ID</th>
     <th>Listing ID</th>
+    <th>Listing Product ID</th>
     <th>Policy ID</th>
     <th>My Mode</th>
     <th>Parent Mode</th>
 </tr>
 HTML;
 
+        $alreadyRendered = array();
         foreach ($nonexistentTemplates as $templateName => $items) {
+
+            $tableContent .= <<<HTML
+<tr>
+    <td colspan="5" align="center">{$templateName}</td>
+</tr>
+HTML;
 
             foreach ($items as $index => $itemInfo) {
 
@@ -307,25 +315,29 @@ HTML;
                     $parentMode = (int)$itemInfo['parent_mode'] == 1 ? 'custom' : 'template';
                 }
 
+                $key = $templateName .'##'. $myMode .'##'. $itemInfo['listing_id'];
+                if ($myMode == 'parent' && in_array($key, $alreadyRendered)) {
+                    continue;
+                }
+
+                $alreadyRendered[] = $key;
                 $tableContent .= <<<HTML
 <tr>
-    <td>{$templateName}</td>
-    <td>{$itemInfo['my_id']}</td>
     <td>{$itemInfo['listing_id']}</td>
+    <td>{$itemInfo['my_id']}</td>
     <td>{$itemInfo['my_needed_id']}</td>
     <td>{$myMode}</td>
     <td>{$parentMode}</td>
 </tr>
 HTML;
             }
-            $tableContent .= "</tr>";
         }
 
-        echo $this->getStyleHtml() . <<<HTML
+        $html = $this->getStyleHtml() . <<<HTML
 <html>
     <body>
         <h2 style="margin: 20px 0 0 10px">Nonexistent templates
-            <span style="color: #808080; font-size: 15px;">( entries)</span>
+            <span style="color: #808080; font-size: 15px;">(#count# entries)</span>
         </h2>
         <br/>
         <table class="grid" cellpadding="0" cellspacing="0">
@@ -334,6 +346,8 @@ HTML;
     </body>
 </html>
 HTML;
+
+        echo str_replace('#count#', count($alreadyRendered), $html);
     }
 
     private function getNonexistentTemplatesByDifficultLogic($templateCode)
@@ -436,7 +450,7 @@ HTML;
         return $select->query()->fetchAll();
     }
 
-    //#############################################
+    //########################################
 
     /**
      * @title "Show eBay Duplicates [parse logs]"
@@ -572,7 +586,7 @@ HTML;
         $skipped    = array();
         $duplicated = array();
 
-        while($row = $queryStmt->fetch()) {
+        while ($row = $queryStmt->fetch()) {
 
             $key = $row['listing_id'].'##'.$row['product_id'];
 
@@ -641,7 +655,7 @@ HTML;
         echo str_replace('#count#', count($duplicated), $html);
     }
 
-    //#############################################
+    //########################################
 
     /**
      * @title "Add Products into Listing"
@@ -741,7 +755,7 @@ HTML;
         $this->_redirectUrl(Mage::helper('M2ePro/View_Development')->getPageModuleTabUrl());
     }
 
-    //#############################################
+    //########################################
 
     private function getEmptyResultsHtml($messageText)
     {
@@ -755,5 +769,5 @@ HTML;
 HTML;
     }
 
-    //#############################################
+    //########################################
 }

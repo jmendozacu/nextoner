@@ -1,13 +1,15 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Adminhtml_Common_LogController
     extends Ess_M2ePro_Controller_Adminhtml_Common_MainController
 {
-    //#############################################
+    //########################################
 
     protected function _initAction()
     {
@@ -44,14 +46,14 @@ class Ess_M2ePro_Adminhtml_Common_LogController
         return parent::preDispatch();
     }
 
-    //#############################################
+    //########################################
 
     public function indexAction()
     {
         $this->_redirect('*/*/listing');
     }
 
-    //#############################################
+    //########################################
 
     public function listingAction()
     {
@@ -74,8 +76,17 @@ class Ess_M2ePro_Adminhtml_Common_LogController
             );
         }
 
-        $this->_initAction()
-             ->_title(Mage::helper('M2ePro')->__('Listings Log'))
+        $this->_initAction();
+
+        $channel = $this->getRequest()->getParam('channel');
+
+        if (!is_null($channel) && $channel !== 'all') {
+            $this->setComponentPageHelpLink('Logs#Logs-ListingsLog', $channel);
+        } else {
+            $this->setComponentPageHelpLink('Logs#Logs-ListingsLog');
+        }
+
+        $this->_title(Mage::helper('M2ePro')->__('Listings Log'))
              ->_addContent($block)
              ->renderLayout();
     }
@@ -98,7 +109,7 @@ class Ess_M2ePro_Adminhtml_Common_LogController
         $this->getResponse()->setBody($response);
     }
 
-    // -------------------------------
+    // ---------------------------------------
 
     public function listingProductAction()
     {
@@ -136,7 +147,7 @@ class Ess_M2ePro_Adminhtml_Common_LogController
         $this->getResponse()->setBody($response);
     }
 
-    // -------------------------------
+    // ---------------------------------------
 
     public function listingOtherAction()
     {
@@ -159,8 +170,17 @@ class Ess_M2ePro_Adminhtml_Common_LogController
             );
         }
 
-        $this->_initAction()
-             ->_title(Mage::helper('M2ePro')->__('3rd Party Listings Log'))
+        $this->_initAction();
+
+        $channel = $this->getRequest()->getParam('channel');
+
+        if (!is_null($channel) && $channel !== 'all') {
+            $this->setComponentPageHelpLink('Logs#Logs-3rdPartyListingsLog', $channel);
+        } else {
+            $this->setComponentPageHelpLink('Logs#Logs-3rdPartyListingsLog');
+        }
+
+        $this->_title(Mage::helper('M2ePro')->__('3rd Party Listings Log'))
              ->_addContent($block)
              ->renderLayout();
     }
@@ -183,12 +203,21 @@ class Ess_M2ePro_Adminhtml_Common_LogController
         $this->getResponse()->setBody($response);
     }
 
-    //---------------------------------------------
+    // ---------------------------------------
 
     public function synchronizationAction()
     {
-        $this->_initAction()
-             ->_title(Mage::helper('M2ePro')->__('Synchronization Log'))
+        $this->_initAction();
+
+        $channel = $this->getRequest()->getParam('channel');
+
+        if (!is_null($channel) && $channel !== 'all') {
+            $this->setComponentPageHelpLink('Logs#Logs-SynchronizationLog', $channel);
+        } else {
+            $this->setComponentPageHelpLink('Logs#Logs-SynchronizationLog');
+        }
+
+        $this->_title(Mage::helper('M2ePro')->__('Synchronization Log'))
              ->_addContent($this->getLayout()->createBlock(
                  'M2ePro/adminhtml_common_log', '',
                  array('active_tab' => Ess_M2ePro_Block_Adminhtml_Common_Log_Tabs::TAB_ID_SYNCHRONIZATION)
@@ -205,12 +234,21 @@ class Ess_M2ePro_Adminhtml_Common_LogController
         $this->getResponse()->setBody($response);
     }
 
-    //---------------------------------------------
+    // ---------------------------------------
 
     public function orderAction()
     {
-        $this->_initAction()
-             ->_title(Mage::helper('M2ePro')->__('Orders Log'))
+        $this->_initAction();
+
+        $channel = $this->getRequest()->getParam('channel');
+
+        if (!is_null($channel) && $channel !== 'all') {
+            $this->setComponentPageHelpLink('Logs#Logs-OrdersLog', $channel);
+        } else {
+            $this->setComponentPageHelpLink('Logs#Logs-OrdersLog');
+        }
+
+        $this->_title(Mage::helper('M2ePro')->__('Orders Log'))
              ->_addContent($this->getLayout()->createBlock(
                  'M2ePro/adminhtml_common_log', '',
                  array('active_tab' => Ess_M2ePro_Block_Adminhtml_Common_Log_Tabs::TAB_ID_ORDER)
@@ -226,5 +264,5 @@ class Ess_M2ePro_Adminhtml_Common_LogController
         $this->getResponse()->setBody($grid->toHtml());
     }
 
-    //#############################################
+    //########################################
 }

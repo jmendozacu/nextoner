@@ -1,19 +1,10 @@
 CommonAmazonTemplateDescriptionCategorySpecificHandler = Class.create();
 CommonAmazonTemplateDescriptionCategorySpecificHandler.prototype = Object.extend(new CommonHandler(), {
 
-    //----------------------------------
+    // ---------------------------------------
 
     initialize: function()
     {
-        // ugly hack
-        //if (version_compare(Prototype.Version,'1.7') < 0) {
-        //    for (var property in Selector.xpath.operators) {
-        //        Selector.xpath.operators[property] = Selector.xpath.operators[property].split('#{3}').join('#{4}');
-        //    }
-        //    Selector.patterns['attr'] = /\[\s*((?:[\w\u00c0-\uFFFF-]|\\.)+)\s*(?:(\S?=)\s*(['"]*)(.*?)\3|)\s*\](?![^\[]*\])(?![^\(]*\))/;
-        //}
-        // -------
-
         var self = this;
 
         self.dictionaryHelper = new CommonAmazonTemplateDescriptionCategorySpecificDictionary();
@@ -21,9 +12,10 @@ CommonAmazonTemplateDescriptionCategorySpecificHandler.prototype = Object.extend
         self.specificsContainer   = $('specifics_container');
         self.specificsHiddenInput = $('encoded_specifics_data');
 
-        // -------
+        // ---------------------------------------
 
         self.categoryInfo    = null;
+        self.productDataNick = null;
 
         self.formDataSpecifics = [];
         self.selectedSpecifics = {};
@@ -31,7 +23,7 @@ CommonAmazonTemplateDescriptionCategorySpecificHandler.prototype = Object.extend
 
         self.themeAttributes  = [];
 
-        // -------
+        // ---------------------------------------
 
         self.initValidation();
     },
@@ -168,7 +160,7 @@ CommonAmazonTemplateDescriptionCategorySpecificHandler.prototype = Object.extend
         return true;
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     setFormDataSpecifics: function(values)
     {
@@ -180,12 +172,14 @@ CommonAmazonTemplateDescriptionCategorySpecificHandler.prototype = Object.extend
         this.formDataSpecifics = [];
     },
 
-    //###################################
+    //########################################
 
-    run: function(categoryInfo)
+    run: function(categoryInfo, productDataNick)
     {
         this.specificsContainer.update();
-        this.categoryInfo = categoryInfo;
+
+        this.categoryInfo    = categoryInfo;
+        this.productDataNick = productDataNick;
 
         this.initThemeAttributes();
         this.initSpecifics();
@@ -193,7 +187,8 @@ CommonAmazonTemplateDescriptionCategorySpecificHandler.prototype = Object.extend
 
     reset: function()
     {
-        this.categoryInfo = null;
+        this.categoryInfo    = null;
+        this.productDataNick = null;
 
         this.selectedSpecifics = {};
         this.renderedSpecifics = [];
@@ -205,10 +200,10 @@ CommonAmazonTemplateDescriptionCategorySpecificHandler.prototype = Object.extend
 
     isReady: function()
     {
-        return this.categoryInfo != null;
+        return this.categoryInfo != null && this.productDataNick != null;
     },
 
-    //###################################
+    //########################################
 
     initThemeAttributes: function()
     {
@@ -219,7 +214,7 @@ CommonAmazonTemplateDescriptionCategorySpecificHandler.prototype = Object.extend
             asynchronous: false,
             parameters: {
                 marketplace_id:    $('marketplace_id').value,
-                product_data_nick: self.categoryInfo.product_data_nick
+                product_data_nick: self.productDataNick
             },
             onSuccess: function(transport) {
                 self.themeAttributes = transport.responseText.evalJSON();
@@ -236,7 +231,7 @@ CommonAmazonTemplateDescriptionCategorySpecificHandler.prototype = Object.extend
             asynchronous: true,
             parameters: {
                 marketplace_id:     $('marketplace_id').value,
-                product_data_nick:  self.categoryInfo.product_data_nick
+                product_data_nick:  self.productDataNick
             },
             onSuccess: function(transport) {
                 try {
@@ -255,7 +250,7 @@ CommonAmazonTemplateDescriptionCategorySpecificHandler.prototype = Object.extend
         });
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     renderRootContainer: function()
     {
@@ -302,7 +297,7 @@ CommonAmazonTemplateDescriptionCategorySpecificHandler.prototype = Object.extend
         });
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     renderSpecifics: function(specifics)
     {
@@ -354,7 +349,7 @@ CommonAmazonTemplateDescriptionCategorySpecificHandler.prototype = Object.extend
         }
     },
 
-    //###################################
+    //########################################
 
     isSpecificRendered: function(xPathWithIndex)
     {
@@ -424,7 +419,7 @@ CommonAmazonTemplateDescriptionCategorySpecificHandler.prototype = Object.extend
         return xPathWithIndex.replace(/\d+$/, '') + latestIndex;
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     markSpecificAsSelected: function(xPathWithIndex, data)
     {
@@ -445,7 +440,7 @@ CommonAmazonTemplateDescriptionCategorySpecificHandler.prototype = Object.extend
         var self = this;
         var regexpObj = new RegExp('^' + xPathWithIndex);
 
-        // -- for removing all child specifics
+        // for removing all child specifics
         $H(this.selectedSpecifics).each(function(el) {
 
             var specificKey = el.key;
@@ -481,14 +476,14 @@ CommonAmazonTemplateDescriptionCategorySpecificHandler.prototype = Object.extend
         return searchResult;
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     prepareSpecificsDataToPost: function()
     {
         this.specificsHiddenInput.value = Object.toJSON(this.selectedSpecifics);
     },
 
-    //###################################
+    //########################################
 
     canSpecificBeOverwrittenByVariationTheme: function(specific)
     {
@@ -496,5 +491,5 @@ CommonAmazonTemplateDescriptionCategorySpecificHandler.prototype = Object.extend
                this.themeAttributes[specific.xml_tag].length > 0;
     }
 
-    //----------------------------------
+    // ---------------------------------------
 });

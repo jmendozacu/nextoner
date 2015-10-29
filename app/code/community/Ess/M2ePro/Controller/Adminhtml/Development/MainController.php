@@ -1,17 +1,24 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 abstract class Ess_M2ePro_Controller_Adminhtml_Development_MainController
     extends Ess_M2ePro_Controller_Adminhtml_BaseController
 {
-    //#############################################
+    //########################################
 
     public function indexAction()
     {
         $this->_redirect(Mage::helper('M2ePro/View_Development')->getPageRoute());
+    }
+
+    protected function _isAllowed()
+    {
+        return Mage::getSingleton('admin/session')->isLoggedIn();
     }
 
     public function loadLayout($ids=null, $generateBlocks=true, $generateXml=true)
@@ -25,11 +32,11 @@ abstract class Ess_M2ePro_Controller_Adminhtml_Development_MainController
         }
 
         $tempResult = parent::loadLayout($ids, $generateBlocks, $generateXml);
-        $tempResult->_title(Ess_M2ePro_Helper_View_Development::TITLE);
+        $tempResult->_title(Mage::helper('M2ePro/View_Development')->getTitle());
         return $tempResult;
     }
 
-    //#############################################
+    //########################################
 
     private function addDevelopmentNotification()
     {
@@ -58,5 +65,5 @@ abstract class Ess_M2ePro_Controller_Adminhtml_Development_MainController
         return true;
     }
 
-    //#############################################
+    //########################################
 }

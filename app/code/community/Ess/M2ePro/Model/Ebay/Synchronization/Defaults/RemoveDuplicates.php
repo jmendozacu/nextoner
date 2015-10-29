@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
@@ -13,7 +15,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
 
     private $duplicatedItems = array();
 
-    //####################################
+    //########################################
 
     protected function getNick()
     {
@@ -25,7 +27,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
         return 'Remove Duplicated Products';
     }
 
-    // -----------------------------------
+    // ---------------------------------------
 
     protected function getPercentsStart()
     {
@@ -37,7 +39,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
         return 10;
     }
 
-    //####################################
+    //########################################
 
     protected function performActions()
     {
@@ -50,7 +52,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
         $this->stopDuplicatedItems();
     }
 
-    //####################################
+    //########################################
 
     private function checkTooManyBlockedListingProducts()
     {
@@ -104,7 +106,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
         }
     }
 
-    //####################################
+    //########################################
 
     private function processListingProducts()
     {
@@ -126,7 +128,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
 
                 $additionalData = $product->getAdditionalData();
                 if (empty($additionalData['last_failed_action_data'])) {
-                    throw new Exception('last_failed_action_data is empty');
+                    throw new Ess_M2ePro_Model_Exception('last_failed_action_data is empty');
                 }
 
                 $lastFailedActionData = $additionalData['last_failed_action_data'];
@@ -157,7 +159,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
                     );
 
                     if (empty($itemInfo['relisted_item_id'])) {
-                        throw new Exception('Duplicate was not found');
+                        throw new Ess_M2ePro_Model_Exception('Duplicate was not found');
                     }
 
                     $this->duplicatedItems[$accountId][$marketplaceId][] = $itemInfo['relisted_item_id'];
@@ -185,7 +187,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
                 ));
 
                 if (empty($duplicatedItem)) {
-                    throw new Exception('Duplicate was not found');
+                    throw new Ess_M2ePro_Model_Exception('Duplicate was not found');
                 }
 
                 $this->duplicatedItems[$accountId][$marketplaceId][] = $duplicatedItem['id'];
@@ -217,7 +219,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
 
                 $additionalData = $product->getAdditionalData();
                 if (empty($additionalData['last_failed_action_data'])) {
-                    throw new Exception('last_failed_action_data is empty');
+                    throw new Ess_M2ePro_Model_Exception('last_failed_action_data is empty');
                 }
 
                 $lastFailedActionData = $additionalData['last_failed_action_data'];
@@ -245,7 +247,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
                 );
 
                 if (empty($itemInfo['relisted_item_id'])) {
-                    throw new Exception('Duplicate was not found');
+                    throw new Ess_M2ePro_Model_Exception('Duplicate was not found');
                 }
 
                 $this->duplicatedItems[$accountId][$marketplaceId][] = $itemInfo['relisted_item_id'];
@@ -257,7 +259,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
         }
     }
 
-    // ------------------------------------
+    // ---------------------------------------
 
     private function stopDuplicatedItems()
     {
@@ -290,7 +292,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
         }
     }
 
-    //####################################
+    //########################################
 
     private function getBlockedListingProductCollection()
     {
@@ -318,7 +320,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
         return $collection;
     }
 
-    //####################################
+    //########################################
 
     private function getEbayItemInfo($itemId, $accountId)
     {
@@ -346,7 +348,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
         return isset($responseData['items']) ? $responseData['items'] : array();
     }
 
-    // ------------------------------------
+    // ---------------------------------------
 
     private function getDuplicateItemFromPossible(array $possibleDuplicates, array $searchParams)
     {
@@ -378,7 +380,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
         return array();
     }
 
-    //####################################
+    //########################################
 
     private function modifyAndLogListingProduct(Ess_M2ePro_Model_Listing_Product $listingProduct,
                                                 $status, $duplicateItemId = null)
@@ -411,12 +413,14 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
             'additional_data' => json_encode($additionalData),
         ))->save();
 
+        $listingProduct->getChildObject()->updateVariationsStatus();
+
         if (is_null($duplicateItemId)) {
             return;
         }
 
         // M2ePro_TRANSLATIONS
-        // Duplicated Item %item_id% was found and Stopped on eBay.;
+        // Duplicated Item %item_id% was found and Stopped on eBay.
         $textToTranslate = 'Duplicated Item %item_id% was found and stopped on eBay.';
         $duplicateDeletedMessage = Mage::helper('M2ePro')->__($textToTranslate, $duplicateItemId);
 
@@ -483,7 +487,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
         );
     }
 
-    // -----------------------------------
+    // ---------------------------------------
 
     private function getStatusLogMessage($statusFrom, $statusTo)
     {
@@ -507,5 +511,5 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Defaults_RemoveDuplicates
         return $message;
     }
 
-    //####################################
+    //########################################
 }

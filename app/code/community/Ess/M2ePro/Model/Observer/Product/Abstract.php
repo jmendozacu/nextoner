@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2015 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 abstract class Ess_M2ePro_Model_Observer_Product_Abstract extends Ess_M2ePro_Model_Observer_Abstract
@@ -25,14 +27,14 @@ abstract class Ess_M2ePro_Model_Observer_Product_Abstract extends Ess_M2ePro_Mod
      */
     private $magentoProduct = NULL;
 
-    //####################################
+    //########################################
 
     public function beforeProcess()
     {
         $product = $this->getEvent()->getProduct();
 
         if (!($product instanceof Mage_Catalog_Model_Product)) {
-            throw new Exception('Product event doesn\'t have correct Product instance.');
+            throw new Ess_M2ePro_Model_Exception('Product event doesn\'t have correct Product instance.');
         }
 
         $this->product = $product;
@@ -41,16 +43,16 @@ abstract class Ess_M2ePro_Model_Observer_Product_Abstract extends Ess_M2ePro_Mod
         $this->storeId = (int)$this->product->getData('store_id');
     }
 
-    //####################################
+    //########################################
 
     /**
      * @return Mage_Catalog_Model_Product
-     * @throws LogicException
+     * @throws Ess_M2ePro_Model_Exception_Logic
      */
     protected function getProduct()
     {
         if (!($this->product instanceof Mage_Catalog_Model_Product)) {
-            throw new LogicException('Property "Product" should be set first.');
+            throw new Ess_M2ePro_Model_Exception_Logic('Property "Product" should be set first.');
         }
 
         return $this->product;
@@ -58,12 +60,13 @@ abstract class Ess_M2ePro_Model_Observer_Product_Abstract extends Ess_M2ePro_Mod
 
     /**
      * @return Mage_Catalog_Model_Product
-     * @throws LogicException
+     * @throws Ess_M2ePro_Model_Exception_Logic
      */
     protected function reloadProduct()
     {
         if ($this->getProductId() <= 0) {
-            throw new LogicException('To reload Product instance product_id should be greater than 0.');
+            throw new Ess_M2ePro_Model_Exception_Logic('To reload Product instance product_id should be
+                greater than 0.');
         }
 
         $this->product = Mage::getModel('catalog/product')->setStoreId($this->getStoreId())
@@ -72,7 +75,7 @@ abstract class Ess_M2ePro_Model_Observer_Product_Abstract extends Ess_M2ePro_Mod
         return $this->getProduct();
     }
 
-    // -----------------------------------
+    // ---------------------------------------
 
     /**
      * @return int
@@ -90,8 +93,11 @@ abstract class Ess_M2ePro_Model_Observer_Product_Abstract extends Ess_M2ePro_Mod
         return (int)$this->storeId;
     }
 
-    //####################################
+    //########################################
 
+    /**
+     * @return bool
+     */
     protected function isAdminDefaultStoreId()
     {
         return $this->getStoreId() == Mage_Core_Model_App::ADMIN_STORE_ID;
@@ -99,7 +105,7 @@ abstract class Ess_M2ePro_Model_Observer_Product_Abstract extends Ess_M2ePro_Mod
 
     /**
      * @return Ess_M2ePro_Model_Magento_Product
-     * @throws LogicException
+     * @throws Ess_M2ePro_Model_Exception_Logic
      */
     protected function getMagentoProduct()
     {
@@ -108,11 +114,12 @@ abstract class Ess_M2ePro_Model_Observer_Product_Abstract extends Ess_M2ePro_Mod
         }
 
         if ($this->getProductId() <= 0) {
-            throw new LogicException('To load Magento Product instance product_id should be greater than 0.');
+            throw new Ess_M2ePro_Model_Exception_Logic('To load Magento Product instance product_id should be
+                greater than 0.');
         }
 
         return $this->magentoProduct = Mage::getModel('M2ePro/Magento_Product')->setProduct($this->getProduct());
     }
 
-    //####################################
+    //########################################
 }

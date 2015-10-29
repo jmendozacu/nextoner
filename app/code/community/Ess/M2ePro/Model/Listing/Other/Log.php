@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Listing_Other_Log extends Ess_M2ePro_Model_Log_Abstract
@@ -53,7 +55,7 @@ class Ess_M2ePro_Model_Listing_Other_Log extends Ess_M2ePro_Model_Log_Abstract
     const ACTION_CHANNEL_CHANGE = 18;
     const _ACTION_CHANNEL_CHANGE = 'Change Item on Channel';
 
-    //####################################
+    //########################################
 
     public function _construct()
     {
@@ -61,23 +63,24 @@ class Ess_M2ePro_Model_Listing_Other_Log extends Ess_M2ePro_Model_Log_Abstract
         $this->_init('M2ePro/Listing_Other_Log');
     }
 
-    //####################################
+    //########################################
 
     public function addGlobalMessage($initiator = Ess_M2ePro_Helper_Data::INITIATOR_UNKNOWN,
                                      $actionId = NULL,
                                      $action = NULL,
                                      $description = NULL,
                                      $type = NULL,
-                                     $priority = NULL)
+                                     $priority = NULL,
+                                     array $additionalData = array())
     {
         $dataForAdd = $this->makeDataForAdd(NULL,
-                                            $this->makeAndGetCreator(),
                                             $initiator,
                                             $actionId,
                                             $action,
                                             $description,
                                             $type,
-                                            $priority);
+                                            $priority,
+                                            $additionalData);
 
         $this->createMessage($dataForAdd);
     }
@@ -91,7 +94,6 @@ class Ess_M2ePro_Model_Listing_Other_Log extends Ess_M2ePro_Model_Log_Abstract
                                       $priority = NULL)
     {
         $dataForAdd = $this->makeDataForAdd($listingOtherId,
-                                            $this->makeAndGetCreator(),
                                             $initiator,
                                             $actionId,
                                             $action,
@@ -102,7 +104,7 @@ class Ess_M2ePro_Model_Listing_Other_Log extends Ess_M2ePro_Model_Log_Abstract
         $this->createMessage($dataForAdd);
     }
 
-    //####################################
+    //########################################
 
     public function getActionTitle($type)
     {
@@ -114,7 +116,7 @@ class Ess_M2ePro_Model_Listing_Other_Log extends Ess_M2ePro_Model_Log_Abstract
         return $this->getActionsTitlesByClass(__CLASS__,'ACTION_');
     }
 
-    //------------------------------------
+    // ---------------------------------------
 
     public function clearMessages($listingOtherId = NULL)
     {
@@ -127,7 +129,7 @@ class Ess_M2ePro_Model_Listing_Other_Log extends Ess_M2ePro_Model_Log_Abstract
         return 'other_listings';
     }
 
-    //####################################
+    //########################################
 
     protected function createMessage($dataForAdd)
     {
@@ -158,13 +160,13 @@ class Ess_M2ePro_Model_Listing_Other_Log extends Ess_M2ePro_Model_Log_Abstract
     }
 
     protected function makeDataForAdd($listingOtherId,
-                                      $creator,
                                       $initiator = Ess_M2ePro_Helper_Data::INITIATOR_UNKNOWN,
                                       $actionId = NULL,
                                       $action = NULL,
                                       $description = NULL,
                                       $type = NULL,
-                                      $priority = NULL)
+                                      $priority = NULL,
+                                      array $additionalData = array())
     {
         $dataForAdd = array();
 
@@ -174,7 +176,6 @@ class Ess_M2ePro_Model_Listing_Other_Log extends Ess_M2ePro_Model_Log_Abstract
             $dataForAdd['listing_other_id'] = NULL;
         }
 
-        $dataForAdd['creator'] = $creator;
         $dataForAdd['initiator'] = $initiator;
 
         if (!is_null($actionId)) {
@@ -207,8 +208,10 @@ class Ess_M2ePro_Model_Listing_Other_Log extends Ess_M2ePro_Model_Log_Abstract
             $dataForAdd['priority'] = self::PRIORITY_LOW;
         }
 
+        $dataForAdd['additional_data'] = json_encode($additionalData);
+
         return $dataForAdd;
     }
 
-    //####################################
+    //########################################
 }

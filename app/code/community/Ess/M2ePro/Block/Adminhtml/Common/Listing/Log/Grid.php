@@ -1,12 +1,14 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Block_Adminhtml_Common_Listing_Log_Grid extends Ess_M2ePro_Block_Adminhtml_Listing_Log_Grid
 {
-    // ########################################
+    //########################################
 
     protected function getActionTitles()
     {
@@ -27,12 +29,15 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Log_Grid extends Ess_M2ePro_Bloc
 
             $excludeActions[Ess_M2ePro_Model_Listing_Log::ACTION_DELETE_PRODUCT_FROM_COMPONENT] = '';
             $excludeActions[Ess_M2ePro_Model_Listing_Log::ACTION_DELETE_AND_REMOVE_PRODUCT] = '';
+
+            $excludeActions[Ess_M2ePro_Model_Listing_Log::ACTION_SWITCH_TO_AFN_ON_COMPONENT] = '';
+            $excludeActions[Ess_M2ePro_Model_Listing_Log::ACTION_SWITCH_TO_MFN_ON_COMPONENT] = '';
         }
 
         return array_diff_key($allActions, $excludeActions);
     }
 
-    // ########################################
+    //########################################
 
     public function callbackColumnListingTitleID($value, $row, $column, $isExport)
     {
@@ -57,5 +62,5 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Log_Grid extends Ess_M2ePro_Bloc
         return $value;
     }
 
-    // ########################################
+    //########################################
 }

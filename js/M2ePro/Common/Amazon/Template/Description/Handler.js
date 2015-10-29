@@ -1,31 +1,26 @@
 CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
 
-    //----------------------------------
+    // ---------------------------------------
 
     initialize: function()
     {
-        // ugly hack
-        //if (version_compare(Prototype.Version,'1.7') < 0) {
-        //    for (var property in Selector.xpath.operators) {
-        //        Selector.xpath.operators[property] = Selector.xpath.operators[property].split('#{3}').join('#{4}');
-        //    }
-        //    Selector.patterns['attr'] = /\[\s*((?:[\w\u00c0-\uFFFF-]|\\.)+)\s*(?:(\S?=)\s*(['"]*)(.*?)\3|)\s*\](?![^\[]*\])(?![^\(]*\))/;
-        //}
-        // -------
-
         var self = this;
 
         self.specificHandler = null;
 
-        // -------
+        // ---------------------------------------
+        self.categoryInfo = {};
+
         self.categoryPathHiddenInput            = $('category_path');
-        self.categoryProductDataNickHiddenInput = $('product_data_nick');
         self.categoryNodeIdHiddenInput          = $('browsenode_id');
-        // -------
 
-        self.variationThemes = [];
+        self.categoryProductDataNickHiddenInput = $('product_data_nick');
+        // ---------------------------------------
 
-        // -------
+        self.productDataNicksInfo = {};
+        self.variationThemes      = [];
+
+        // ---------------------------------------
 
         self.initValidation();
     },
@@ -55,7 +50,7 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
             return value >= el.getAttribute('min_value');
         });
 
-        Validation.add('M2ePro-validate-category', M2ePro.translator.translate('You should select Category first'), function(value) {
+        Validation.add('M2ePro-validate-category', M2ePro.translator.translate('You should select Category and Product Type first'), function(value) {
 
             if (!self.isNewAsinAccepted()) {
                 return true;
@@ -65,7 +60,7 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
         });
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     setSpecificHandler: function(object)
     {
@@ -73,7 +68,7 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
         self.specificHandler = object;
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     isNewAsinAccepted: function()
     {
@@ -90,12 +85,12 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
         var self = AmazonTemplateDescriptionHandlerObj;
 
         if (!self.specificHandler.isReady()) {
-            alert(M2ePro.translator.translate('You should select Category first'));
+            alert(M2ePro.translator.translate('You should select Category and Product Type first'));
             self.goToGeneralTab();
         }
     },
 
-    //##################################
+    //########################################
 
     duplicate_click: function($headId)
     {
@@ -109,6 +104,8 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
             M2ePro.customData.category_locked = false;
             this.hideCategoryWarning('category_locked_warning_message');
             $('edit_category_link').show();
+
+            $('product_data_nick_select').removeAttribute('disabled');
         }
 
         if (M2ePro.customData.marketplace_locked) {
@@ -136,7 +133,7 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
         CommonHandlerObj.duplicate_click($headId, M2ePro.translator.translate('Add Description Policy'));
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     save_click: function($super, url)
     {
@@ -154,7 +151,7 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
         $super(url, tabsId);
     },
 
-    //##################################
+    //########################################
 
     onChangeMarketplace: function()
     {
@@ -173,11 +170,21 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
         AmazonTemplateDescriptionCategoryChooserHandlerObj.showEditCategoryPopUp();
     },
 
+    onChangeProductDataNick: function()
+    {
+        var self = AmazonTemplateDescriptionHandlerObj;
+
+        self.saveRecentProductDataNick(this.value);
+
+        self.resetRequiredAttributesForProductType();
+        self.setProductDataNick(this.value);
+    },
+
     onChangeNewAsinAccepted: function()
     {
         var self = AmazonTemplateDescriptionHandlerObj;
 
-        // --
+        // ---------------------------------------
         var onlyAsinBlocks = $$('.hide-when-asin-is-disabled');
 
         onlyAsinBlocks.invoke('hide');
@@ -196,7 +203,7 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
             $('item_package_quantity_mode').simulate('change');
             $('number_of_items_mode').simulate('change');
         }
-        // --
+        // ---------------------------------------
 
         // set is required
         parseInt(this.value) ? $('category_path').addClassName('required-entry')
@@ -219,10 +226,10 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
             if(this.value == 0) chooser.value = '';
             self.updateFieldRequirements(chooser, this.value, 'M2ePro-required-when-visible');
         }
-        // --
+        // ---------------------------------------
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     onChangeWorldwideId: function()
     {
@@ -291,33 +298,112 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
         }
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
-    setCategory: function(categoryInfo)
+    setCategory: function(categoryInfo, notSetProductTypeForceIfOnlyOne)
     {
-        this.initHiddenValues(categoryInfo);
+        var self = this;
+        notSetProductTypeForceIfOnlyOne = notSetProductTypeForceIfOnlyOne || false;
+
+        this.categoryInfo = categoryInfo;
+
+        this.categoryPathHiddenInput.value   = this.getInterfaceCategoryPath(categoryInfo);
+        this.categoryNodeIdHiddenInput.value = categoryInfo.browsenode_id;
+
         this.updateCategoryPathSpan(this.getInterfaceCategoryPath(categoryInfo, true));
 
-        this.updateRequiredAttributesForCategory(categoryInfo);
+        this.updateAvailableProductTypes();
+
+        if (self.categoryInfo.product_data_nicks.length == 1 && !notSetProductTypeForceIfOnlyOne) {
+            self.setProductDataNickFromTree(self.categoryInfo.product_data_nicks[0]);
+        }
+
         this.hideCategoryWarning('category_is_not_accessible_message');
+    },
+
+    setProductDataNickFromTree: function(productDataNick)
+    {
+        $$('#product_data_nick_select option').each(function(el) {
+
+            var optGroup = $(el).up('optgroup');
+
+            if (el.value == productDataNick && optGroup &&
+                optGroup.getAttribute('is_recent') === null && optGroup.getAttribute('is_recommended') === null)
+            {
+                el.setAttribute('selected', 'selected');
+                return true;
+            }
+        });
+
+        AmazonTemplateDescriptionHandlerObj.setProductDataNick(productDataNick);
+    },
+
+    setProductDataNick: function(productDataNick)
+    {
+        var self = this;
+
+        this.categoryProductDataNickHiddenInput.value = productDataNick;
+
+        self.categoryInfo['required_attributes'] = {};
+
+        $H(this.productDataNicksInfo).each(function(item){
+
+            if (item.key == productDataNick) {
+                self.categoryInfo['required_attributes'] = item.value.required_attributes;
+                return true;
+            }
+        });
+
+        this.updateRequiredAttributesForProductType();
         this.updateWarningMessagesVisibility();
 
         this.specificHandler.reset();
-        this.specificHandler.run(categoryInfo);
+        this.specificHandler.run(this.categoryInfo, productDataNick);
     },
+
+    saveRecentProductDataNick: function(productDataNick)
+    {
+        if (productDataNick == '') {
+            return;
+        }
+
+        new Ajax.Request(M2ePro.url.get('adminhtml_common_amazon_template_description/saveRecentProductDataNick'), {
+            method     : 'post',
+            parameters : {
+                marketplace_id:    $('marketplace_id').value,
+                product_data_nick: productDataNick
+            }
+        });
+    },
+
+    // ---------------------------------------
 
     resetCategory: function()
     {
-        this.resetHiddenValues();
-        this.resetCategoryPathSpan();
+        this.categoryInfo = {};
 
-        this.resetRequiredAttributesForCategory();
+        this.categoryPathHiddenInput.value   = '';
+        this.categoryNodeIdHiddenInput.value = '';
+
+        this.resetCategoryPathSpan();
+        this.resetProductDataNick();
+
         this.hideCategoryWarning('category_variation_warning_message');
+    },
+
+    resetProductDataNick: function()
+    {
+        this.categoryProductDataNickHiddenInput.value = '';
+
+        this.resetRequiredAttributesForProductType();
+
+        $('product_data_nick_tr').hide();
+        $('product_data_nick_select').update();
 
         this.specificHandler.reset();
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     prepareEditMode: function()
     {
@@ -336,43 +422,50 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
 
                 self.resetCategory();
                 self.showCategoryWarning('category_is_not_accessible_message');
+
             } else {
 
                 var categoryInfo = transport.responseText.evalJSON();
 
-                if (categoryInfo.hasOwnProperty('partial_match')) {
+                self.setCategory(categoryInfo, true);
+                var isProductTypeAvailable = self.isProductTypeAvailable(M2ePro.formData.general.product_data_nick);
+
+                if (isProductTypeAvailable) {
+                    self.setProductDataNickFromTree(M2ePro.formData.general.product_data_nick);
+                } else {
                     self.specificHandler.resetFormDataSpecifics();
                 }
 
-                self.setCategory(categoryInfo);
-
                 if (M2ePro.customData.category_locked) {
+
                     self.showCategoryWarning('category_locked_warning_message');
                     $('edit_category_link').hide();
+
+                    $('product_data_nick_select').setAttribute('disabled', 'disabled');
                 }
 
-                if (categoryInfo.hasOwnProperty('partial_match')) {
+                if (!isProductTypeAvailable) {
                     self.showCategoryWarning('category_is_not_accessible_message');
+                    $('product_data_nick_select').removeAttribute('disabled');
                 }
             }
         };
 
         AmazonTemplateDescriptionCategoryChooserHandlerObj.getCategoryInfoFromDictionaryBrowseNodeId(
-            M2ePro.formData.general.product_data_nick,
             M2ePro.formData.general.browsenode_id,
             M2ePro.formData.general.category_path,
             callback
         );
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     showCategoryWarning: function(item)
     {
         var me = $(item);
 
         var atLeastOneWarningShown = $$('#category_warning_messages span.category-warning-item').any(function(obj) {
-            return $(obj).visible();
+            return $(obj).id != me.id && $(obj).visible();
         });
 
         if (atLeastOneWarningShown && me.previous('span.additional-br')) {
@@ -399,21 +492,7 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
         !atLeastOneWarningShown && $('category_warning_messages').hide();
     },
 
-    //----------------------------------
-
-    initHiddenValues: function(categoryInfo)
-    {
-        this.categoryPathHiddenInput.value            = this.getInterfaceCategoryPath(categoryInfo);
-        this.categoryProductDataNickHiddenInput.value = categoryInfo.product_data_nick;
-        this.categoryNodeIdHiddenInput.value          = categoryInfo.browsenode_id;
-    },
-
-    resetHiddenValues: function()
-    {
-        this.categoryPathHiddenInput.value            = '';
-        this.categoryProductDataNickHiddenInput.value = '';
-        this.categoryNodeIdHiddenInput.value          = '';
-    },
+    // ---------------------------------------
 
     updateCategoryPathSpan: function(path)
     {
@@ -426,7 +505,7 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
         span.innerHTML = '<span style="color: grey; font-style: italic">' + M2ePro.translator.translate('Not Selected') + '</span>';
     },
 
-    resetRequiredAttributesForCategory: function()
+    resetRequiredAttributesForProductType: function()
     {
         this.resetManufacturerPartNumberRequired();
         this.resetTargetAudienceRequired();
@@ -435,13 +514,13 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
         this.resetNumberOfItemsRequired();
     },
 
-    updateRequiredAttributesForCategory: function(categoryInfo)
+    updateRequiredAttributesForProductType: function()
     {
-        this.updateManufacturerPartNumberRequired(categoryInfo);
-        this.updateTargetAudienceRequired(categoryInfo);
-        this.updateItemDimensionWeightRequired(categoryInfo);
-        this.updateItemPackageQuantityRequired(categoryInfo);
-        this.updateNumberOfItemsRequired(categoryInfo);
+        this.updateManufacturerPartNumberRequired();
+        this.updateTargetAudienceRequired();
+        this.updateItemDimensionWeightRequired();
+        this.updateItemPackageQuantityRequired();
+        this.updateNumberOfItemsRequired();
     },
 
     updateWarningMessagesVisibility: function()
@@ -465,7 +544,7 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
         });
     },
 
-    //##################################
+    //########################################
 
     resetManufacturerPartNumberRequired: function()
     {
@@ -505,20 +584,20 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
         chooser.removeAttribute('required_attribute_for_new_asin');
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
-    updateManufacturerPartNumberRequired: function(categoryInfo)
+    updateManufacturerPartNumberRequired: function()
     {
-        if (!categoryInfo.required_attributes.hasOwnProperty('/DescriptionData/MfrPartNumber')) {
+        if (!this.categoryInfo.required_attributes.hasOwnProperty('/DescriptionData/MfrPartNumber')) {
             return;
         }
 
         this.updateFieldRequirements($('manufacturer_part_number_mode'), 1);
     },
 
-    updateTargetAudienceRequired: function(categoryInfo)
+    updateTargetAudienceRequired: function()
     {
-        if (!categoryInfo.required_attributes.hasOwnProperty('/DescriptionData/TargetAudience')) {
+        if (!this.categoryInfo.required_attributes.hasOwnProperty('/DescriptionData/TargetAudience')) {
             return;
         }
 
@@ -534,14 +613,14 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
             value : M2ePro.php.constant('Ess_M2ePro_Model_Amazon_Template_Description_Definition::TARGET_AUDIENCE_MODE_CUSTOM')
         }));
 
-        categoryInfo.required_attributes['/DescriptionData/TargetAudience'].each(function(value) {
+        this.categoryInfo.required_attributes['/DescriptionData/TargetAudience'].each(function(value) {
             AmazonTemplateDescriptionDefinitionHandlerObj.forceFillUpElement('target_audience', value);
         });
     },
 
-    updateItemDimensionWeightRequired: function(categoryInfo)
+    updateItemDimensionWeightRequired: function()
     {
-        if (!categoryInfo.required_attributes.hasOwnProperty('/DescriptionData/ItemDimensions/Weight')) {
+        if (!this.categoryInfo.required_attributes.hasOwnProperty('/DescriptionData/ItemDimensions/Weight')) {
             return;
         }
 
@@ -554,9 +633,9 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
         chooser.simulate('change');
     },
 
-    updateItemPackageQuantityRequired: function(categoryInfo)
+    updateItemPackageQuantityRequired: function()
     {
-        if (!categoryInfo.required_attributes.hasOwnProperty('/ItemPackageQuantity')) {
+        if (!this.categoryInfo.required_attributes.hasOwnProperty('/ItemPackageQuantity')) {
             return;
         }
 
@@ -569,9 +648,9 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
         }
     },
 
-    updateNumberOfItemsRequired: function(categoryInfo)
+    updateNumberOfItemsRequired: function()
     {
-        if (!categoryInfo.required_attributes.hasOwnProperty('/NumberOfItems')) {
+        if (!this.categoryInfo.required_attributes.hasOwnProperty('/NumberOfItems')) {
             return;
         }
 
@@ -584,7 +663,105 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
         }
     },
 
-    //##################################
+    //########################################
+
+    updateAvailableProductTypes: function()
+    {
+        var self = AmazonTemplateDescriptionHandlerObj;
+
+        $('product_data_nick_tr').show();
+
+        var renderingCallback = function(transport) {
+
+            var response = transport.responseText.evalJSON();
+
+            if (!response) {
+                return;
+            }
+
+            var html = '';
+
+            $H(response['grouped_data']).each(function(data) {
+
+                var group            = data.key,
+                    productDataNicks = data.value;
+
+                html += '<optgroup label="' + group + '">';
+
+                $H(productDataNicks).each(function(el) {
+                    html += '<option value="' + el.value.product_data_nick + '">' + el.value.title + '</option>';
+                });
+
+                html += '</optgroup>';
+            });
+
+            var recommendedHtml = '';
+
+            if (self.categoryInfo.product_data_nicks.length > 0) {
+
+                recommendedHtml += '<optgroup is_recommended="1" label="' + M2ePro.translator.translate('Recommended') + '">';
+
+                self.categoryInfo.product_data_nicks.each(function(el){
+
+                    var title = typeof response['product_data'][el] != 'undefined' ? response['product_data'][el]['group'] + ' > ' + response['product_data'][el]['title']
+                                                                                   : el;
+
+                    recommendedHtml += '<option value="' + el + '">' + title + '</option>';
+                });
+
+                recommendedHtml += '</optgroup>';
+            }
+
+            var recentHtml = '';
+
+            if (Object.keys(response['recent_data']).length > 0) {
+
+                recentHtml += '<optgroup is_recent="1" label="' + M2ePro.translator.translate('Recent') + '">';
+
+                $H(response['recent_data']).each(function(data) {
+
+                    var title = data.value['group'] + ' > ' + data.value['title'];
+                    recentHtml += '<option value="' + data.key + '">' + title + '</option>';
+                });
+
+                recentHtml += '</optgroup>';
+            }
+
+            html = '<option style="display: none;"></option>' + recommendedHtml + recentHtml + html;
+            $('product_data_nick_select').update(html);
+        };
+
+        new Ajax.Request(M2ePro.url.get('adminhtml_common_amazon_template_description/getAvailableProductTypes'), {
+            method: 'post',
+            asynchronous: false,
+            parameters: {
+                marketplace_id: $('marketplace_id').value,
+                browsenode_id:  self.categoryNodeIdHiddenInput.value
+            },
+            onSuccess: function(transport) {
+
+                self.productDataNicksInfo = transport.responseText.evalJSON()['product_data'];
+                renderingCallback.call(self, transport);
+            }
+        });
+    },
+
+    isProductTypeAvailable: function(productType)
+    {
+        var result = false;
+
+        $H(this.productDataNicksInfo).each(function(el){
+
+            if (productType == el.key) {
+                result = true;
+                return true;
+            }
+        });
+
+        return result;
+    },
+
+    //########################################
 
     updateSpanRequirements: function(element, dependence)
     {
@@ -598,7 +775,7 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
     {
         className = className || 'required-entry';
 
-        // --
+        // ---------------------------------------
         var firstOption = element.select('option').first();
         if (firstOption.value == '0') {
 
@@ -617,39 +794,41 @@ CommonAmazonTemplateDescriptionHandler = Class.create(CommonHandler, {
                 }));
             }
         }
-        // --
+        // ---------------------------------------
 
-        // --
+        // ---------------------------------------
         if (parseInt(dependence) && element.value == 0) {
             element.value = '';
         }
-        // --
+        // ---------------------------------------
 
-        //--
+        // ---------------------------------------
         parseInt(dependence) ? element.addClassName(className)
                              : element.removeClassName(className);
-        //--
+        // ---------------------------------------
 
         element.simulate('change');
         this.updateSpanRequirements(element, dependence);
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     getInterfaceCategoryPath: function(categoryInfo, withBrowseNodeId)
     {
         withBrowseNodeId = withBrowseNodeId || false;
 
-        var path = categoryInfo.path.replace(/>/g,' > ') + ' > ' + categoryInfo.title;
+        var path = categoryInfo.path != null ? categoryInfo.path.replace(/>/g,' > ') + ' > ' + categoryInfo.title
+                                             : categoryInfo.title;
+
         return !withBrowseNodeId ? path : path + ' ('+categoryInfo.browsenode_id+')';
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     goToGeneralTab: function()
     {
         amazonTemplateDescriptionEditTabsJsTabs.showTabContent($('amazonTemplateDescriptionEditTabs_general'));
     }
 
-    //----------------------------------
+    // ---------------------------------------
 });

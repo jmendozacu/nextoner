@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2014 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Amazon_Marketplace_Details
@@ -10,8 +12,13 @@ class Ess_M2ePro_Model_Amazon_Marketplace_Details
 
     private $productData = array();
 
-    // ##########################################################
+    //########################################
 
+    /**
+     * @param $marketplaceId
+     * @return $this
+     * @throws Ess_M2ePro_Model_Exception
+     */
     public function setMarketplaceId($marketplaceId)
     {
         if ($this->marketplaceId === $marketplaceId) {
@@ -24,8 +31,20 @@ class Ess_M2ePro_Model_Amazon_Marketplace_Details
         return $this;
     }
 
-    // ##########################################################
+    //########################################
 
+    /**
+     * @return array
+     */
+    public function getProductData()
+    {
+       return $this->productData;
+    }
+
+    /**
+     * @param $productDataNick
+     * @return array
+     */
     public function getVariationThemes($productDataNick)
     {
         if (!isset($this->productData[$productDataNick])) {
@@ -35,18 +54,23 @@ class Ess_M2ePro_Model_Amazon_Marketplace_Details
         return (array)$this->productData[$productDataNick]['variation_themes'];
     }
 
+    /**
+     * @param $productDataNick
+     * @param $theme
+     * @return array
+     */
     public function getVariationThemeAttributes($productDataNick, $theme)
     {
         $themes = $this->getVariationThemes($productDataNick);
         return !empty($themes[$theme]['attributes']) ? $themes[$theme]['attributes'] : array();
     }
 
-    // ##########################################################
+    //########################################
 
     private function load()
     {
         if (is_null($this->marketplaceId)) {
-            throw new Exception('Marketplace was not set.');
+            throw new Ess_M2ePro_Model_Exception('Marketplace was not set.');
         }
 
         /** @var $connRead Varien_Db_Adapter_Pdo_Mysql */
@@ -60,11 +84,11 @@ class Ess_M2ePro_Model_Amazon_Marketplace_Details
             ->fetch();
 
         if ($data === false) {
-            throw new Exception('Marketplace not found or not synchronized');
+            throw new Ess_M2ePro_Model_Exception('Marketplace not found or not synchronized');
         }
 
         $this->productData    = json_decode($data['product_data'], true);
     }
 
-    // ##########################################################
+    //########################################
 }

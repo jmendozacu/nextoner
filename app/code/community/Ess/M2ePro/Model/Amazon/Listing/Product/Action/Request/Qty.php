@@ -1,18 +1,33 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Qty
     extends Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Abstract
 {
-    // ########################################
+    const FULFILLMENT_MODE_AFN = 'AFN';
+    const FULFILLMENT_MODE_MFN = 'MFN';
 
+    //########################################
+
+    /**
+     * @return array
+     */
     public function getData()
     {
         if (!$this->getConfigurator()->isQtyAllowed()) {
             return array();
+        }
+
+        $params = $this->getParams();
+        if (!empty($params['switch_to']) && $params['switch_to'] === self::FULFILLMENT_MODE_AFN) {
+            return array(
+                'switch_to' => self::FULFILLMENT_MODE_AFN
+            );
         }
 
         if (!isset($this->validatorsData['qty'])) {
@@ -43,10 +58,14 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Qty
             $data['restock_date'] = $this->validatorsData['restock_date'];
         }
 
+        if (!empty($params['switch_to']) && $params['switch_to'] === self::FULFILLMENT_MODE_MFN) {
+            $data['switch_to'] = self::FULFILLMENT_MODE_MFN;
+        }
+
         return $data;
     }
 
-    // ########################################
+    //########################################
 
     public function checkQtyWarnings()
     {
@@ -58,7 +77,7 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Qty
             $productId = $this->getAmazonListingProduct()->getActualMagentoProduct()->getProductId();
             $storeId = $this->getListing()->getStoreId();
 
-            if(!empty(Ess_M2ePro_Model_Magento_Product::$statistics[$listingProductId][$productId][$storeId]['qty'])) {
+            if (!empty(Ess_M2ePro_Model_Magento_Product::$statistics[$listingProductId][$productId][$storeId]['qty'])) {
 
                 $qtys = Ess_M2ePro_Model_Magento_Product::$statistics[$listingProductId][$productId][$storeId]['qty'];
                 foreach ($qtys as $type => $override) {
@@ -85,5 +104,5 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Qty
         }
     }
 
-    // ########################################
+    //########################################
 }

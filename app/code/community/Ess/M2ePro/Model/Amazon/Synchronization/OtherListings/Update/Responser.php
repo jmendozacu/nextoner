@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Amazon_Synchronization_OtherListings_Update_Responser
@@ -10,7 +12,7 @@ class Ess_M2ePro_Model_Amazon_Synchronization_OtherListings_Update_Responser
     protected $logsActionId = NULL;
     protected $synchronizationLog = NULL;
 
-    // ########################################
+    //########################################
 
     protected function processResponseMessages(array $messages = array())
     {
@@ -46,8 +48,12 @@ class Ess_M2ePro_Model_Amazon_Synchronization_OtherListings_Update_Responser
         return true;
     }
 
-    // ########################################
+    //########################################
 
+    /**
+     * @param Ess_M2ePro_Model_Processing_Request $processingRequest
+     * @throws Ess_M2ePro_Model_Exception_Logic
+     */
     public function unsetProcessingLocks(Ess_M2ePro_Model_Processing_Request $processingRequest)
     {
         parent::unsetProcessingLocks($processingRequest);
@@ -93,7 +99,7 @@ class Ess_M2ePro_Model_Amazon_Synchronization_OtherListings_Update_Responser
         $connWrite->delete($tempTable, array('`hash` = ?' => (string)$this->params['processed_inventory_hash']));
     }
 
-    // ########################################
+    //########################################
 
     protected function processResponseData($response)
     {
@@ -104,9 +110,7 @@ class Ess_M2ePro_Model_Amazon_Synchronization_OtherListings_Update_Responser
             $this->updateReceivedOtherListings($receivedItems);
             $this->createNotExistedOtherListings($receivedItems);
 
-            $this->updateNotReceivedOtherListings(
-                $receivedItems, $this->params['processed_inventory_hash'], $response['next_part']
-            );
+            $this->updateNotReceivedOtherListings($receivedItems, $response['next_part']);
 
         } catch (Exception $exception) {
 
@@ -120,7 +124,7 @@ class Ess_M2ePro_Model_Amazon_Synchronization_OtherListings_Update_Responser
         }
     }
 
-    // ########################################
+    //########################################
 
     protected function updateReceivedOtherListings($receivedItems)
     {
@@ -148,6 +152,7 @@ class Ess_M2ePro_Model_Amazon_Synchronization_OtherListings_Update_Responser
             );
 
             if ($newData['is_afn_channel']) {
+                $newData['online_qty'] = NULL;
                 $newData['status'] = Ess_M2ePro_Model_Listing_Product::STATUS_UNKNOWN;
             } else {
                 if ($newData['online_qty'] > 0) {
@@ -179,21 +184,43 @@ class Ess_M2ePro_Model_Amazon_Synchronization_OtherListings_Update_Responser
 
             if ($newData['online_price'] != $existingData['online_price']) {
                 // M2ePro_TRANSLATIONS
-                // Item Price was successfully changed from %from% to %to% .
+                // Item Price was successfully changed from %from% to %to%.
                 $tempLogMessages[] = Mage::helper('M2ePro')->__(
-                    'Item Price was successfully changed from %from% to %to% .',
+                    'Item Price was successfully changed from %from% to %to%.',
                     $existingData['online_price'],
                     $newData['online_price']
                 );
             }
 
-            if ($newData['online_qty'] != $existingData['online_qty']) {
+            if (!is_null($newData['online_qty']) && $newData['online_qty'] != $existingData['online_qty']) {
                 // M2ePro_TRANSLATIONS
-                // Item QTY was successfully changed from %from% to %to% .
+                // Item QTY was successfully changed from %from% to %to%.
                 $tempLogMessages[] = Mage::helper('M2ePro')->__(
-                    'Item QTY was successfully changed from %from% to %to% .',
+                    'Item QTY was successfully changed from %from% to %to%.',
                     $existingData['online_qty'],
                     $newData['online_qty']
+                );
+            }
+
+            if (is_null($newData['online_qty']) && $newData['is_afn_channel'] != $existingData['is_afn_channel']) {
+
+                $from = Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Qty::FULFILLMENT_MODE_MFN;
+                $to = Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Qty::FULFILLMENT_MODE_MFN;
+
+                if ($existingData['is_afn_channel']) {
+                    $from = Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Qty::FULFILLMENT_MODE_AFN;
+                }
+
+                if ($newData['is_afn_channel']) {
+                    $to = Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Qty::FULFILLMENT_MODE_AFN;
+                }
+
+                // M2ePro_TRANSLATIONS
+                // Item Fulfillment was successfully changed from %from% to %to%.
+                $tempLogMessages[] = Mage::helper('M2ePro')->__(
+                    'Item Fulfillment was successfully changed from %from% to %to%.',
+                    $from,
+                    $to
                 );
             }
 
@@ -207,16 +234,16 @@ class Ess_M2ePro_Model_Amazon_Synchronization_OtherListings_Update_Responser
 
                 if (!empty($statusChangedFrom) && !empty($statusChangedTo)) {
                     // M2ePro_TRANSLATIONS
-                    // Item Status was successfully changed from "%from%" to "%to%" .
+                    // Item Status was successfully changed from "%from%" to "%to%".
                     $tempLogMessages[] = Mage::helper('M2ePro')->__(
-                        'Item Status was successfully changed from "%from%" to "%to%" .',
+                        'Item Status was successfully changed from "%from%" to "%to%".',
                         $statusChangedFrom,
                         $statusChangedTo
                     );
                 }
             }
 
-            foreach($tempLogMessages as $tempLogMessage) {
+            foreach ($tempLogMessages as $tempLogMessage) {
                 $tempLog->addProductMessage(
                     (int)$existingItem['listing_other_id'],
                     Ess_M2ePro_Helper_Data::INITIATOR_EXTENSION,
@@ -283,6 +310,7 @@ class Ess_M2ePro_Model_Amazon_Synchronization_OtherListings_Update_Responser
             );
 
             if ((bool)$newData['is_afn_channel']) {
+                $newData['online_qty'] = NULL;
                 $newData['status'] = Ess_M2ePro_Model_Listing_Product::STATUS_UNKNOWN;
             } else {
                 if ((int)$newData['online_qty'] > 0) {
@@ -326,7 +354,7 @@ class Ess_M2ePro_Model_Amazon_Synchronization_OtherListings_Update_Responser
         }
     }
 
-    //-----------------------------------------
+    // ---------------------------------------
 
     protected function updateNotReceivedOtherListings($receivedItems,$nextPart)
     {
@@ -338,10 +366,10 @@ class Ess_M2ePro_Model_Amazon_Synchronization_OtherListings_Update_Responser
 
         $tempTable = Mage::getSingleton('core/resource')->getTableName('m2epro_amazon_processed_inventory');
 
-        //--------------------------
-        $chunckedArray = array_chunk($receivedItems,1000);
+        // ---------------------------------------
+        $chunkedArray = array_chunk($receivedItems,1000);
 
-        foreach ($chunckedArray as $partReceivedItems) {
+        foreach ($chunkedArray as $partReceivedItems) {
 
             $inserts = array();
             foreach ($partReceivedItems as $partReceivedItem) {
@@ -353,7 +381,7 @@ class Ess_M2ePro_Model_Amazon_Synchronization_OtherListings_Update_Responser
 
             $connWrite->insertMultiple($tempTable, $inserts);
         }
-        //--------------------------
+        // ---------------------------------------
 
         if (!is_null($nextPart)) {
             return;
@@ -421,14 +449,14 @@ class Ess_M2ePro_Model_Amazon_Synchronization_OtherListings_Update_Responser
             'status_changer' => Ess_M2ePro_Model_Listing_Product::STATUS_CHANGER_COMPONENT
         );
 
-        $chunckedIds = array_chunk($notReceivedIds,1000);
-        foreach ($chunckedIds as $partIds) {
+        $chunkedIds = array_chunk($notReceivedIds,1000);
+        foreach ($chunkedIds as $partIds) {
             $where = '`id` IN ('.implode(',',$partIds).')';
             $connWrite->update($listingOtherMainTable,$bind,$where);
         }
     }
 
-    // ########################################
+    //########################################
 
     protected function filterReceivedOnlyOtherListings(array $receivedItems)
     {
@@ -488,7 +516,7 @@ class Ess_M2ePro_Model_Amazon_Synchronization_OtherListings_Update_Responser
         return $stmtTemp;
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @return Ess_M2ePro_Model_Account
@@ -506,7 +534,7 @@ class Ess_M2ePro_Model_Amazon_Synchronization_OtherListings_Update_Responser
         return $this->getAccount()->getChildObject()->getMarketplace();
     }
 
-    //-----------------------------------------
+    // ---------------------------------------
 
     protected function getLogsActionId()
     {
@@ -530,5 +558,5 @@ class Ess_M2ePro_Model_Amazon_Synchronization_OtherListings_Update_Responser
         return $this->synchronizationLog;
     }
 
-    // ########################################
+    //########################################
 }

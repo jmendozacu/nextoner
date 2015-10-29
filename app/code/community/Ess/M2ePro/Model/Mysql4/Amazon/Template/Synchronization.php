@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Mysql4_Amazon_Template_Synchronization
@@ -9,7 +11,7 @@ class Ess_M2ePro_Model_Mysql4_Amazon_Template_Synchronization
 {
     protected $_isPkAutoIncrement = false;
 
-    // ########################################
+    //########################################
 
     public function _construct()
     {
@@ -17,7 +19,7 @@ class Ess_M2ePro_Model_Mysql4_Amazon_Template_Synchronization
         $this->_isPkAutoIncrement = false;
     }
 
-    // ########################################
+    //########################################
 
     public function setSynchStatusNeed($newData, $oldData, $listingsProducts)
     {
@@ -29,6 +31,7 @@ class Ess_M2ePro_Model_Mysql4_Amazon_Template_Synchronization
             'listing' => 'revise_change_listing',
             'sellingFormatTemplate' => 'revise_change_selling_format_template',
             'descriptionTemplate'   => 'revise_change_description_template',
+            'shippingOverrideTemplate' => 'revise_change_shipping_override_template'
         );
 
         $settings = $this->getEnabledReviseSettings($newData, $oldData, $settings);
@@ -67,7 +70,7 @@ class Ess_M2ePro_Model_Mysql4_Amazon_Template_Synchronization
         );
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function getEnabledReviseSettings($newData, $oldData, $settings)
     {
@@ -88,5 +91,5 @@ class Ess_M2ePro_Model_Mysql4_Amazon_Template_Synchronization
         return $settings;
     }
 
-    // ########################################
+    //########################################
 }

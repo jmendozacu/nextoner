@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Listing_Log extends Ess_M2ePro_Model_Log_Abstract
@@ -51,6 +53,10 @@ class Ess_M2ePro_Model_Listing_Log extends Ess_M2ePro_Model_Log_Abstract
     const _ACTION_DELETE_AND_REMOVE_PRODUCT = 'Remove from Channel & Listing';
     const ACTION_NEW_SKU_PRODUCT_ON_COMPONENT = 27;
     const _ACTION_NEW_SKU_PRODUCT_ON_COMPONENT = 'New SKU Item on Channel';
+    const ACTION_SWITCH_TO_AFN_ON_COMPONENT = 29;
+    const _ACTION_SWITCH_TO_AFN_ON_COMPONENT = 'Switching Fulfillment to AFN';
+    const ACTION_SWITCH_TO_MFN_ON_COMPONENT = 30;
+    const _ACTION_SWITCH_TO_MFN_ON_COMPONENT = 'Switching Fulfillment to MFN';
 
     const ACTION_CHANGE_PRODUCT_SPECIAL_PRICE_FROM_DATE = 19;
     const _ACTION_CHANGE_PRODUCT_SPECIAL_PRICE_FROM_DATE = 'Change of Product Special Price from date in Magento Store';
@@ -73,7 +79,7 @@ class Ess_M2ePro_Model_Listing_Log extends Ess_M2ePro_Model_Log_Abstract
     const ACTION_TRANSLATE_PRODUCT = 28;
     const _ACTION_TRANSLATE_PRODUCT = 'Translation';
 
-    //####################################
+    //########################################
 
     public function _construct()
     {
@@ -81,7 +87,7 @@ class Ess_M2ePro_Model_Listing_Log extends Ess_M2ePro_Model_Log_Abstract
         $this->_init('M2ePro/Listing_Log');
     }
 
-    //####################################
+    //########################################
 
     public function addListingMessage($listingId,
                                       $initiator = Ess_M2ePro_Helper_Data::INITIATOR_UNKNOWN,
@@ -89,10 +95,10 @@ class Ess_M2ePro_Model_Listing_Log extends Ess_M2ePro_Model_Log_Abstract
                                       $action = NULL,
                                       $description = NULL,
                                       $type = NULL,
-                                      $priority = NULL)
+                                      $priority = NULL,
+                                      array $additionalData = array())
     {
         $dataForAdd = $this->makeDataForAdd($listingId,
-                                            $this->makeAndGetCreator(),
                                             $initiator,
                                             NULL,
                                             NULL,
@@ -100,7 +106,8 @@ class Ess_M2ePro_Model_Listing_Log extends Ess_M2ePro_Model_Log_Abstract
                                             $action,
                                             $description,
                                             $type,
-                                            $priority);
+                                            $priority,
+                                            $additionalData);
 
         $this->createMessage($dataForAdd);
     }
@@ -116,7 +123,6 @@ class Ess_M2ePro_Model_Listing_Log extends Ess_M2ePro_Model_Log_Abstract
                                       $priority = NULL)
     {
         $dataForAdd = $this->makeDataForAdd($listingId,
-                                            $this->makeAndGetCreator(),
                                             $initiator,
                                             $productId,
                                             $listingProductId,
@@ -129,7 +135,7 @@ class Ess_M2ePro_Model_Listing_Log extends Ess_M2ePro_Model_Log_Abstract
         $this->createMessage($dataForAdd);
     }
 
-    //####################################
+    //########################################
 
     public function updateListingTitle($listingId , $title)
     {
@@ -157,7 +163,7 @@ class Ess_M2ePro_Model_Listing_Log extends Ess_M2ePro_Model_Log_Abstract
         return true;
     }
 
-    //------------------------------------
+    // ---------------------------------------
 
     public function getActionTitle($type)
     {
@@ -169,7 +175,7 @@ class Ess_M2ePro_Model_Listing_Log extends Ess_M2ePro_Model_Log_Abstract
         return $this->getActionsTitlesByClass(__CLASS__,'ACTION_');
     }
 
-    //------------------------------------
+    // ---------------------------------------
 
     public function clearMessages($listingId = NULL)
     {
@@ -182,7 +188,7 @@ class Ess_M2ePro_Model_Listing_Log extends Ess_M2ePro_Model_Log_Abstract
         return 'listings';
     }
 
-    //####################################
+    //########################################
 
     protected function createMessage($dataForAdd)
     {
@@ -208,7 +214,6 @@ class Ess_M2ePro_Model_Listing_Log extends Ess_M2ePro_Model_Log_Abstract
     }
 
     protected function makeDataForAdd($listingId,
-                                      $creator,
                                       $initiator = Ess_M2ePro_Helper_Data::INITIATOR_UNKNOWN,
                                       $productId = NULL,
                                       $listingProductId = NULL,
@@ -216,12 +221,12 @@ class Ess_M2ePro_Model_Listing_Log extends Ess_M2ePro_Model_Log_Abstract
                                       $action = NULL,
                                       $description = NULL,
                                       $type = NULL,
-                                      $priority = NULL)
+                                      $priority = NULL,
+                                      array $additionalData = array())
     {
         $dataForAdd = array();
 
         $dataForAdd['listing_id'] = (int)$listingId;
-        $dataForAdd['creator'] = $creator;
         $dataForAdd['initiator'] = $initiator;
 
         if (!is_null($productId)) {
@@ -266,8 +271,10 @@ class Ess_M2ePro_Model_Listing_Log extends Ess_M2ePro_Model_Log_Abstract
             $dataForAdd['priority'] = self::PRIORITY_LOW;
         }
 
+        $dataForAdd['additional_data'] = json_encode($additionalData);
+
         return $dataForAdd;
     }
 
-    //####################################
+    //########################################
 }

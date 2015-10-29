@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2015 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 abstract class Ess_M2ePro_Model_Observer_Abstract
@@ -11,7 +13,7 @@ abstract class Ess_M2ePro_Model_Observer_Abstract
      */
     private $eventObserver = NULL;
 
-    //####################################
+    //########################################
 
     public function canProcess()
     {
@@ -20,12 +22,12 @@ abstract class Ess_M2ePro_Model_Observer_Abstract
 
     abstract public function process();
 
-    //####################################
+    //########################################
 
     public function beforeProcess() {}
     public function afterProcess() {}
 
-    //####################################
+    //########################################
 
     /**
      * @param Varien_Event_Observer $eventObserver
@@ -37,18 +39,18 @@ abstract class Ess_M2ePro_Model_Observer_Abstract
 
     /**
      * @return Varien_Event_Observer
-     * @throws LogicException
+     * @throws Ess_M2ePro_Model_Exception_Logic
      */
     protected function getEventObserver()
     {
         if (!($this->eventObserver instanceof Varien_Event_Observer)) {
-            throw new LogicException('Property "eventObserver" should be set first.');
+            throw new Ess_M2ePro_Model_Exception_Logic('Property "eventObserver" should be set first.');
         }
 
         return $this->eventObserver;
     }
 
-    //####################################
+    //########################################
 
     /**
      * @return Varien_Event
@@ -58,5 +60,5 @@ abstract class Ess_M2ePro_Model_Observer_Abstract
         return $this->getEventObserver()->getEvent();
     }
 
-    //####################################
+    //########################################
 }

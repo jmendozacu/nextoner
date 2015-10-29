@@ -1,37 +1,39 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Block_Adminhtml_Common_Buy_Listing_Search_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
-    // ####################################
+    //########################################
 
     public function __construct()
     {
         parent::__construct();
 
         // Initialization block
-        //------------------------------
+        // ---------------------------------------
         $this->setId('buyListingSearchGrid');
-        //------------------------------
+        // ---------------------------------------
 
         // Set default values
-        //------------------------------
+        // ---------------------------------------
         $this->setDefaultSort('id');
         $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(true);
         $this->setUseAjax(true);
-        //------------------------------
+        // ---------------------------------------
     }
 
-    // ####################################
+    //########################################
 
     protected function _prepareCollection()
     {
         // Get collection products in listing
-        //--------------------------------
+        // ---------------------------------------
         $listingProductCollection = Mage::helper('M2ePro/Component_Buy')->getCollection('Listing_Product');
         $listingProductCollection->getSelect()->distinct();
         $listingProductCollection->getSelect()
@@ -41,10 +43,10 @@ class Ess_M2ePro_Block_Adminhtml_Common_Buy_Listing_Search_Grid extends Mage_Adm
             ->join(array('bl'=>Mage::getResourceModel('M2ePro/Buy_Listing')->getMainTable()),
                    '(`bl`.`listing_id` = `l`.`id`)',
                    array('template_selling_format_id'));
-        //--------------------------------
+        // ---------------------------------------
 
         // Communicate with magento product table
-        //--------------------------------
+        // ---------------------------------------
         $dbSelect = Mage::getResourceModel('core/config')->getReadConnection()
             ->select()
             ->from(Mage::getSingleton('core/resource')
@@ -70,7 +72,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Buy_Listing_Search_Grid extends Mage_Adm
                 '(`cpev`.`attribute_id` = `ea`.`attribute_id` AND `ea`.`attribute_code` = \'name\')',
                 array())
             ->where('`cpev`.`store_id` = ('.$dbSelect->__toString().')');
-        //--------------------------------
+        // ---------------------------------------
 
         $listingProductCollection->getSelect()->reset(Zend_Db_Select::COLUMNS);
         $listingProductCollection->getSelect()->columns(
@@ -87,6 +89,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Buy_Listing_Search_Grid extends Mage_Adm
                 'product_id'                    => 'main_table.product_id',
                 'listing_id'                    => 'main_table.listing_id',
                 'status'                        => 'main_table.status',
+                'template_new_product_id'       => 'second_table.template_new_product_id',
                 'general_id'                    => 'second_table.general_id',
                 'online_sku'                    => 'second_table.sku',
                 'online_qty'                    => 'second_table.online_qty',
@@ -94,12 +97,12 @@ class Ess_M2ePro_Block_Adminhtml_Common_Buy_Listing_Search_Grid extends Mage_Adm
             )
         );
 
-        //------------------------------
+        // ---------------------------------------
         $listingOtherCollection = Mage::helper('M2ePro/Component_Buy')->getCollection('Listing_Other');
         $listingOtherCollection->getSelect()->distinct();
 
         // add stock availability, type id, status & visibility to select
-        //------------------------------
+        // ---------------------------------------
         $listingOtherCollection->getSelect()
             ->joinLeft(
                 array('cisi' => Mage::getResourceModel('cataloginventory/stock_item')->getMainTable()),
@@ -108,7 +111,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Buy_Listing_Search_Grid extends Mage_Adm
             ->joinLeft(array('cpe'=>Mage::getSingleton('core/resource')->getTableName('catalog_product_entity')),
                 '(cpe.entity_id = `main_table`.product_id)',
                 array('magento_sku'=>'sku'));
-        //------------------------------
+        // ---------------------------------------
 
         $listingOtherCollection->getSelect()->reset(Zend_Db_Select::COLUMNS);
         $listingOtherCollection->getSelect()->columns(
@@ -125,15 +128,16 @@ class Ess_M2ePro_Block_Adminhtml_Common_Buy_Listing_Search_Grid extends Mage_Adm
                 'product_id'                    => 'main_table.product_id',
                 'listing_id'                    => new Zend_Db_Expr('NULL'),
                 'status'                        => 'main_table.status',
+                'template_new_product_id'       => new Zend_Db_Expr('NULL'),
                 'general_id'                    => 'second_table.general_id',
                 'online_sku'                    => 'second_table.sku',
                 'online_qty'                    => 'second_table.online_qty',
                 'online_price'                  => 'second_table.online_price',
             )
         );
-        //------------------------------
+        // ---------------------------------------
 
-        //------------------------------
+        // ---------------------------------------
         $selects = array(
             $listingProductCollection->getSelect(),
             $listingOtherCollection->getSelect()
@@ -158,14 +162,13 @@ class Ess_M2ePro_Block_Adminhtml_Common_Buy_Listing_Search_Grid extends Mage_Adm
                 'product_id',
                 'listing_id',
                 'status',
+                'template_new_product_id',
                 'general_id',
                 'online_sku',
                 'online_qty',
                 'online_price'
             )
         );
-
-//        exit($resultCollection->getSelect()->__toString());
 
         // Set collection to grid
         $this->setCollection($resultCollection);
@@ -188,7 +191,6 @@ class Ess_M2ePro_Block_Adminhtml_Common_Buy_Listing_Search_Grid extends Mage_Adm
         $this->addColumn('name', array(
             'header'    => Mage::helper('M2ePro')->__('Product Title / Listing / Product SKU'),
             'align'     => 'left',
-            //'width'     => '300px',
             'type'      => 'text',
             'index'     => 'product_name',
             'filter_index' => 'product_name',
@@ -239,7 +241,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Buy_Listing_Search_Grid extends Mage_Adm
         $this->addColumn('general_id', array(
             'header' => Mage::helper('M2ePro')->__('Rakuten.com SKU'),
             'align' => 'left',
-            'width' => '90px',
+            'width' => '100px',
             'type' => 'text',
             'index' => 'general_id',
             'filter_index' => 'general_id',
@@ -294,7 +296,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Buy_Listing_Search_Grid extends Mage_Adm
         return parent::_prepareColumns();
     }
 
-    // ####################################
+    //########################################
 
     public function callbackColumnProductId($value, $row, $column, $isExport)
     {
@@ -415,6 +417,10 @@ class Ess_M2ePro_Block_Adminhtml_Common_Buy_Listing_Search_Grid extends Mage_Adm
 
     public function callbackColumnSku($value, $row, $column, $isExport)
     {
+        if ($row->getData('status') == Ess_M2ePro_Model_Listing_Product::STATUS_NOT_LISTED) {
+            return '<span style="color: gray;">' . Mage::helper('M2ePro')->__('Not Listed') . '</span>';
+        }
+
         if (is_null($value) || $value === '') {
             return Mage::helper('M2ePro')->__('N/A');
         }
@@ -423,14 +429,17 @@ class Ess_M2ePro_Block_Adminhtml_Common_Buy_Listing_Search_Grid extends Mage_Adm
 
     public function callbackColumnGeneralId($value, $row, $column, $isExport)
     {
-        if ((int)$row->getData('status') == Ess_M2ePro_Model_Listing_Product::STATUS_NOT_LISTED) {
-            if (is_null($value) || $value === '') {
-                return Mage::helper('M2ePro')->__('N/A');
-            }
-        } else {
-            if (is_null($value) || $value === '') {
+        if (empty($value)) {
+
+            if ($row->getData('status') != Ess_M2ePro_Model_Listing_Product::STATUS_NOT_LISTED) {
                 return '<i style="color:gray;">receiving...</i>';
             }
+
+            if ($row->getData('template_new_product_id')) {
+                return Mage::helper('M2ePro')->__('New SKU');
+            }
+
+            return Mage::helper('M2ePro')->__('N/A');
         }
 
         $url = Mage::helper('M2ePro/Component_Buy')->getItemUrl($value);
@@ -439,14 +448,12 @@ class Ess_M2ePro_Block_Adminhtml_Common_Buy_Listing_Search_Grid extends Mage_Adm
 
     public function callbackColumnAvailableQty($value, $row, $column, $isExport)
     {
-        if ((int)$row->getData('status') == Ess_M2ePro_Model_Listing_Product::STATUS_NOT_LISTED) {
-            if (is_null($value) || $value === '') {
-                return Mage::helper('M2ePro')->__('N/A');
-            }
-        } else {
-            if (is_null($value) || $value === '') {
-                return '<i style="color:gray;">'.Mage::helper('M2ePro')->__('receiving...').'</i>';
-            }
+        if ($row->getData('status') == Ess_M2ePro_Model_Listing_Product::STATUS_NOT_LISTED) {
+            return '<span style="color: gray;">' . Mage::helper('M2ePro')->__('Not Listed') . '</span>';
+        }
+
+        if (is_null($value) || $value === '') {
+            return '<i style="color:gray;">'.Mage::helper('M2ePro')->__('receiving...').'</i>';
         }
 
         if ($value <= 0) {
@@ -458,14 +465,12 @@ class Ess_M2ePro_Block_Adminhtml_Common_Buy_Listing_Search_Grid extends Mage_Adm
 
     public function callbackColumnPrice($value, $row, $column, $isExport)
     {
-        if ((int)$row->getData('status') == Ess_M2ePro_Model_Listing_Product::STATUS_NOT_LISTED) {
-            if (is_null($value) || $value === '') {
-                return Mage::helper('M2ePro')->__('N/A');
-            }
-        } else {
-            if (is_null($value) || $value === '') {
-                return '<i style="color:gray;">'.Mage::helper('M2ePro')->__('receiving...').'</i>';
-            }
+        if ($row->getData('status') == Ess_M2ePro_Model_Listing_Product::STATUS_NOT_LISTED) {
+            return '<span style="color: gray;">' . Mage::helper('M2ePro')->__('Not Listed') . '</span>';
+        }
+
+        if (is_null($value) || $value === '') {
+            return '<i style="color:gray;">'.Mage::helper('M2ePro')->__('receiving...').'</i>';
         }
 
         if ((float)$value <= 0) {
@@ -592,7 +597,7 @@ HTML;
             ->where('product_name LIKE ? OR magento_sku LIKE ? OR listing_title LIKE ?', '%'.$value.'%');
     }
 
-    // ####################################
+    //########################################
 
     public function getGridUrl()
     {
@@ -604,5 +609,5 @@ HTML;
         return false;
     }
 
-    // ####################################
+    //########################################
 }

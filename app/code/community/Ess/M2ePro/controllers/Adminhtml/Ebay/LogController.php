@@ -1,12 +1,14 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Adminhtml_Ebay_LogController extends Ess_M2ePro_Controller_Adminhtml_Ebay_MainController
 {
-    //#############################################
+    //########################################
 
     protected function _initAction()
     {
@@ -18,6 +20,8 @@ class Ess_M2ePro_Adminhtml_Ebay_LogController extends Ess_M2ePro_Controller_Admi
 
         $this->_initPopUp();
 
+        $this->setPageHelpLink(NULL, 'pages/viewpage.action?pageId=17367088');
+
         return $this;
     }
 
@@ -26,14 +30,14 @@ class Ess_M2ePro_Adminhtml_Ebay_LogController extends Ess_M2ePro_Controller_Admi
         return Mage::getSingleton('admin/session')->isAllowed('m2epro_ebay/logs');
     }
 
-    //#############################################
+    //########################################
 
     public function indexAction()
     {
         $this->_redirect('*/*/listing');
     }
 
-    // -------------------------------
+    // ---------------------------------------
 
     public function listingAction()
     {
@@ -48,6 +52,8 @@ class Ess_M2ePro_Adminhtml_Ebay_LogController extends Ess_M2ePro_Controller_Admi
         }
 
         $this->_initAction();
+
+        $this->setPageHelpLink(NULL, 'pages/viewpage.action?pageId=17367088#Logs.-ListingsLog');
 
         if (!empty($id)) {
             $logBlock = $this->getLayout()->createBlock('M2ePro/adminhtml_ebay_listing_log');
@@ -76,7 +82,7 @@ class Ess_M2ePro_Adminhtml_Ebay_LogController extends Ess_M2ePro_Controller_Admi
         $this->getResponse()->setBody($response);
     }
 
-    // -------------------------------
+    // ---------------------------------------
 
     public function listingProductAction()
     {
@@ -112,7 +118,7 @@ class Ess_M2ePro_Adminhtml_Ebay_LogController extends Ess_M2ePro_Controller_Admi
         $this->getResponse()->setBody($response);
     }
 
-    // -------------------------------
+    // ---------------------------------------
 
     public function listingOtherAction()
     {
@@ -127,6 +133,9 @@ class Ess_M2ePro_Adminhtml_Ebay_LogController extends Ess_M2ePro_Controller_Admi
         Mage::helper('M2ePro/Data_Global')->setValue('temp_data', $model->getData());
 
         $this->_initAction();
+
+        $this->setPageHelpLink(NULL,
+            'pages/viewpage.action?pageId=17367088#Logs.-3rdPartyListingsLog(advancedmodeonly)');
 
         if (!empty($id)) {
             $logBlock = $this->getLayout()->createBlock('M2ePro/adminhtml_ebay_listing_other_log');
@@ -156,12 +165,15 @@ class Ess_M2ePro_Adminhtml_Ebay_LogController extends Ess_M2ePro_Controller_Admi
         $this->getResponse()->setBody($response);
     }
 
-    // -------------------------------
+    // ---------------------------------------
 
     public function synchronizationAction()
     {
-        $this->_initAction()
-             ->_addContent(
+        $this->_initAction();
+
+        $this->setPageHelpLink(NULL, 'pages/viewpage.action?pageId=17367088#Logs.-SynchronizationLog');
+
+        $this->_addContent(
                  $this->getLayout()->createBlock(
                      'M2ePro/adminhtml_ebay_log', '',
                      array('active_tab' => Ess_M2ePro_Block_Adminhtml_Ebay_Log_Tabs::TAB_ID_SYNCHRONIZATION)
@@ -176,12 +188,15 @@ class Ess_M2ePro_Adminhtml_Ebay_LogController extends Ess_M2ePro_Controller_Admi
         $this->getResponse()->setBody($response);
     }
 
-    // -------------------------------
+    // ---------------------------------------
 
     public function orderAction()
     {
-        $this->_initAction()
-             ->_addContent(
+        $this->_initAction();
+
+        $this->setPageHelpLink(NULL, 'pages/viewpage.action?pageId=17367088#Logs.-OrdersLog');
+
+        $this->_addContent(
                  $this->getLayout()->createBlock(
                      'M2ePro/adminhtml_ebay_log', '',
                      array('active_tab' => Ess_M2ePro_Block_Adminhtml_Ebay_Log_Tabs::TAB_ID_ORDER)
@@ -195,5 +210,5 @@ class Ess_M2ePro_Adminhtml_Ebay_LogController extends Ess_M2ePro_Controller_Admi
         $this->getResponse()->setBody($grid->toHtml());
     }
 
-    //#############################################
+    //########################################
 }

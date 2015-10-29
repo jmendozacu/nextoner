@@ -1,14 +1,19 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_Relist_Response
     extends Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_Response
 {
-    // ########################################
+    //########################################
 
+    /**
+     * @param array $params
+     */
     public function processSuccess($params = array())
     {
         $data = array();
@@ -23,8 +28,6 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_Relist_Response
         }
 
         $data = $this->appendStatusChangerValue($data);
-        $data = $this->appendAfnChannelValues($data);
-
         $data = $this->appendQtyValues($data);
         $data = $this->appendPriceValues($data);
 
@@ -35,8 +38,11 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_Relist_Response
         $this->getListingProduct()->save();
     }
 
-    // ########################################
+    //########################################
 
+    /**
+     * @return string
+     */
     public function getSuccessfulMessage()
     {
         if ($this->getConfigurator()->isAllAllowed()) {
@@ -50,5 +56,5 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_Relist_Response
         return 'QTY was successfully Relisted';
     }
 
-    // ########################################
+    //########################################
 }

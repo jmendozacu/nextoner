@@ -1,13 +1,15 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Adminhtml_Common_Amazon_OrderController
     extends Ess_M2ePro_Controller_Adminhtml_Common_MainController
 {
-    //#############################################
+    //########################################
 
     protected function _initAction()
     {
@@ -28,17 +30,7 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_OrderController
         return Mage::getSingleton('admin/session')->isAllowed('m2epro_common/orders');
     }
 
-    //#############################################
-
-    public function preDispatch()
-    {
-        parent::preDispatch();
-
-        Mage::getSingleton('M2ePro/Order_Log_Manager')
-            ->setInitiator(Ess_M2ePro_Helper_Data::INITIATOR_USER);
-    }
-
-    //#############################################
+    //########################################
 
     public function indexAction()
     {
@@ -62,7 +54,7 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_OrderController
         $this->getResponse()->setBody($response);
     }
 
-    //#############################################
+    //########################################
 
     public function viewAction()
     {
@@ -72,12 +64,15 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_OrderController
         Mage::helper('M2ePro/Data_Global')->setValue('temp_data', $order);
 
         $this->_initAction();
+
+        $this->setComponentPageHelpLink('Manage+Order+Details', Ess_M2ePro_Helper_Component_Amazon::NICK);
+
         $this->_initPopUp();
         $this->_addContent($this->getLayout()->createBlock('M2ePro/adminhtml_common_amazon_order_view'))
             ->renderLayout();
     }
 
-    //#############################################
+    //########################################
 
     public function orderItemGridAction()
     {
@@ -97,7 +92,7 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_OrderController
         $this->getResponse()->setBody($response);
     }
 
-    //#############################################
+    //########################################
 
     public function createMagentoOrderAction()
     {
@@ -106,6 +101,7 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_OrderController
 
         /** @var $order Ess_M2ePro_Model_Order */
         $order = Mage::helper('M2ePro/Component_Amazon')->getObject('Order', (int)$id);
+        $order->getLog()->setInitiator(Ess_M2ePro_Helper_Data::INITIATOR_USER);
 
         // M2ePro_TRANSLATIONS
         // Magento Order is already created for this Amazon Order.
@@ -121,7 +117,7 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_OrderController
         }
 
         // Create magento order
-        // -------------
+        // ---------------------------------------
         try {
             $order->createMagentoOrder();
             $this->_getSession()->addSuccess(Mage::helper('M2ePro')->__('Magento Order was created.'));
@@ -132,32 +128,32 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_OrderController
             );
             $this->_getSession()->addError($message);
         }
-        // -------------
+        // ---------------------------------------
 
         // Create invoice
-        // -------------
+        // ---------------------------------------
         if ($order->getChildObject()->canCreateInvoice()) {
             $result = $order->createInvoice();
             $result && $this->_getSession()->addSuccess(Mage::helper('M2ePro')->__('Invoice was created.'));
         }
-        // -------------
+        // ---------------------------------------
 
         // Create shipment
-        // -------------
+        // ---------------------------------------
         if ($order->getChildObject()->canCreateShipment()) {
             $result = $order->createShipment();
             $result && $this->_getSession()->addSuccess(Mage::helper('M2ePro')->__('Shipment was created.'));
         }
-        // -------------
+        // ---------------------------------------
 
-        // -------------
+        // ---------------------------------------
         $order->updateMagentoOrderStatus();
-        // -------------
+        // ---------------------------------------
 
         $this->_redirect('*/*/view', array('id' => $id));
     }
 
-    //#############################################
+    //########################################
 
     public function editShippingAddressAction()
     {
@@ -224,7 +220,7 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_OrderController
         $this->_redirect('*/adminhtml_common_amazon_order/view', array('id' => $order->getId()));
     }
 
-    //#############################################
+    //########################################
 
     public function updateShippingStatusAction()
     {
@@ -255,7 +251,7 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_OrderController
         $this->_redirectUrl($this->_getRefererUrl());
     }
 
-    //#############################################
+    //########################################
 
     public function goToAmazonAction()
     {
@@ -276,5 +272,5 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_OrderController
         return $this->_redirectUrl($url);
     }
 
-    //#############################################
+    //########################################
 }

@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 abstract class Ess_M2ePro_Model_Connector_Ebay_OtherItem_Abstract
@@ -32,7 +34,7 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_OtherItem_Abstract
      */
     protected $requestDataObject = NULL;
 
-    // ########################################
+    //########################################
 
     public function __construct(array $params = array(), Ess_M2ePro_Model_Listing_Other $otherListing)
     {
@@ -48,7 +50,7 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_OtherItem_Abstract
         parent::__construct($params, $this->otherListing->getMarketplace(), $this->otherListing->getAccount(), NULL);
     }
 
-    // ########################################
+    //########################################
 
     public function process()
     {
@@ -85,12 +87,16 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_OtherItem_Abstract
         return $result;
     }
 
+    /**
+     * @return int
+     * @throws Ess_M2ePro_Model_Exception
+     */
     public function getStatus()
     {
         return $this->getLogger()->getStatus();
     }
 
-    // ########################################
+    //########################################
 
     protected function isNeedSendRequest()
     {
@@ -116,11 +122,11 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_OtherItem_Abstract
         return $this->filterManualListingOther();
     }
 
-    // -----------------------------------------
+    // ---------------------------------------
 
     abstract protected function filterManualListingOther();
 
-    // ########################################
+    //########################################
 
     protected function eventBeforeProcess()
     {
@@ -139,20 +145,20 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_OtherItem_Abstract
         $lockItem->remove();
     }
 
-    // ########################################
+    //########################################
 
     abstract protected function getLogsAction();
 
     abstract protected function getActionType();
 
-    // ########################################
+    //########################################
 
     protected function validateResponseData($response)
     {
         return true;
     }
 
-    // ########################################
+    //########################################
 
     protected function logRequestMessages()
     {
@@ -168,10 +174,11 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_OtherItem_Abstract
         }
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @return Ess_M2ePro_Model_Ebay_Listing_Other_Action_Logger
+     * @throws Ess_M2ePro_Model_Exception
      */
     protected function getLogger()
     {
@@ -181,7 +188,7 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_OtherItem_Abstract
             $logger = Mage::getModel('M2ePro/Ebay_Listing_Other_Action_Logger');
 
             if (!isset($this->params['logs_action_id']) || !isset($this->params['status_changer'])) {
-                throw new Exception('Product Connector has not received some params');
+                throw new Ess_M2ePro_Model_Exception('Product Connector has not received some params');
             }
 
             $logger->setActionId((int)$this->params['logs_action_id']);
@@ -207,7 +214,7 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_OtherItem_Abstract
         return $this->logger;
     }
 
-    // ########################################
+    //########################################
 
     private function getOrmActionType()
     {
@@ -220,10 +227,10 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_OtherItem_Abstract
                 return 'Stop';
         }
 
-        throw new Exception('Wrong Action type');
+        throw new Ess_M2ePro_Model_Exception('Wrong Action type');
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @return Ess_M2ePro_Model_Ebay_Listing_Other_Action_Type_Request
@@ -264,7 +271,7 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_OtherItem_Abstract
         return $this->responseObject;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     /**
      * @param array $data
@@ -293,5 +300,5 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_OtherItem_Abstract
         return $this->requestDataObject;
     }
 
-    // ########################################
+    //########################################
 }

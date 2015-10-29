@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Helper_View_Ebay extends Mage_Core_Helper_Abstract
@@ -10,7 +12,6 @@ class Ess_M2ePro_Helper_View_Ebay extends Mage_Core_Helper_Abstract
     // Sell On eBay
 
     const NICK  = 'ebay';
-    const TITLE = 'Sell On eBay';
 
     const WIZARD_INSTALLATION_NICK = 'installationEbay';
     const MENU_ROOT_NODE_NICK = 'm2epro_ebay';
@@ -18,14 +19,21 @@ class Ess_M2ePro_Helper_View_Ebay extends Mage_Core_Helper_Abstract
     const MODE_SIMPLE = 'simple';
     const MODE_ADVANCED = 'advanced';
 
-    // ########################################
+    //########################################
+
+    public function getTitle()
+    {
+        return Mage::helper('M2ePro')->__('Sell On eBay');
+    }
+
+    //########################################
 
     public function getMenuRootNodeLabel()
     {
-        return Mage::helper('M2ePro')->__(self::TITLE);
+        return $this->getTitle();
     }
 
-    // ########################################
+    //########################################
 
     public function getPageNavigationPath($pathNick, $tabName = NULL, $additionalEnd = NULL)
     {
@@ -41,17 +49,17 @@ class Ess_M2ePro_Helper_View_Ebay extends Mage_Core_Helper_Abstract
         $resultPath['menu'] = $menuLabel;
 
         if ($tabName) {
-            $resultPath['tab'] = $tabName . ' ' . Mage::helper('M2ePro')->__('Tab');
+            $resultPath['tab'] = Mage::helper('M2ePro')->__($tabName) . ' ' . Mage::helper('M2ePro')->__('Tab');
         }
 
         if ($additionalEnd) {
-            $resultPath['additional'] = $additionalEnd;
+            $resultPath['additional'] = Mage::helper('M2ePro')->__($additionalEnd);
         }
 
         return join($resultPath, ' > ');
     }
 
-    // ########################################
+    //########################################
 
     public function getWizardInstallationNick()
     {
@@ -65,7 +73,7 @@ class Ess_M2ePro_Helper_View_Ebay extends Mage_Core_Helper_Abstract
         );
     }
 
-    // ########################################
+    //########################################
 
     public function getMode()
     {
@@ -81,7 +89,7 @@ class Ess_M2ePro_Helper_View_Ebay extends Mage_Core_Helper_Abstract
         Mage::helper('M2ePro/Module')->getConfig()->setGroupValue('/view/ebay/', 'mode', $mode);
     }
 
-    //-----------------------------------------
+    // ---------------------------------------
 
     public function isSimpleMode()
     {
@@ -93,7 +101,7 @@ class Ess_M2ePro_Helper_View_Ebay extends Mage_Core_Helper_Abstract
         return $this->getMode() == self::MODE_ADVANCED;
     }
 
-    // ########################################
+    //########################################
 
     public function prepareMenu(array $menuArray)
     {
@@ -110,7 +118,7 @@ class Ess_M2ePro_Helper_View_Ebay extends Mage_Core_Helper_Abstract
         !empty($tempTitle) && $menuArray[self::MENU_ROOT_NODE_NICK]['label'] = $tempTitle;
 
         // Add wizard menu item
-        //---------------------------------
+        // ---------------------------------------
         /* @var $wizardHelper Ess_M2ePro_Helper_Module_Wizard */
         $wizardHelper = Mage::helper('M2ePro/Module_Wizard');
 
@@ -131,7 +139,7 @@ class Ess_M2ePro_Helper_View_Ebay extends Mage_Core_Helper_Abstract
         return $menuArray;
     }
 
-    // ########################################
+    //########################################
 
     public function isFeedbacksShouldBeShown($accountId = NULL)
     {
@@ -185,5 +193,5 @@ class Ess_M2ePro_Helper_View_Ebay extends Mage_Core_Helper_Abstract
         return $result;
     }
 
-    // ########################################
+    //########################################
 }

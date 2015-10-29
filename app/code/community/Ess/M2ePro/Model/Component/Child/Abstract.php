@@ -1,15 +1,20 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 abstract class Ess_M2ePro_Model_Component_Child_Abstract extends Ess_M2ePro_Model_Component_Abstract
 {
     protected $parentObject = NULL;
 
-    // ########################################
+    //########################################
 
+    /**
+     * @param Ess_M2ePro_Model_Component_Parent_Abstract $object
+     */
     public function setParentObject(Ess_M2ePro_Model_Component_Parent_Abstract $object)
     {
         if (is_null($object->getId())) {
@@ -21,12 +26,12 @@ abstract class Ess_M2ePro_Model_Component_Child_Abstract extends Ess_M2ePro_Mode
 
     /**
      * @return Ess_M2ePro_Model_Component_Parent_Abstract
-     * @throws LogicException
+     * @throws Ess_M2ePro_Model_Exception_Logic
      */
     public function getParentObject()
     {
         if (is_null($this->getId())) {
-             throw new LogicException('Method require loaded instance first');
+             throw new Ess_M2ePro_Model_Exception_Logic('Method require loaded instance first');
         }
 
         if (!is_null($this->parentObject)) {
@@ -36,7 +41,7 @@ abstract class Ess_M2ePro_Model_Component_Child_Abstract extends Ess_M2ePro_Mode
         $tempMode = $this->getComponentMode();
 
         if (is_null($tempMode)) {
-            throw new LogicException('Set Component Mode first');
+            throw new Ess_M2ePro_Model_Exception_Logic('Set Component Mode first');
         }
 
         $modelName = str_replace('M2ePro/'.ucwords($tempMode).'_','',$this->_resourceName);
@@ -49,7 +54,7 @@ abstract class Ess_M2ePro_Model_Component_Child_Abstract extends Ess_M2ePro_Mode
         return $this->parentObject;
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @param string $modelName
@@ -58,19 +63,19 @@ abstract class Ess_M2ePro_Model_Component_Child_Abstract extends Ess_M2ePro_Mode
      * @param array $filters
      * @param array $sort
      * @return array
-     * @throws LogicException
+     * @throws Ess_M2ePro_Model_Exception_Logic
      */
     protected function getRelatedComponentItems($modelName, $fieldName, $asObjects = false,
                                                 array $filters = array(), array $sort = array())
     {
         if (is_null($this->getId())) {
-             throw new LogicException('Method require loaded instance first');
+             throw new Ess_M2ePro_Model_Exception_Logic('Method require loaded instance first');
         }
 
         $tempMode = $this->getComponentMode();
 
         if (is_null($tempMode)) {
-             throw new LogicException('Set Component Mode first');
+             throw new Ess_M2ePro_Model_Exception_Logic('Set Component Mode first');
         }
 
         $tempModel = Mage::helper('M2ePro/Component')->getComponentModel($tempMode,$modelName);
@@ -82,12 +87,12 @@ abstract class Ess_M2ePro_Model_Component_Child_Abstract extends Ess_M2ePro_Mode
         return $this->getRelatedItems($tempModel,$fieldName,$asObjects,$filters,$sort);
     }
 
-    // ########################################
+    //########################################
 
     protected function getComponentMode()
     {
         return NULL;
     }
 
-    // ########################################
+    //########################################
 }

@@ -1,14 +1,19 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Images
     extends Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Abstract
 {
-    // ########################################
+    //########################################
 
+    /**
+     * @return array
+     */
     public function getData()
     {
         $data = array();
@@ -20,7 +25,7 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Images
         $this->searchNotFoundAttributes();
 
         $images = array(
-            'offer' => $this->getAmazonListingProduct()->getListingSource()->getImages(),
+            'offer' => $this->getAmazonListingProduct()->getListingSource()->getGalleryImages(),
         );
 
         if ($this->getAmazonListingProduct()->isExistDescriptionTemplate()) {
@@ -29,7 +34,11 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Images
                 $this->getAmazonListingProduct()->getActualMagentoProduct()
             );
 
-            $images['product'] = $definitionSource->getImages();
+            $images['product'] = $definitionSource->getGalleryImages();
+
+            if ($this->getVariationManager()->isRelationChildType()) {
+                $images['variation_difference'] = $definitionSource->getVariationDifferenceImages();
+            }
         }
 
         $this->processNotFoundAttributes('Images');
@@ -42,8 +51,12 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Images
             $data['images_data']['product'] = $images['product'];
         }
 
+        if (!empty($images['variation_difference'])) {
+            $data['images_data']['variation_difference'] = $images['variation_difference'];
+        }
+
         return $data;
     }
 
-    // ########################################
+    //########################################
 }

@@ -1,12 +1,14 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Adminhtml_Ebay_FeedbackController extends Ess_M2ePro_Controller_Adminhtml_Ebay_MainController
 {
-    //#############################################
+    //########################################
 
     protected function _initAction()
     {
@@ -16,6 +18,8 @@ class Ess_M2ePro_Adminhtml_Ebay_FeedbackController extends Ess_M2ePro_Controller
         $this->getLayout()->getBlock('head')
              ->addJs('M2ePro/Ebay/FeedbackHandler.js');
 
+        $this->setPageHelpLink(NULL, 'pages/viewpage.action?pageId=17367096');
+
         return $this;
     }
 
@@ -24,7 +28,7 @@ class Ess_M2ePro_Adminhtml_Ebay_FeedbackController extends Ess_M2ePro_Controller
         return Mage::getSingleton('admin/session')->isAllowed('m2epro_ebay/configuration');
     }
 
-    //#############################################
+    //########################################
 
     public function indexAction()
     {
@@ -43,7 +47,7 @@ class Ess_M2ePro_Adminhtml_Ebay_FeedbackController extends Ess_M2ePro_Controller
         $this->getResponse()->setBody($response);
     }
 
-    //#############################################
+    //########################################
 
     public function saveAction()
     {
@@ -59,7 +63,7 @@ class Ess_M2ePro_Adminhtml_Ebay_FeedbackController extends Ess_M2ePro_Controller
         $this->getResponse()->setBody(json_encode(array('result' => ($result ? 'success' : 'failure'))));
     }
 
-    //#############################################
+    //########################################
 
     public function getFeedbackTemplatesAction()
     {
@@ -73,7 +77,7 @@ class Ess_M2ePro_Adminhtml_Ebay_FeedbackController extends Ess_M2ePro_Controller
         )));
     }
 
-    //#############################################
+    //########################################
 
     public function goToOrderAction()
     {
@@ -96,7 +100,7 @@ class Ess_M2ePro_Adminhtml_Ebay_FeedbackController extends Ess_M2ePro_Controller
         $this->_redirect('*/adminhtml_ebay_order/view', array('id' => $order->getId()));
     }
 
-    //#############################################
+    //########################################
 
     public function goToItemAction()
     {
@@ -142,5 +146,5 @@ class Ess_M2ePro_Adminhtml_Ebay_FeedbackController extends Ess_M2ePro_Controller
         return $this->_redirect('*/*/index');
     }
 
-    //#############################################
+    //########################################
 }

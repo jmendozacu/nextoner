@@ -1,14 +1,16 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Helper_Server extends Mage_Core_Helper_Abstract
 {
     const MAX_INTERVAL_OF_RETURNING_TO_DEFAULT_BASEURL = 86400;
 
-    // ########################################
+    //########################################
 
     public function getEndpoint()
     {
@@ -47,7 +49,7 @@ class Ess_M2ePro_Helper_Server extends Mage_Core_Helper_Abstract
         return true;
     }
 
-    // ########################################
+    //########################################
 
     public function getAdminKey()
     {
@@ -62,7 +64,7 @@ class Ess_M2ePro_Helper_Server extends Mage_Core_Helper_Abstract
         );
     }
 
-    // ########################################
+    //########################################
 
     public function sendRequest(array $postData,
                                 array $headers,
@@ -71,7 +73,7 @@ class Ess_M2ePro_Helper_Server extends Mage_Core_Helper_Abstract
     {
         $curlObject = curl_init();
 
-        //set the server we are using
+        // set the server we are using
         curl_setopt($curlObject, CURLOPT_URL, $this->getEndpoint());
 
         // stop CURL from verifying the peer's certificate
@@ -102,30 +104,42 @@ class Ess_M2ePro_Helper_Server extends Mage_Core_Helper_Abstract
 
         if ($response === false) {
 
-            if ($errorNumber !== CURLE_OPERATION_TIMEOUTED &&
-                !$secondAttempt && $this->switchEndpoint()) {
+            $switchingResult = $this->switchEndpoint();
+
+            if ($errorNumber !== CURLE_OPERATION_TIMEOUTED && !$secondAttempt && $switchingResult) {
                 return $this->sendRequest($postData,$headers,$timeout,true);
             }
 
-            throw new Ess_M2ePro_Model_Exception('Server connection is failed. Please try again later.',
-                                                 array('curl_info' => $curlInfo, 'curl_error_number' => $errorNumber));
+            $errorMsg = 'The Action was not completed because connection with M2E Pro Server was not set.
+            There are several possible reasons:  temporary connection problem – please wait and try again later;
+            block of outgoing connection by firewall – please, ensure that connection to s1.m2epro.com and
+            s2.m2epro.com, port 443 is allowed; CURL library is not installed or it does not support HTTPS Protocol –
+            please, install/update CURL library on your server and ensure it supports HTTPS Protocol.
+            More information you can find <a target="_blank" href="'.
+            Mage::helper('M2ePro/Module_Support')
+                ->getKnowledgebaseUrl('664870-issues-with-m2e-pro-server-connection')
+                .'">here</a>';
+
+            throw new Ess_M2ePro_Model_Exception_Connection($errorMsg,
+                                                            array('curl_error_number' => $errorNumber,
+                                                                  'curl_info' => $curlInfo));
         }
 
         return array(
-            'response'          => $response,
             'curl_error_number' => $errorNumber,
-            'curl_info'         => $curlInfo
+            'curl_info'         => $curlInfo,
+            'response'          => $response
         );
     }
 
-    // ########################################
+    //########################################
 
     private function getCurrentBaseUrl()
     {
         return $this->getBaseUrlByIndex($this->getCurrentBaseUrlIndex());
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     private function getDefaultBaseUrlIndex()
     {
@@ -151,12 +165,12 @@ class Ess_M2ePro_Helper_Server extends Mage_Core_Helper_Abstract
         return $index;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     private function setDefaultBaseUrlIndex($index)
     {
         Mage::helper('M2ePro/Primary')->getConfig()
-                ->getGroupValue('/server/','default_baseurl_index',$index);
+                ->setGroupValue('/server/','default_baseurl_index',$index);
     }
 
     private function setCurrentBaseUrlIndex($index)
@@ -165,7 +179,7 @@ class Ess_M2ePro_Helper_Server extends Mage_Core_Helper_Abstract
                 ->setGroupValue('/server/baseurl/','current_index',$index);
     }
 
-    // ########################################
+    //########################################
 
     private function getMaxBaseUrlIndex()
     {
@@ -190,5 +204,5 @@ class Ess_M2ePro_Helper_Server extends Mage_Core_Helper_Abstract
         return Mage::helper('M2ePro/Primary')->getConfig()->getGroupValue('/server/','baseurl_'.$index);
     }
 
-    // ########################################
+    //########################################
 }

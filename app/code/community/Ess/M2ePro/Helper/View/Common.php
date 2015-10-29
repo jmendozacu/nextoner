@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Helper_View_Common extends Mage_Core_Helper_Abstract
@@ -10,25 +12,31 @@ class Ess_M2ePro_Helper_View_Common extends Mage_Core_Helper_Abstract
     // Sell On Multi-Channels
 
     const NICK  = 'common';
-    const TITLE = 'Sell On Multi-Channels';
 
     const WIZARD_INSTALLATION_NICK = 'installationCommon';
     const MENU_ROOT_NODE_NICK = 'm2epro_common';
 
-    // ########################################
+    //########################################
+
+    public function getTitle()
+    {
+        return Mage::helper('M2ePro')->__('Sell On Multi-Channels');
+    }
+
+    //########################################
 
     public function getMenuRootNodeLabel()
     {
         $activeComponents = $this->getActiveComponentsLabels();
 
         if (count($activeComponents) <= 0 || count($activeComponents) > 1) {
-            return Mage::helper('M2ePro')->__(self::TITLE);
+            return $this->getTitle();
         }
 
         return array_shift($activeComponents);
     }
 
-    // ########################################
+    //########################################
 
     public function getActiveComponentsLabels()
     {
@@ -45,7 +53,7 @@ class Ess_M2ePro_Helper_View_Common extends Mage_Core_Helper_Abstract
         return $labels;
     }
 
-    // ########################################
+    //########################################
 
     public function getPageNavigationPath($pathNick, $tabName = NULL, $channel = NULL, $additionalEnd = NULL,
                                           $params = array())
@@ -62,7 +70,7 @@ class Ess_M2ePro_Helper_View_Common extends Mage_Core_Helper_Abstract
         $pathParts['menu'] = $menuLabel;
 
         if ($tabName) {
-            $pathParts['tab'] = $tabName . ' ' . Mage::helper('M2ePro')->__('Tab');
+            $pathParts['tab'] = Mage::helper('M2ePro')->__($tabName) . ' ' . Mage::helper('M2ePro')->__('Tab');
         } else {
             $pathParts['tab'] = NULL;
         }
@@ -88,7 +96,7 @@ class Ess_M2ePro_Helper_View_Common extends Mage_Core_Helper_Abstract
             } else {
 
                 if (!Mage::helper('M2ePro/Component_' . ucfirst($channel))->isActive()) {
-                    throw new Exception('Channel is not Active!');
+                    throw new Ess_M2ePro_Model_Exception('Channel is not Active!');
                 }
 
                 if (count($components) > 1) {
@@ -99,7 +107,7 @@ class Ess_M2ePro_Helper_View_Common extends Mage_Core_Helper_Abstract
 
         $pathParts['channel'] = $channelLabel;
 
-        $pathParts['additional'] = $additionalEnd;
+        $pathParts['additional'] = Mage::helper('M2ePro')->__($additionalEnd);
 
         $resultPath = array();
 
@@ -118,7 +126,7 @@ class Ess_M2ePro_Helper_View_Common extends Mage_Core_Helper_Abstract
         return join($resultPath, ' > ');
     }
 
-    // ########################################
+    //########################################
 
     public function getWizardInstallationNick()
     {
@@ -132,7 +140,7 @@ class Ess_M2ePro_Helper_View_Common extends Mage_Core_Helper_Abstract
         );
     }
 
-    // ########################################
+    //########################################
 
     public function getAutocompleteMaxItems()
     {
@@ -141,7 +149,7 @@ class Ess_M2ePro_Helper_View_Common extends Mage_Core_Helper_Abstract
         return $temp <= 0 ? 100 : $temp;
     }
 
-    // ########################################
+    //########################################
 
     public function prepareMenu(array $menuArray)
     {
@@ -158,7 +166,7 @@ class Ess_M2ePro_Helper_View_Common extends Mage_Core_Helper_Abstract
         !empty($tempTitle) && $menuArray[self::MENU_ROOT_NODE_NICK]['label'] = $tempTitle;
 
         // Add wizard menu item
-        //---------------------------------
+        // ---------------------------------------
         /* @var $wizardHelper Ess_M2ePro_Helper_Module_Wizard */
         $wizardHelper = Mage::helper('M2ePro/Module_Wizard');
 
@@ -176,12 +184,12 @@ class Ess_M2ePro_Helper_View_Common extends Mage_Core_Helper_Abstract
 
             return $menuArray;
         }
-        //---------------------------------
+        // ---------------------------------------
 
         return $menuArray;
     }
 
-    // ########################################
+    //########################################
 
     public function is3rdPartyShouldBeShown($component)
     {
@@ -191,7 +199,7 @@ class Ess_M2ePro_Helper_View_Common extends Mage_Core_Helper_Abstract
         );
 
         if (!in_array($component, $components)) {
-            throw new LogicException('Invalid component nick.');
+            throw new Ess_M2ePro_Model_Exception_Logic('Invalid component nick.');
         }
 
         $sessionKey = $component . '_is_3rd_party_should_be_shown';
@@ -229,5 +237,5 @@ class Ess_M2ePro_Helper_View_Common extends Mage_Core_Helper_Abstract
         return $result;
     }
 
-    // ########################################
+    //########################################
 }

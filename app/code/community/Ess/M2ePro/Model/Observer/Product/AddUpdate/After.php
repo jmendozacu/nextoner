@@ -1,31 +1,34 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2015 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Observer_Product_AddUpdate_After extends Ess_M2ePro_Model_Observer_Product_AddUpdate_Abstract
 {
     private $attributeAffectOnStoreIdCache = array();
 
-    //####################################
+    //########################################
 
     public function beforeProcess()
     {
         parent::beforeProcess();
 
         if (!$this->isProxyExist()) {
-            throw new LogicException('Before proxy should be defined earlier than after Action is performed.');
+            throw new Ess_M2ePro_Model_Exception_Logic('Before proxy should be defined earlier than after Action
+                is performed.');
         }
 
         if ($this->getProductId() <= 0) {
-            throw new LogicException('Product ID should be defined for "after save" event.');
+            throw new Ess_M2ePro_Model_Exception_Logic('Product ID should be defined for "after save" event.');
         }
 
         $this->reloadProduct();
     }
 
-    // ------------------------------------
+    // ---------------------------------------
 
     public function process()
     {
@@ -58,7 +61,7 @@ class Ess_M2ePro_Model_Observer_Product_AddUpdate_After extends Ess_M2ePro_Model
         $this->performCategoryAutoActions();
     }
 
-    //####################################
+    //########################################
 
     private function updateProductsNamesInLogs()
     {
@@ -108,7 +111,7 @@ class Ess_M2ePro_Model_Observer_Product_AddUpdate_After extends Ess_M2ePro_Model
         }
     }
 
-    //####################################
+    //########################################
 
     private function performStatusChanges()
     {
@@ -308,7 +311,7 @@ class Ess_M2ePro_Model_Observer_Product_AddUpdate_After extends Ess_M2ePro_Model
         }
     }
 
-    // ------------------------------------
+    // ---------------------------------------
 
     private function performTrackingAttributesChanges()
     {
@@ -366,7 +369,7 @@ class Ess_M2ePro_Model_Observer_Product_AddUpdate_After extends Ess_M2ePro_Model
         }
     }
 
-    //####################################
+    //########################################
 
     private function performGlobalAutoActions()
     {
@@ -463,7 +466,7 @@ class Ess_M2ePro_Model_Observer_Product_AddUpdate_After extends Ess_M2ePro_Model
         }
     }
 
-    //####################################
+    //########################################
 
     protected function isAddingProductProcess()
     {
@@ -471,7 +474,7 @@ class Ess_M2ePro_Model_Observer_Product_AddUpdate_After extends Ess_M2ePro_Model
                (string)$this->getEvent()->getProduct()->getOrigData('sku') == '';
     }
 
-    //------------------------------------
+    // ---------------------------------------
 
     private function isProxyExist()
     {
@@ -486,12 +489,13 @@ class Ess_M2ePro_Model_Observer_Product_AddUpdate_After extends Ess_M2ePro_Model
 
     /**
      * @return Ess_M2ePro_Model_Observer_Product_AddUpdate_Before_Proxy
-     * @throws LogicException
+     * @throws Ess_M2ePro_Model_Exception_Logic
      */
     private function getProxy()
     {
         if (!$this->isProxyExist()) {
-            throw new LogicException('Before proxy should be defined earlier than after Action is performed.');
+            throw new Ess_M2ePro_Model_Exception_Logic('Before proxy should be defined earlier than after Action
+                is performed.');
         }
 
         $key = $this->getProductId().'_'.$this->getStoreId();
@@ -503,7 +507,7 @@ class Ess_M2ePro_Model_Observer_Product_AddUpdate_After extends Ess_M2ePro_Model
         return Ess_M2ePro_Model_Observer_Product_AddUpdate_Before::$proxyStorage[$key];
     }
 
-    //####################################
+    //########################################
 
     private function updateProductChangeRecord($attributeCode, $storeId, $oldValue, $newValue)
     {
@@ -558,7 +562,7 @@ class Ess_M2ePro_Model_Observer_Product_AddUpdate_After extends Ess_M2ePro_Model
         return $this->attributeAffectOnStoreIdCache[$cacheKey] = in_array($onStoreId,$affectedStoreIds);
     }
 
-    //####################################
+    //########################################
 
     private function getAffectedListingsProductsByTrackingAttribute($attributeCode)
     {
@@ -580,7 +584,7 @@ class Ess_M2ePro_Model_Observer_Product_AddUpdate_After extends Ess_M2ePro_Model
         return in_array($attributeCode,$tempAttributes) ? $this->getAffectedOtherListings() : array();
     }
 
-    //####################################
+    //########################################
 
     private function logListingProductMessage(Ess_M2ePro_Model_Listing_Product $listingProduct, $action,
                                               $oldValue, $newValue, $messagePostfix = '')
@@ -588,12 +592,7 @@ class Ess_M2ePro_Model_Observer_Product_AddUpdate_After extends Ess_M2ePro_Model
         // M2ePro_TRANSLATIONS
         // From [%from%] to [%to%].
 
-        if ($listingProduct->isComponentModeEbay()) {
-            $log = Mage::getModel('M2ePro/Listing_Log');
-            $log->setComponentMode($listingProduct->getComponentMode());
-        } else {
-            $log = Mage::getModel('M2ePro/'.ucfirst($listingProduct->getComponentMode()).'_Listing_Log');
-        }
+        $log = Mage::getModel('M2ePro/'.ucfirst($listingProduct->getComponentMode()).'_Listing_Log');
 
         $oldValue = strlen($oldValue) > 150 ? substr($oldValue, 0, 150) . ' ...' : $oldValue;
         $newValue = strlen($newValue) > 150 ? substr($newValue, 0, 150) . ' ...' : $newValue;
@@ -601,6 +600,61 @@ class Ess_M2ePro_Model_Observer_Product_AddUpdate_After extends Ess_M2ePro_Model
         $messagePostfix = trim(trim($messagePostfix), '.');
         if (!empty($messagePostfix)) {
             $messagePostfix = ' '.$messagePostfix;
+        }
+
+        if ($listingProduct->isComponentModeEbay() && is_array($listingProduct->getData('found_options_ids'))) {
+
+            $collection = Mage::getModel('M2ePro/Listing_Product_Variation_Option')->getCollection()
+                ->addFieldToFilter('main_table.id', array('in' => $listingProduct->getData('found_options_ids')));
+
+            $additionalData = array();
+            foreach ($collection as $listingProductVariationOption) {
+                /** @var Ess_M2ePro_Model_Listing_Product_Variation_Option $listingProductVariationOption  */
+                $additionalData['variation_options'][$listingProductVariationOption
+                    ->getAttribute()] = $listingProductVariationOption->getOption();
+            }
+
+            if (!empty($additionalData['variation_options']) &&
+                $collection->getFirstItem()->getProductType() == Ess_M2ePro_Model_Magento_Product::TYPE_BUNDLE) {
+
+                foreach ($additionalData['variation_options'] as $attribute => $option) {
+                    $log->addProductMessage(
+                        $listingProduct->getListingId(),
+                        $listingProduct->getProductId(),
+                        $listingProduct->getId(),
+                        Ess_M2ePro_Helper_Data::INITIATOR_EXTENSION,
+                        NULL,
+                        $action,
+                        Mage::getModel('M2ePro/Log_Abstract')->encodeDescription(
+                            'From [%from%] to [%to%]'.$messagePostfix.'.',
+                            array('!from'=>$oldValue,'!to'=>$newValue)
+                        ),
+                        Ess_M2ePro_Model_Log_Abstract::TYPE_NOTICE,
+                        Ess_M2ePro_Model_Log_Abstract::PRIORITY_LOW,
+                        array('variation_options' => array($attribute => $option))
+                    );
+                }
+
+                return;
+            }
+
+            $log->addProductMessage(
+                $listingProduct->getListingId(),
+                $listingProduct->getProductId(),
+                $listingProduct->getId(),
+                Ess_M2ePro_Helper_Data::INITIATOR_EXTENSION,
+                NULL,
+                $action,
+                Mage::getModel('M2ePro/Log_Abstract')->encodeDescription(
+                    'From [%from%] to [%to%]'.$messagePostfix.'.',
+                    array('!from'=>$oldValue,'!to'=>$newValue)
+                ),
+                Ess_M2ePro_Model_Log_Abstract::TYPE_NOTICE,
+                Ess_M2ePro_Model_Log_Abstract::PRIORITY_LOW,
+                $additionalData
+            );
+
+            return;
         }
 
         $log->addProductMessage(
@@ -650,5 +704,5 @@ class Ess_M2ePro_Model_Observer_Product_AddUpdate_After extends Ess_M2ePro_Model
         );
     }
 
-    //####################################
+    //########################################
 }

@@ -1,13 +1,15 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Adminhtml_Common_SynchronizationController
     extends Ess_M2ePro_Controller_Adminhtml_Common_MainController
 {
-    //#############################################
+    //########################################
 
     protected function _initAction()
     {
@@ -25,6 +27,8 @@ class Ess_M2ePro_Adminhtml_Common_SynchronizationController
 
         $this->_initPopUp();
 
+        $this->setComponentPageHelpLink('Synchronization');
+
         return $this;
     }
 
@@ -33,7 +37,7 @@ class Ess_M2ePro_Adminhtml_Common_SynchronizationController
         return Mage::getSingleton('admin/session')->isAllowed('m2epro_common/configuration');
     }
 
-    //#############################################
+    //########################################
 
     public function indexAction()
     {
@@ -48,7 +52,7 @@ class Ess_M2ePro_Adminhtml_Common_SynchronizationController
             )->renderLayout();
     }
 
-    //#############################################
+    //########################################
 
     public function saveAction()
     {
@@ -71,7 +75,7 @@ class Ess_M2ePro_Adminhtml_Common_SynchronizationController
         }
     }
 
-    //#############################################
+    //########################################
 
     public function runAllEnabledNowAction()
     {
@@ -94,7 +98,7 @@ class Ess_M2ePro_Adminhtml_Common_SynchronizationController
         $dispatcher->process();
     }
 
-    //#############################################
+    //########################################
 
     public function synchCheckProcessingNowAction()
     {
@@ -125,7 +129,7 @@ class Ess_M2ePro_Adminhtml_Common_SynchronizationController
         )));
     }
 
-    //#############################################
+    //########################################
 
     public function runReviseAllAction()
     {
@@ -147,5 +151,5 @@ class Ess_M2ePro_Adminhtml_Common_SynchronizationController
 
     }
 
-    //#############################################
+    //########################################
 }

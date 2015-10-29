@@ -1,17 +1,32 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Validator_General
     extends Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_Validator
 {
-    // ########################################
+    //########################################
 
+    /**
+     * @return bool
+     */
     public function validate()
     {
         if ($this->getVariationManager()->isRelationParentType() && !$this->validateParentListingProductFlags()) {
+            return false;
+        }
+
+        if ($this->getAmazonListingProduct()->isAfnChannel()) {
+
+            // M2ePro_TRANSLATIONS
+            // List Action for FBA Items is impossible as their Quantity is unknown. You can run Revise Action for such Items, but the Quantity value will be ignored.
+            $this->addMessage('List Action for FBA Items is impossible as their Quantity is unknown. You can run Revise
+            Action for such Items, but the Quantity value will be ignored.');
+
             return false;
         }
 
@@ -56,7 +71,7 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Validator_General
         return true;
     }
 
-    // ########################################
+    //########################################
 
     private function validateChildRequirements()
     {
@@ -89,5 +104,5 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Validator_General
         return true;
     }
 
-    // ########################################
+    //########################################
 }

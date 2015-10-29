@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class M2eProChangesCatcher extends Magmi_ItemProcessor
@@ -18,21 +20,24 @@ class M2eProChangesCatcher extends Magmi_ItemProcessor
         'inserted'      => 0
     );
 
-    // ########################################
+    //########################################
 
     public function initialize($params) {}
 
+    /**
+     * @return array
+     */
     public function getPluginInfo()
     {
         return array(
             "name"    => "Ess M2ePro Product Changes Inspector",
             "author"  => "ESS",
-            "version" => "1.0.3",
+            "version" => "1.0.4",
             "url"     => "http://docs.m2epro.com/display/BestPractice/Plugin+for+Magmi+Import+Tool"
         );
     }
 
-    // ########################################
+    //########################################
 
     public function processItemAfterId(&$item, $params = null)
     {
@@ -50,15 +55,18 @@ class M2eProChangesCatcher extends Magmi_ItemProcessor
         return $result;
     }
 
-    public function afterImport()
+    /**
+     * @return bool
+     */
+    public function endImport()
     {
         $this->filterOnlyAffectedChanges();
         $this->insertChanges();
 
-        return parent::afterImport();
+        return true;
     }
 
-    // ########################################
+    //########################################
 
     private function filterOnlyAffectedChanges()
     {
@@ -143,7 +151,7 @@ class M2eProChangesCatcher extends Magmi_ItemProcessor
         $this->saveStatistics();
     }
 
-    // ########################################
+    //########################################
 
     protected function resetStatistics()
     {
@@ -156,13 +164,13 @@ class M2eProChangesCatcher extends Magmi_ItemProcessor
 
     protected function saveStatistics()
     {
-        $message  = "Not presented (skipped): {$this->statistics['not_presented']}## ";
-        $message .= "Existed (skipped): {$this->statistics['existed']}## ";
+        $message  = "Not presented (skipped): {$this->statistics['not_presented']} ## ";
+        $message .= "Existed (skipped): {$this->statistics['existed']} ## ";
         $message .= "Processed: {$this->statistics['inserted']}.";
 
         $this->log($message);
         $this->resetStatistics();
     }
 
-    // ########################################
+    //########################################
 }

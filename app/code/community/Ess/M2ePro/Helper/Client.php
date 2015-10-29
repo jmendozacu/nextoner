@@ -1,14 +1,16 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Helper_Client extends Mage_Core_Helper_Abstract
 {
     const API_APACHE_HANDLER = 'apache2handler';
 
-    // ########################################
+    //########################################
 
     public function getHost()
     {
@@ -16,13 +18,13 @@ class Ess_M2ePro_Helper_Client extends Mage_Core_Helper_Abstract
         return $domain == '' ? $this->getIp() : $domain;
     }
 
-    //-----------------------------------------
+    // ---------------------------------------
 
     public function getDomain()
     {
         $domain = Mage::helper('M2ePro/Module')->getCacheConfig()->getGroupValue('/location_info/', 'domain');
         if (is_null($domain) && isset($_SERVER['HTTP_HOST'])) {
-            $domain = $_SERVER['HTTP_HOST'];
+            $domain = rtrim($_SERVER['HTTP_HOST'], '/');
         }
 
         if (!is_null($domain)) {
@@ -30,7 +32,7 @@ class Ess_M2ePro_Helper_Client extends Mage_Core_Helper_Abstract
             return strtolower(trim($domain));
         }
 
-        throw new Exception('Server domain is not defined');
+        throw new Ess_M2ePro_Model_Exception('Server domain is not defined');
     }
 
     public function getIp()
@@ -48,7 +50,7 @@ class Ess_M2ePro_Helper_Client extends Mage_Core_Helper_Abstract
             return strtolower(trim($serverIp));
         }
 
-        throw new Exception('Server IP is not defined');
+        throw new Ess_M2ePro_Model_Exception('Server IP is not defined');
     }
 
     public function getBaseDirectory()
@@ -71,7 +73,7 @@ class Ess_M2ePro_Helper_Client extends Mage_Core_Helper_Abstract
         return false;
     }
 
-    //-----------------------------------------
+    // ---------------------------------------
 
     public function updateBackupConnectionData($forceUpdate = false)
     {
@@ -107,14 +109,14 @@ class Ess_M2ePro_Helper_Client extends Mage_Core_Helper_Abstract
         );
     }
 
-    // ########################################
+    //########################################
 
     public function getSystem()
     {
         return php_uname();
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function getPhpVersion()
     {
@@ -126,7 +128,7 @@ class Ess_M2ePro_Helper_Client extends Mage_Core_Helper_Abstract
         return @php_sapi_name();
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function isPhpApiApacheHandler()
     {
@@ -138,7 +140,7 @@ class Ess_M2ePro_Helper_Client extends Mage_Core_Helper_Abstract
         return !$this->isPhpApiApacheHandler();
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function getPhpSettings()
     {
@@ -201,7 +203,7 @@ class Ess_M2ePro_Helper_Client extends Mage_Core_Helper_Abstract
         return $pi;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function getMysqlVersion()
     {
@@ -260,7 +262,7 @@ class Ess_M2ePro_Helper_Client extends Mage_Core_Helper_Abstract
         );
     }
 
-    // ########################################
+    //########################################
 
     public function getMemoryLimit($inMegabytes = true)
     {
@@ -310,7 +312,7 @@ class Ess_M2ePro_Helper_Client extends Mage_Core_Helper_Abstract
         return true;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function updateMySqlConnection()
     {
@@ -324,5 +326,5 @@ class Ess_M2ePro_Helper_Client extends Mage_Core_Helper_Abstract
         }
     }
 
-    // ########################################
+    //########################################
 }

@@ -1,26 +1,36 @@
 <?php
 
 /*
-* @copyright  Copyright (c) 2013 by  ESS-UA.
-*/
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
+ */
 
 class Ess_M2ePro_Adminhtml_Wizard_InstallationEbayController
     extends Ess_M2ePro_Controller_Adminhtml_Ebay_WizardController
 {
-    //#############################################
+    //########################################
+
+    protected function _initAction()
+    {
+        $result = parent::_initAction();
+
+        $this->getLayout()->getBlock('head')
+             ->addJs('M2ePro/Wizard/InstallationEbay.js');
+
+        return $result;
+    }
 
     protected function getNick()
     {
         return Ess_M2ePro_Helper_View_Ebay::WIZARD_INSTALLATION_NICK;
     }
 
-    //#############################################
+    //########################################
 
     public function indexAction()
     {
-        /* @var $wizardHelper Ess_M2ePro_Helper_Module_Wizard */
-        $wizardHelper = Mage::helper('M2ePro/Module_Wizard');
-        $wizardHelper->setStatus(
+        $this->getWizardHelper()->setStatus(
             'ebayProductDetails', Ess_M2ePro_Helper_Module_Wizard::STATUS_SKIPPED
         );
 
@@ -29,40 +39,30 @@ class Ess_M2ePro_Adminhtml_Wizard_InstallationEbayController
 
     public function installationAction()
     {
-        /* @var $wizardHelper Ess_M2ePro_Helper_Module_Wizard */
-        $wizardHelper = Mage::helper('M2ePro/Module_Wizard');
-
-        if ($wizardHelper->isFinished($this->getNick()) ||
-            $wizardHelper->isNotStarted($this->getNick())) {
+        if ($this->isFinished() || $this->isNotStarted()) {
             return $this->_redirect('*/*/index');
         }
 
-        if (!$wizardHelper->getStep($this->getNick())) {
-            $wizardHelper->setStep(
-                $this->getNick(),
-                $wizardHelper->getWizard($this->getNick())->getFirstStep()
-            );
+        if (!$this->getCurrentStep()) {
+            $this->setStep($this->getFirstStep());
         }
 
-        $currentStep = $wizardHelper->getStep($this->getNick());
-
-        $this->_forward($currentStep);
+        $this->_forward($this->getCurrentStep());
     }
 
-    //#############################################
+    //########################################
 
     private function renderSimpleStep()
     {
-        $wizardHelper = Mage::helper('M2ePro/Module_Wizard');
-
-        $currentStep = $wizardHelper->getStep($this->getNick());
-
         return $this->_initAction()
-            ->_addContent($wizardHelper->createBlock('installation_'.$currentStep,$this->getNick()))
-            ->renderLayout();
+                    ->_addContent($this->getWizardHelper()->createBlock(
+                        'installation_' . $this->getCurrentStep(),
+                        $this->getNick())
+                    )
+                    ->renderLayout();
     }
 
-    //#############################################
+    //########################################
 
     public function wizardTutorialAction()
     {
@@ -84,7 +84,7 @@ class Ess_M2ePro_Adminhtml_Wizard_InstallationEbayController
         return $this->renderSimpleStep();
     }
 
-    //#############################################
+    //########################################
 
     public function listingTutorialAction()
     {
@@ -111,7 +111,7 @@ class Ess_M2ePro_Adminhtml_Wizard_InstallationEbayController
         return $this->_redirect('*/adminhtml_ebay_listing_create',array('step' => 4, 'wizard' => true));
     }
 
-    //#############################################
+    //########################################
 
     public function productTutorialAction()
     {
@@ -168,7 +168,7 @@ class Ess_M2ePro_Adminhtml_Wizard_InstallationEbayController
         );
     }
 
-    //#############################################
+    //########################################
 
     public function categoryStepOneAction()
     {
@@ -215,14 +215,14 @@ class Ess_M2ePro_Adminhtml_Wizard_InstallationEbayController
         );
     }
 
-    //#############################################
+    //########################################
 
     public function beforeTokenAction()
     {
         // Get and save session id
-        //-------------------------------
+        // ---------------------------------------
 
-        $keys = array(
+        $requiredKeys = array(
             'email',
             'firstname',
             'lastname',
@@ -231,23 +231,32 @@ class Ess_M2ePro_Adminhtml_Wizard_InstallationEbayController
             'postal_code',
         );
 
-        $post = $this->getRequest()->getPost();
-        unset($post['form_key']);
-        foreach ($keys as $key) {
-            (!isset($post[$key]) || !$post[$key]) && $post[$key] = 'undefined';
+        $licenseData = array();
+        foreach ($requiredKeys as $key) {
+
+            if ($tempValue = $this->getRequest()->getParam($key)) {
+                $licenseData[$key] = $tempValue;
+                continue;
+            }
+
+            $response = array(
+                'url'     => null,
+                'message' => Mage::helper('M2ePro')->__('You should fill all required fields.')
+            );
+            return $this->getResponse()->setBody(json_encode($response));
         }
 
         $registry = Mage::getModel('M2ePro/Registry')->load('/wizard/license_form_data/', 'key');
         $registry->setData('key', '/wizard/license_form_data/');
-        $registry->setData('value', json_encode($post));
+        $registry->setData('value', json_encode($licenseData));
         $registry->save();
 
         if (!Mage::helper('M2ePro/Module_License')->getKey()) {
 
             $licenseResult = Mage::helper('M2ePro/Module_License')->obtainRecord(
-                $post['email'],
-                $post['firstname'], $post['lastname'],
-                $post['country'], $post['city'], $post['postal_code']
+                $licenseData['email'],
+                $licenseData['firstname'], $licenseData['lastname'],
+                $licenseData['country'], $licenseData['city'], $licenseData['postal_code']
             );
 
             if (!$licenseResult) {
@@ -288,7 +297,7 @@ class Ess_M2ePro_Adminhtml_Wizard_InstallationEbayController
             'url' => $response['url']
         )));
 
-        //-------------------------------
+        // ---------------------------------------
     }
 
     public function afterTokenAction()
@@ -330,8 +339,9 @@ class Ess_M2ePro_Adminhtml_Wizard_InstallationEbayController
         $data = array_merge(
             array(
                 'title' => $response['info']['UserID'],
+                'user_id' => $response['info']['UserID'],
                 'mode' => $accountMode,
-                'ebay_info' => json_encode($response['info']),
+                'info' => json_encode($response['info']),
                 'server_hash' => $response['hash'],
                 'token_session' => $tokenSessionId,
                 'token_expired_date' => $response['token_expired_date']
@@ -342,14 +352,12 @@ class Ess_M2ePro_Adminhtml_Wizard_InstallationEbayController
         $accountModel = Mage::helper('M2ePro/Component_Ebay')->getModel('Account')->setData($data)->save();
         $accountModel->getChildObject()->updateEbayStoreInfo();
 
-        $nextStep = Mage::helper('M2ePro/Module_Wizard')->getWizard($this->getNick())->getNextStep();
-
-        Mage::helper('M2ePro/Module_Wizard')->setStep($this->getNick(),$nextStep);
+        $this->setStep($this->getNextStep());
 
         return $this->_redirect('*/*/installation');
     }
 
-    //#############################################
+    //########################################
 
     public function setModeAndUpdateAccountAction()
     {
@@ -383,7 +391,7 @@ class Ess_M2ePro_Adminhtml_Wizard_InstallationEbayController
         )));
     }
 
-    //#############################################
+    //########################################
 
     public function getAccountSettingsAction()
     {
@@ -411,5 +419,5 @@ class Ess_M2ePro_Adminhtml_Wizard_InstallationEbayController
 
     }
 
-    //#############################################
+    //########################################
 }

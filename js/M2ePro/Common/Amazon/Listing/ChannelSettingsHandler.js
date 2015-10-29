@@ -1,7 +1,7 @@
 CommonAmazonListingChannelSettingsHandler = Class.create();
 CommonAmazonListingChannelSettingsHandler.prototype = Object.extend(new CommonHandler(), {
 
-    //----------------------------------
+    // ---------------------------------------
 
     initialize: function()
     {
@@ -16,19 +16,36 @@ CommonAmazonListingChannelSettingsHandler.prototype = Object.extend(new CommonHa
 
         Validation.add('M2ePro-validate-sku-modification-custom-value', M2ePro.text.sku_modification_custom_value_error, function(value) {
 
-            if ($('sku_modification_mode').value == AmazonListingChannelSettingsHandlerObj.SKU_MODIFICATION_MODE_NONE) {
+            var self = AmazonListingChannelSettingsHandlerObj;
+
+            if ($('sku_modification_mode').value == self.SKU_MODIFICATION_MODE_NONE) {
                 return true;
             }
 
-            if ($('sku_modification_mode').value == AmazonListingChannelSettingsHandlerObj.SKU_MODIFICATION_MODE_TEMPLATE) {
+            if ($('sku_modification_mode').value == self.SKU_MODIFICATION_MODE_TEMPLATE) {
                 return value.match(/%value%/g);
             }
 
             return true;
         });
+
+        Validation.add('M2ePro-validate-sku-modification-custom-value-max-length', M2ePro.text.sku_modification_custom_value_max_length_error, function(value) {
+
+            var self = AmazonListingChannelSettingsHandlerObj;
+
+            if ($('sku_modification_mode').value == self.SKU_MODIFICATION_MODE_NONE) {
+                return true;
+            }
+
+            if ($('sku_modification_mode').value == self.SKU_MODIFICATION_MODE_TEMPLATE) {
+                value = value.replace('%value%', '');
+            }
+
+            return value.length < M2ePro.php.constant('Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Validator_Sku_General::SKU_MAX_LENGTH');
+        });
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     getAvailableConstantsForImages: function()
     {
@@ -44,7 +61,7 @@ CommonAmazonListingChannelSettingsHandler.prototype = Object.extend(new CommonHa
         ];
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     sku_mode_change: function()
     {
@@ -56,24 +73,26 @@ CommonAmazonListingChannelSettingsHandler.prototype = Object.extend(new CommonHa
         }
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     sku_modification_mode_change: function()
     {
-        if ($('sku_modification_mode').value == M2ePro.php.constant('Ess_M2ePro_Model_Amazon_Listing::SKU_MODIFICATION_MODE_TEMPLATE')) {
+        var self = AmazonListingChannelSettingsHandlerObj;
+
+        if ($('sku_modification_mode').value == self.SKU_MODIFICATION_MODE_TEMPLATE) {
             $('sku_modification_custom_value').value = '%value%';
         } else {
             $('sku_modification_custom_value').value = '';
         }
 
-        if ($('sku_modification_mode').value == M2ePro.php.constant('Ess_M2ePro_Model_Amazon_Listing::SKU_MODIFICATION_MODE_NONE')) {
+        if ($('sku_modification_mode').value == self.SKU_MODIFICATION_MODE_NONE) {
             $('sku_modification_custom_value_tr').hide();
         } else {
             $('sku_modification_custom_value_tr').show();
         }
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     general_id_mode_change: function()
     {
@@ -90,7 +109,7 @@ CommonAmazonListingChannelSettingsHandler.prototype = Object.extend(new CommonHa
         AmazonListingChannelSettingsHandlerObj.hideEmptyOption($('general_id_custom_attribute'));
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     worldwide_id_mode_change: function()
     {
@@ -107,7 +126,7 @@ CommonAmazonListingChannelSettingsHandler.prototype = Object.extend(new CommonHa
         AmazonListingChannelSettingsHandlerObj.hideEmptyOption($('worldwide_id_custom_attribute'));
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     condition_mode_change: function()
     {
@@ -143,7 +162,7 @@ CommonAmazonListingChannelSettingsHandler.prototype = Object.extend(new CommonHa
         }
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     image_main_mode_change: function()
     {
@@ -181,7 +200,7 @@ CommonAmazonListingChannelSettingsHandler.prototype = Object.extend(new CommonHa
         }
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     gift_wrap_mode_change: function()
     {
@@ -205,7 +224,7 @@ CommonAmazonListingChannelSettingsHandler.prototype = Object.extend(new CommonHa
         }
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     condition_note_mode_change: function()
     {
@@ -249,7 +268,7 @@ CommonAmazonListingChannelSettingsHandler.prototype = Object.extend(new CommonHa
         }
     },
 
-    //----------------------------------
+    // ---------------------------------------
 
     appendToText: function(ddId, targetId)
     {
@@ -287,5 +306,5 @@ CommonAmazonListingChannelSettingsHandler.prototype = Object.extend(new CommonHa
         }
     }
 
-    //----------------------------------
+    // ---------------------------------------
 });

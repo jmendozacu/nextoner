@@ -1,13 +1,15 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 final class Ess_M2ePro_Model_Amazon_Synchronization_Marketplaces_Categories
     extends Ess_M2ePro_Model_Amazon_Synchronization_Marketplaces_Abstract
 {
-    //####################################
+    //########################################
 
     protected function getNick()
     {
@@ -19,7 +21,7 @@ final class Ess_M2ePro_Model_Amazon_Synchronization_Marketplaces_Categories
         return 'Categories';
     }
 
-    // -----------------------------------
+    // ---------------------------------------
 
     protected function getPercentsStart()
     {
@@ -31,7 +33,7 @@ final class Ess_M2ePro_Model_Amazon_Synchronization_Marketplaces_Categories
         return 100;
     }
 
-    //####################################
+    //########################################
 
     protected function performActions()
     {
@@ -43,6 +45,7 @@ final class Ess_M2ePro_Model_Amazon_Synchronization_Marketplaces_Categories
                             ->getObject('Marketplace', (int)$params['marketplace_id']);
 
         $this->deleteAllCategories($marketplace);
+        $this->deleteAllProductDataInfo($marketplace);
 
         $this->getActualOperationHistory()->addText('Starting Marketplace "'.$marketplace->getTitle().'"');
 
@@ -82,7 +85,7 @@ final class Ess_M2ePro_Model_Amazon_Synchronization_Marketplaces_Categories
         $this->logSuccessfulOperation($marketplace);
     }
 
-    //####################################
+    //########################################
 
     protected function receiveFromAmazon(Ess_M2ePro_Model_Marketplace $marketplace, $partNumber)
     {
@@ -113,6 +116,16 @@ final class Ess_M2ePro_Model_Amazon_Synchronization_Marketplaces_Categories
         $connWrite->delete($tableCategories,array('marketplace_id = ?' => $marketplace->getId()));
     }
 
+    protected function deleteAllProductDataInfo(Ess_M2ePro_Model_Marketplace $marketplace)
+    {
+        /** @var $connWrite Varien_Db_Adapter_Pdo_Mysql */
+        $connWrite = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $tableCategories = Mage::getSingleton('core/resource')
+            ->getTableName('m2epro_amazon_dictionary_category_product_data');
+
+        $connWrite->delete($tableCategories,array('marketplace_id = ?' => $marketplace->getId()));
+    }
+
     protected function saveCategoriesToDb(Ess_M2ePro_Model_Marketplace $marketplace, array $categories)
     {
         $totalCountCategories = count($categories);
@@ -133,17 +146,17 @@ final class Ess_M2ePro_Model_Amazon_Synchronization_Marketplaces_Categories
 
             $data = $categories[$i];
 
+            $isLeaf = $data['is_leaf'];
             $insertData[] = array(
-                'marketplace_id'      => $marketplace->getId(),
-                'category_id'         => $data['id'],
-                'parent_category_id'  => $data['parent_id'],
-                'title'               => $data['title'],
-                'path'                => $data['path'],
-                'is_leaf'             => $data['is_listable'],
-                'product_data_nick'   => ($data['is_listable'] ? $data['product_data']['nick'] : NULL),
-                'browsenode_id'       => ($data['is_listable'] ? $data['browsenode_id'] : NULL),
-                'keywords'            => ($data['is_listable'] ? json_encode($data['keywords']) : NULL),
-                'required_attributes' => ($data['is_listable'] ? json_encode($data['required_attributes']) : NULL)
+                'marketplace_id'     => $marketplace->getId(),
+                'category_id'        => $data['id'],
+                'parent_category_id' => $data['parent_id'],
+                'browsenode_id'      => ($isLeaf ? $data['browsenode_id'] : NULL),
+                'product_data_nicks' => ($isLeaf ? json_encode($data['product_data_nicks']) : NULL),
+                'title'              => $data['title'],
+                'path'               => $data['path'],
+                'keywords'           => ($isLeaf ? json_encode($data['keywords']) : NULL),
+                'is_leaf'            => $isLeaf,
             );
 
             if (count($insertData) >= 100 || $i >= ($totalCountCategories - 1)) {
@@ -176,5 +189,5 @@ final class Ess_M2ePro_Model_Amazon_Synchronization_Marketplaces_Categories
                                     Ess_M2ePro_Model_Log_Abstract::PRIORITY_LOW);
     }
 
-    //####################################
+    //########################################
 }

@@ -1,3 +1,6 @@
+<?php $url = $this->isEditMode() ? Mage::helper('M2ePro/Module_Support')->getDocumentationUrl(NULL, NULL, 'x/XYkVAQ') :
+    Mage::helper('M2ePro/Module_Support')->getDocumentationUrl(NULL, NULL, 'x/1YcVAQ');
+?>
 <div id="block_notice_amazon_listing_add_selling_settings" class="block_notices_module" title="<?php echo Mage::helper('M2ePro')->__('Selling Settings'); ?>">
     <?php echo Mage::helper('M2ePro')->__('
     On this Page you can specify main <strong>Selling Settings</strong> for Amazon Items you are going to sell using this M2E Pro Listing.<br/><br/>
@@ -6,39 +9,40 @@
     Additional Settings - Handling Time and Restock Date.<br/><br/>
 
     In addition to, in this Section you can select Selling Format Policy that contains Settings connected with forming
-    of Price, Quantity etc. and Synchronization Policy that describes Rules of Automatic Synchronization of Magento Product and Amazon Item.
-'); ?>
+    of Price, Quantity etc. and Synchronization Policy that describes Rules of Automatic Synchronization of Magento Product and Amazon Item.</br></br>
+    More detailed information about ability to work with this Page you can find <a href="%url%" target="_blank">here</a>.', $url
+    ); ?>
 </div>
 
 <?php
-    $restockDateValue = $this->getData('restock_date_value');
-    if (!empty($restockDateValue) && strtotime($restockDateValue)) {
-        $this->setData('restock_date_value', Mage::helper('M2ePro')->gmtDateToTimezone($restockDateValue));
-    }
+$restockDateValue = $this->getData('restock_date_value');
+if (!empty($restockDateValue) && strtotime($restockDateValue)) {
+    $this->setData('restock_date_value', Mage::helper('M2ePro')->gmtDateToTimezone($restockDateValue));
+}
 
-    /** @var Ess_M2ePro_Helper_Magento_Attribute $magentoAttributeHelper */
-    $magentoAttributeHelper = Mage::helper('M2ePro/Magento_Attribute');
+/** @var Ess_M2ePro_Helper_Magento_Attribute $magentoAttributeHelper */
+$magentoAttributeHelper = Mage::helper('M2ePro/Magento_Attribute');
 
-    $attributesByInputTypes = array(
-        'text_textarea' => $magentoAttributeHelper->filterByInputTypes(
+$attributesByInputTypes = array(
+    'text_textarea' => $magentoAttributeHelper->filterByInputTypes(
             $this->getData('all_attributes'), array('text', 'textarea')
         ),
-    );
+);
 
-    $generalAttributesByInputTypes = array(
-        'boolean' => $magentoAttributeHelper->filterByInputTypes($this->getData('all_attributes'), array('boolean')),
-        'text' => $magentoAttributeHelper->filterByInputTypes($this->getData('general_attributes'), array('text')),
-        'text_date' => $magentoAttributeHelper->filterByInputTypes(
+$generalAttributesByInputTypes = array(
+    'boolean' => $magentoAttributeHelper->filterByInputTypes($this->getData('all_attributes'), array('boolean')),
+    'text' => $magentoAttributeHelper->filterByInputTypes($this->getData('general_attributes'), array('text')),
+    'text_date' => $magentoAttributeHelper->filterByInputTypes(
             $this->getData('general_attributes'), array('text', 'date', 'datetime')
         ),
-        'text_select' => $magentoAttributeHelper->filterByInputTypes(
+    'text_select' => $magentoAttributeHelper->filterByInputTypes(
             $this->getData('general_attributes'), array('text', 'select')
         ),
-        'text_images' => $magentoAttributeHelper->filterByInputTypes(
+    'text_images' => $magentoAttributeHelper->filterByInputTypes(
             $this->getData('general_attributes'),
             array('text', 'image', 'media_image', 'gallery', 'multiline', 'textarea', 'select', 'multiselect')
         )
-    );
+);
 
 ?>
 
@@ -62,13 +66,23 @@
     //-----------------------------
     M2ePro.text.condition_note_length_error = '<?php echo Mage::helper('M2ePro')->escapeJs(Mage::helper('M2ePro')->__('Must be not more than 2000 characters long.')); ?>';
     M2ePro.text.sku_modification_custom_value_error = '<?php echo Mage::helper('M2ePro')->escapeJs(Mage::helper('M2ePro')->__('%value% placeholder should be specified')); ?>';
+
+    M2ePro.text.sku_modification_custom_value_max_length_error = '<?php echo Mage::helper('M2ePro')->escapeJs(Mage::helper('M2ePro')->__('The SKU length must be less than %value%.',
+        Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Validator_Sku_General::SKU_MAX_LENGTH)); ?>';
+
     M2ePro.php.setConstants(
         <?php echo Mage::helper('M2ePro')->getClassConstantAsJson('Ess_M2ePro_Helper_Component_Amazon'); ?>,
         'Ess_M2ePro_Helper_Component'
     );
+
     M2ePro.php.setConstants(
         <?php echo Mage::helper('M2ePro')->getClassConstantAsJson('Ess_M2ePro_Model_Amazon_Listing'); ?>,
         'Ess_M2ePro_Model_Amazon_Listing'
+    );
+
+    M2ePro.php.setConstants(
+        <?php echo Mage::helper('M2ePro')->getClassConstantAsJson('Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Validator_Sku_General'); ?>,
+        'Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Validator_Sku_General'
     );
 
     M2ePro.url.addNewSellingFormatTemplate = '<?php echo $this->getUrl('*/adminhtml_common_amazon_template_sellingFormat/new'); ?>';
@@ -203,11 +217,11 @@
                     <td class="value">
                         <input type="hidden" id="sku_custom_attribute" name="sku_custom_attribute" value="<?php echo $this->getData('sku_custom_attribute'); ?>" />
 
-                        <select name="sku_mode" id="sku_mode">
+                        <select name="sku_mode" id="sku_mode" class="M2ePro-custom-attribute-can-be-created" allowed_attribute_types="text" show_code_input="1">
                             <option value="<?php echo Ess_M2ePro_Model_Amazon_Listing::SKU_MODE_PRODUCT_ID ?>" <?php if ($this->getData('sku_mode') == Ess_M2ePro_Model_Amazon_Listing::SKU_MODE_PRODUCT_ID) echo 'selected="selected"' ?>><?php echo Mage::helper('M2ePro')->__('Product ID') ?></option>
                             <option value="<?php echo Ess_M2ePro_Model_Amazon_Listing::SKU_MODE_DEFAULT ?>" <?php if ($this->getData('sku_mode') == Ess_M2ePro_Model_Amazon_Listing::SKU_MODE_DEFAULT) echo 'selected="selected"' ?>><?php echo Mage::helper('M2ePro')->__('Product SKU') ?></option>
 
-                            <optgroup label="Magento Attribute">
+                            <optgroup class="M2ePro-custom-attribute-optgroup" label="Magento Attribute">
                                 <?php foreach ($generalAttributesByInputTypes['text'] as $attribute): ?>
                                     <option attribute_code="<?php echo $attribute['code']; ?>" value="<?php echo Ess_M2ePro_Model_Amazon_Listing::SKU_MODE_CUSTOM_ATTRIBUTE ?>" <?php if ($this->getData('sku_custom_attribute') == $attribute['code']) echo ' selected="selected"'; ?>><?php echo Mage::helper('M2ePro')->escapeHtml($attribute['label']); ?></option>
                                 <?php endforeach ?>
@@ -242,7 +256,7 @@
                         <label for="sku_modification_custom_value"><?php echo Mage::helper('M2ePro')->__('Modification Value') ?>: <span class="required">*</span></label>
                     </td>
                     <td class="value">
-                        <input type="text" id="sku_modification_custom_value" name="sku_modification_custom_value" class="input-text M2ePro-required-when-visible M2ePro-validate-sku-modification-custom-value" value="<?php echo $this->getData('sku_modification_custom_value'); ?>" />
+                        <input type="text" id="sku_modification_custom_value" name="sku_modification_custom_value" class="input-text M2ePro-required-when-visible M2ePro-validate-sku-modification-custom-value M2ePro-validate-sku-modification-custom-value-max-length" value="<?php echo $this->getData('sku_modification_custom_value'); ?>" />
                     <td>
                 </tr>
 
@@ -389,7 +403,7 @@
                         <input type="hidden" id="condition_custom_attribute" name="condition_custom_attribute" value="<?php echo $this->getData('condition_custom_attribute'); ?>" />
                         <input type="hidden" id="condition_value" name="condition_value" value="<?php echo $this->getData('condition_value'); ?>" />
 
-                        <select name="condition_mode" id="condition_mode">
+                        <select name="condition_mode" id="condition_mode" class="M2ePro-custom-attribute-can-be-created" allowed_attribute_types="text,select">
                             <optgroup label="Recommended Value">
                                 <option value="<?php echo Ess_M2ePro_Model_Amazon_Listing::CONDITION_MODE_DEFAULT ?>" attribute_code="<?php echo Ess_M2ePro_Model_Amazon_Listing::CONDITION_NEW ?>" <?php if ($this->getData('condition_value') == Ess_M2ePro_Model_Amazon_Listing::CONDITION_NEW) echo ' selected="selected"'; ?>><?php echo Mage::helper('M2ePro')->__('New') ?></option>
                                 <option value="<?php echo Ess_M2ePro_Model_Amazon_Listing::CONDITION_MODE_DEFAULT ?>" attribute_code="<?php echo Ess_M2ePro_Model_Amazon_Listing::CONDITION_USED_LIKE_NEW ?>" <?php if ($this->getData('condition_value') == Ess_M2ePro_Model_Amazon_Listing::CONDITION_USED_LIKE_NEW) echo ' selected="selected"'; ?>><?php echo Mage::helper('M2ePro')->__('Used - Like New') ?></option>
@@ -404,7 +418,7 @@
                                 <option value="<?php echo Ess_M2ePro_Model_Amazon_Listing::CONDITION_MODE_DEFAULT ?>" attribute_code="<?php echo Ess_M2ePro_Model_Amazon_Listing::CONDITION_CLUB ?>" <?php if ($this->getData('condition_value') == Ess_M2ePro_Model_Amazon_Listing::CONDITION_CLUB) echo ' selected="selected"'; ?>><?php echo Mage::helper('M2ePro')->__('Club') ?></option>
                             </optgroup>
 
-                            <optgroup label="Magento Attribute">
+                            <optgroup class="M2ePro-custom-attribute-optgroup" label="Magento Attribute">
                                 <?php foreach ($generalAttributesByInputTypes['text_select'] as $attribute): ?>
                                     <option attribute_code="<?php echo $attribute['code']; ?>" value="<?php echo Ess_M2ePro_Model_Amazon_Listing::CONDITION_MODE_CUSTOM_ATTRIBUTE ?>" <?php if ($this->getData('condition_custom_attribute') == $attribute['code']) echo ' selected="selected"'; ?>><?php echo Mage::helper('M2ePro')->escapeHtml($attribute['label']); ?></option>
                                 <?php endforeach ?>
@@ -439,7 +453,7 @@
                         <textarea name="condition_note_value" id="condition_note_value" class="M2ePro-required-when-visible M2ePro-validate-condition-note-length"><?php echo Mage::helper('M2ePro')->escapeHtml($this->getData('condition_note_value')) ?></textarea>
                     </td>
                     <td class="value">
-                        <select name="condition_note_custom_attribute" id="condition_note_custom_attribute" style="width: 150px; margin-top: -4px;">
+                        <select name="condition_note_custom_attribute" id="condition_note_custom_attribute" class="M2ePro-custom-attribute-can-be-created" allowed_attribute_types="text,textarea" apply_to_all_attribute_sets="0" style="width: 150px; margin-top: -4px;">
                             <?php foreach ($attributesByInputTypes['text_textarea'] as $attribute): ?>
                                 <option value="<?php echo $attribute['code']; ?>" ><?php echo Mage::helper('M2ePro')->escapeHtml($attribute['label']); ?></option>
                             <?php endforeach ?>
@@ -621,7 +635,7 @@
                         <input type="hidden" id="handling_time_custom_attribute" name="handling_time_custom_attribute" value="<?php echo $this->getData('handling_time_custom_attribute'); ?>" />
                         <input type="hidden" id="handling_time_value" name="handling_time_value" value="<?php echo $this->getData('handling_time_value'); ?>" />
 
-                        <select id="handling_time_mode" name="handling_time_mode">
+                        <select id="handling_time_mode" class="M2ePro-custom-attribute-can-be-created" allowed_attribute_types="text,select" name="handling_time_mode">
                             <option value="<?php echo Ess_M2ePro_Model_Amazon_Listing::HANDLING_TIME_MODE_NONE ?>" <?php if ($this->getData('handling_time_mode') == Ess_M2ePro_Model_Amazon_Listing::HANDLING_TIME_MODE_NONE) echo 'selected="selected"' ?>><?php echo Mage::helper('M2ePro')->__('None') ?></option>
 
                             <optgroup label="Recommended Value">
@@ -630,7 +644,7 @@
                                 <?php } ?>
                             </optgroup>
 
-                            <optgroup label="Magento Attribute">
+                            <optgroup class="M2ePro-custom-attribute-optgroup" label="Magento Attribute">
                                 <?php foreach ($generalAttributesByInputTypes['text_select'] as $attribute): ?>
                                     <option attribute_code="<?php echo $attribute['code']; ?>" value="<?php echo Ess_M2ePro_Model_Amazon_Listing::HANDLING_TIME_MODE_CUSTOM_ATTRIBUTE ?>" <?php if ($this->getData('handling_time_custom_attribute') == $attribute['code']) echo ' selected="selected"'; ?>><?php echo Mage::helper('M2ePro')->escapeHtml($attribute['label']); ?></option>
                                 <?php endforeach ?>
@@ -649,11 +663,11 @@
                     <td class="value">
                         <input type="hidden" id="restock_date_custom_attribute" name="restock_date_custom_attribute" value="<?php echo $this->getData('restock_date_custom_attribute'); ?>" />
 
-                        <select id="restock_date_mode" name="restock_date_mode">
+                        <select id="restock_date_mode" class="M2ePro-custom-attribute-can-be-created" allowed_attribute_types="text,date" name="restock_date_mode">
                             <option value="<?php echo Ess_M2ePro_Model_Amazon_Listing::RESTOCK_DATE_MODE_NONE ?>" <?php if ($this->getData('restock_date_mode') == Ess_M2ePro_Model_Amazon_Listing::RESTOCK_DATE_MODE_NONE) echo 'selected="selected"' ?>><?php echo Mage::helper('M2ePro')->__('None') ?></option>
                             <option value="<?php echo Ess_M2ePro_Model_Amazon_Listing::RESTOCK_DATE_MODE_CUSTOM_VALUE ?>" <?php if ($this->getData('restock_date_mode') == Ess_M2ePro_Model_Amazon_Listing::RESTOCK_DATE_MODE_CUSTOM_VALUE) echo 'selected="selected"' ?>><?php echo Mage::helper('M2ePro')->__('Custom Value') ?></option>
 
-                            <optgroup label="Magento Attribute">
+                            <optgroup class="M2ePro-custom-attribute-optgroup" label="Magento Attribute">
                                 <?php foreach ($generalAttributesByInputTypes['text_date'] as $attribute): ?>
                                     <option attribute_code="<?php echo $attribute['code']; ?>" value="<?php echo Ess_M2ePro_Model_Amazon_Listing::RESTOCK_DATE_MODE_CUSTOM_ATTRIBUTE ?>" <?php if ($this->getData('restock_date_custom_attribute') == $attribute['code']) echo ' selected="selected"'; ?>><?php echo Mage::helper('M2ePro')->escapeHtml($attribute['label']); ?></option>
                                 <?php endforeach ?>

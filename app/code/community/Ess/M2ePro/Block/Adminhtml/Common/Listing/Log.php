@@ -1,26 +1,28 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Block_Adminhtml_Common_Listing_Log extends Mage_Adminhtml_Block_Widget_Grid_Container
 {
-    // ########################################
+    //########################################
 
     public function __construct()
     {
         parent::__construct();
 
         // Initialization block
-        //------------------------------
+        // ---------------------------------------
         $this->setId('listingLog');
         $this->_blockGroup = 'M2ePro';
         $this->_controller = 'adminhtml_common_listing_log';
-        //------------------------------
+        // ---------------------------------------
 
         // Set buttons actions
-        //------------------------------
+        // ---------------------------------------
         $this->removeButton('back');
         $this->removeButton('reset');
         $this->removeButton('delete');
@@ -29,14 +31,14 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Log extends Mage_Adminhtml_Block
         $this->removeButton('edit');
     }
 
-    // ########################################
+    //########################################
 
     public function getListingId()
     {
         return $this->getRequest()->getParam('id', false);
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     /** @var Ess_M2ePro_Model_Listing $listing */
     protected $listing = NULL;
@@ -47,21 +49,22 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Log extends Mage_Adminhtml_Block
     public function getListing()
     {
         if (is_null($this->listing)) {
-            $this->listing = Mage::helper('M2ePro/Component')
-                ->getCachedUnknownObject('Listing', $this->getListingId());
+            $this->listing = Mage::helper('M2ePro/Component')->getCachedUnknownObject(
+                'Listing', $this->getListingId()
+            );
         }
 
         return $this->listing;
     }
 
-    // ########################################
+    //########################################
 
     public function getListingProductId()
     {
         return $this->getRequest()->getParam('listing_product_id', false);
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     /** @var Ess_M2ePro_Model_Listing_Product $listingProduct */
     protected $listingProduct = NULL;
@@ -79,12 +82,12 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Log extends Mage_Adminhtml_Block
         return $this->listingProduct;
     }
 
-    // ########################################
+    //########################################
 
     protected function _beforeToHtml()
     {
         // Set header text
-        //------------------------------
+        // ---------------------------------------
         $this->_headerText = '';
 
         if ($this->getListingId()) {
@@ -133,7 +136,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Log extends Mage_Adminhtml_Block
             }
 
         }
-        //------------------------------
+        // ---------------------------------------
 
         if ($this->_headerText != '') {
             $this->addButton('show_general_log', array(
@@ -149,5 +152,5 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Log extends Mage_Adminhtml_Block
         }
     }
 
-    // ########################################
+    //########################################
 }

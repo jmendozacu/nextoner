@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Block_Adminhtml_Common_Amazon_Listing_Add_SearchAsin_Grid
@@ -13,7 +15,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Amazon_Listing_Add_SearchAsin_Grid
     const SEARCH_SETTINGS_STATUS_NONE = 'none';
     const SEARCH_SETTINGS_STATUS_COMPLETED = 'completed';
 
-    // ####################################
+    //########################################
 
     public function __construct()
     {
@@ -22,19 +24,19 @@ class Ess_M2ePro_Block_Adminhtml_Common_Amazon_Listing_Add_SearchAsin_Grid
         $listingData = $this->getListing()->getData();
 
         // Initialization block
-        //------------------------------
+        // ---------------------------------------
         $this->setId('searchAsinForListingProductsGrid'.$listingData['id']);
-        //------------------------------
+        // ---------------------------------------
 
         // Set default values
-        //------------------------------
+        // ---------------------------------------
         $this->setDefaultSort('product_id');
         $this->setDefaultDir('DESC');
         $this->setUseAjax(true);
-        //------------------------------
+        // ---------------------------------------
     }
 
-    // ####################################
+    //########################################
 
     protected function _prepareCollection()
     {
@@ -42,7 +44,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Amazon_Listing_Add_SearchAsin_Grid
         $listingData = $this->getListing()->getData();
 
         // Get collection
-        //----------------------------
+        // ---------------------------------------
         /* @var $collection Mage_Core_Model_Mysql4_Collection_Abstract */
         $collection = Mage::getConfig()->getModelInstance('Ess_M2ePro_Model_Mysql4_Magento_Product_Collection',
             Mage::getModel('catalog/product')->getResource());
@@ -58,7 +60,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Amazon_Listing_Add_SearchAsin_Grid
                 'left'
             );
 
-        //----------------------------
+        // ---------------------------------------
 
         $collection->joinTable(
             array('lp' => 'M2ePro/Listing_Product'),
@@ -93,12 +95,10 @@ class Ess_M2ePro_Block_Adminhtml_Common_Amazon_Listing_Add_SearchAsin_Grid
             '{{table}}.variation_parent_id is NULL'
         );
 
-        $collection->getSelect()->where('id IN (?)', $listingProductsIds);
+        $collection->getSelect()->where('lp.id IN (?)', $listingProductsIds);
 
-        //----------------------------
-//        exit($collection->getSelect()->__toString());
+        // ---------------------------------------
 
-        // Set collection to grid
         $this->setCollection($collection);
 
         return parent::_prepareCollection();
@@ -180,7 +180,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Amazon_Listing_Add_SearchAsin_Grid
         $this->setMassactionIdField('id');
         $this->setMassactionIdFieldOnlyIndexValue(true);
 
-        //--------------------------------
+        // ---------------------------------------
         $this->getMassactionBlock()->addItem('assignGeneralId', array(
             'label'    => Mage::helper('M2ePro')->__('Search ASIN/ISBN automatically'),
             'url'      => '',
@@ -192,12 +192,12 @@ class Ess_M2ePro_Block_Adminhtml_Common_Amazon_Listing_Add_SearchAsin_Grid
             'url'      => '',
             'confirm'  => Mage::helper('M2ePro')->__('Are you sure?')
         ));
-        //--------------------------------
+        // ---------------------------------------
 
         return parent::_prepareMassaction();
     }
 
-    // ####################################
+    //########################################
 
     public function callbackColumnProductId($value, $row, $column, $isExport)
     {
@@ -387,12 +387,17 @@ HTML;
                 );
                 $productTitle = Mage::helper('M2ePro')->escapeJs($productTitle);
 
-                $linkTxt = Mage::helper('M2ePro')->__('Choose ASIN/ISBN');
+                $linkTxt = Mage::helper('M2ePro')->__('choose one of the Results');
+
+                $linkHtml = <<<HTML
+<a href="javascript:void(0)"
+    onclick="ListingGridHandlerObj.productSearchHandler.openPopUp(1,'{$productTitle}',{$lpId})">{$linkTxt}</a>
+HTML;
 
                 $msg = Mage::helper('M2ePro')->__('Action Required');
                 $tip = Mage::helper('M2ePro')->__(
-                    'Please choose one of the Results that were found by %type% "%value%"',
-                    $this->prepareSearchType($searchData['type']), $searchData['value']
+                    'Please %link% that were found by %type% "%value%"',
+                    $linkHtml, $this->prepareSearchType($searchData['type']), $searchData['value']
                 );
 
                 return <<<HTML
@@ -401,9 +406,7 @@ HTML;
 <span class="tool-tip-message tip-left" style="left: 528px; top: 249px; display: none; min-width: 230px;">
     <img src="{$skinUrl}/images/help.png">
     <span>{$tip}</span>
-</span><br/>
-<a href="javascript:;" title="{$linkTxt}"
-   onclick="ListingGridHandlerObj.productSearchHandler.openPopUp(1,'{$productTitle}',{$lpId})">{$linkTxt}</a>
+</span>
 HTML;
         }
 
@@ -434,15 +437,15 @@ HTML;
         return strtoupper($searchType);
     }
 
-    // ####################################
+    //########################################
 
     private function getGeneralIdColumnValueEmptyGeneralId($row)
     {
-        // ---------------------------------
+        // ---------------------------------------
         $iconPath = $this->getSkinUrl('M2ePro/images/search_statuses/');
-        // ---------------------------------
+        // ---------------------------------------
 
-        // ---------------------------------
+        // ---------------------------------------
         $lpId = $row->getData('id');
 
         $productTitle = Mage::helper('M2ePro')->escapeHtml($row->getData('name'));
@@ -451,13 +454,13 @@ HTML;
         }
         $productTitle = Mage::helper('M2ePro')->__('Search ASIN/ISBN For &quot;%product_title%&quot;', $productTitle);
         $productTitle = Mage::helper('M2ePro')->escapeJs($productTitle);
-        // ---------------------------------
+        // ---------------------------------------
 
-        // ---------------------------------
+        // ---------------------------------------
 
         $searchSettingsStatus = $row->getData('search_settings_status');
 
-        // ---------------------------------
+        // ---------------------------------------
         if ($searchSettingsStatus == Ess_M2ePro_Model_Amazon_Listing_Product::SEARCH_SETTINGS_STATUS_IN_PROGRESS) {
 
             $tip = Mage::helper('M2ePro')->__('Automatic ASIN/ISBN Search in Progress.');
@@ -470,7 +473,19 @@ HTML;
 </a>
 HTML;
         }
-        // ---------------------------------
+        // ---------------------------------------
+
+        // ---------------------------------------
+        if ($searchSettingsStatus == Ess_M2ePro_Model_Amazon_Listing_Product::SEARCH_SETTINGS_STATUS_ACTION_REQUIRED) {
+
+            $linkTxt = Mage::helper('M2ePro')->__('Choose ASIN/ISBN');
+
+            return <<<HTML
+<a href="javascript:;" title="{$linkTxt}"
+   onclick="ListingGridHandlerObj.productSearchHandler.openPopUp(1,'{$productTitle}',{$lpId})">{$linkTxt}</a>
+HTML;
+        }
+        // ---------------------------------------
 
         $na = Mage::helper('M2ePro')->__('N/A');
         $tip = Mage::helper('M2ePro')->__('Search for ASIN/ISBN');
@@ -519,10 +534,10 @@ HTML;
 
         }
 
-        // ---------------------------------
+        // ---------------------------------------
         $hasInActionLock = $this->getLockedData($row);
         $hasInActionLock = $hasInActionLock['in_action'];
-        // ---------------------------------
+        // ---------------------------------------
 
         if ($hasInActionLock) {
             return $text;
@@ -544,7 +559,7 @@ HTML;
         return $text;
     }
 
-    // ####################################
+    //########################################
 
     protected function callbackFilterTitle($collection, $column)
     {
@@ -593,14 +608,14 @@ HTML;
         );
     }
 
-    // ####################################
+    //########################################
 
     public function getRowUrl($row)
     {
         return false;
     }
 
-    // ####################################
+    //########################################
 
     protected function _toHtml()
     {
@@ -641,7 +656,7 @@ JS;
             }
         }
 
-        $javascriptsMain = <<<JAVASCRIPT
+        $javascriptsMain = <<<HTML
 <script type="text/javascript">
 
     if (typeof ListingGridHandlerObj != 'undefined') {
@@ -658,12 +673,12 @@ JS;
     });
 
 </script>
-JAVASCRIPT;
+HTML;
 
         return parent::_toHtml() . $javascriptsMain;
     }
 
-    // ####################################
+    //########################################
 
     /**
      * @return Ess_M2ePro_Model_Amazon_Listing
@@ -672,7 +687,7 @@ JAVASCRIPT;
     public function getListing()
     {
         if (!$listingId = $this->getRequest()->getParam('id')) {
-            throw new Exception('Listing is not defined');
+            throw new Ess_M2ePro_Model_Exception('Listing is not defined');
         }
 
         if (is_null($this->listing)) {
@@ -682,5 +697,5 @@ JAVASCRIPT;
         return $this->listing;
     }
 
-    // ####################################
+    //########################################
 }

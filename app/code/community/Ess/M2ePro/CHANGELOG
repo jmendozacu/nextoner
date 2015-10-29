@@ -1,3 +1,106 @@
+* 6.3.7 (r9707) (27/10/2015)
+
+* Added: Ability to create New Magento Attribute on fly during Policies configuring
+* Added: Auto Add Rules can ignore Magento Products with "Not visible individually" visibility
+* Added: [eBay] Item Preview Tool with Values which will be sent to the Channel
+* Added: [eBay] Ability to set Parts Compatibilities dynamically (groups of ePIDs/kTypes)
+* Added: [eBay] Ability to select several Configurable Attributes for Variation Images
+* Added: [Amazon] Ability to show Quantity value for Amazon Fulfillment Products
+* Added: [Amazon/Rakuten.com] Ability to set VAT settings to increase Product Prices automatically
+* Improvement: Backward compatibility with Magento Security Patch (SUPEE-6788)
+* Improvement: Many improvements of Help Blocks / Tips / Documentation links
+* Improvement: More stable connections with M2E Pro servers (connect time was reduced)
+* Improvement: [eBay] Performance of Channel changes receiving for Listings Items and 3rd Party Listings
+* Improvement: [eBay] Do not revise Item Images if they are not changed in Magento (EPS mode)
+* Improvement: [eBay] Additional features to prevent Items duplicates on Channel (connection issue)
+* Improvement: [eBay] Variation Attributes/Options are shown for Products in Listings Log
+* Improvement: [eBay] SKU column is added to the Variations Grid of Manage Variations popup
+* Improvement: [Amazon] Child Product can be shown on Amazon by clicking on Variation Attributes link
+* Improvement: [Amazon] Description Policy is Managed at the same place with other Policies
+* Improvement: [Amazon] Number of Items and Item Package Quantity can be sent ot Amazon at any time
+* Improvement: [Amazon] Performance during Actions Calculations for Parent/Child Products
+* Improvement: [Rakuten.com] Many improvements to work properly due to the Rakuten Team requirements
+* Fix: Magento Attribute could not be used if it has numbers in its Attribute Code
+* Fix: Inline Magento blocks did not work in Custom Description if custom Package/Theme is used in Magento
+* Fix: In some cases Magento Attribute Value could not be retrieved if attribute has select/multi-select type
+* Fix: [eBay] Some Variations could be sent to the eBay for Magento Configurable Products
+* Fix: [eBay] Wrong Statuses for Variations in Manage Variations popup for some cases
+* Fix: [eBay] Price column filter issue for Items with Out Of Stock Control enabled
+* Fix: [eBay] Variation Images were not revised automatically if they were changed in Magento Product
+* Fix: [eBay] Wrong value of current Item Quantity on Channel for 3rd Party Listings
+* Fix: [eBay] Synchronization Policy settings could not be shown in Custom Settings mode
+* Fix: [eBay] "Notice: Array to string conversion" when Description Policy is created
+* Fix: [Amazon] Price could not be revised for FBA Product if it was changed in Magento
+* Fix: [Amazon] Wrong Inactive (Blocked) status for many Products in some cases (List action issue)
+* Fix: [Amazon] Full revise was not performed for FBA Product automatically if Policy was changed
+* Fix: [Amazon] Some sort of Javascript issues during working on Description Policy Specifics Tab
+* Fix: [Amazon] Memory leak during the List action a lot of Amazon Child Products
+* Fix: [Amazon] Sometimes Parent Product can stuck at "Child Products In Action" state
+* Fix: [Rakuten.com] Many fixes to work properly due to the Rakuten Team requirements
+* Deleted: [Rakuten.com] Ability to get Rakuten Product Title for 3rd Party Listings (technical issue)
+* Deleted: [Rakuten.com] Mapping Rakuten Product to Magento Products by Title automatically
+* Deleted: [Rakuten.com] Ability to List Products automatically using Seller SKU (technical issue)
+
+* 6.3.6 (r9445) (01/09/2015)
+
+* Added: [eBay] Ability to set Upload Images mode manually (Auto/Self-Hosted/EPS-hosted)
+* Added: [eBay] Up to 12 images is Self-Hosted upload images mode is used (earlier only 1)
+* Added: [eBay] Amount of images for each Variation Attribute can be selected manually
+* Added: [eBay] International Shipping Rate Table for "United States" marketplace
+* Added: [eBay] Extended Holiday Returns for "Canada (French)" marketplace
+* Added: [eBay] Freight Shipping Mode for "Canada (French)" marketplace
+* Added: [Amazon] Shipping Override Policy for each Product separately (all Marketplaces)
+* Added: [Amazon] Ability to switch Amazon Items Fulfillment mode (AFN -> MFN, MFN -> AFN)
+* Added: [Amazon] Ability to assign Magento Variational to Amazon Parent-Child Product if amount of attributes is different
+* Improvement: Many improvements of Help Blocks / Tips / Documentation links
+* Improvement: [eBay] Ability to use HTTPs protocol for Self-Hosted images
+* Improvement: [eBay] Boost of Synchronization Schedule feature performance
+* Improvement: [Amazon] Ability to filter AFN and MFN Products separately (QTY filter improvements)
+* Improvement: [Amazon/Rakuten.com] QTY attribute as source for Item Quantity
+* Fix: In some cases 3rd Party Synchronization is not working for all integrations
+* Fix: Message about extension should be updated after upgrade to the latest version
+* Fix: MySql exception "Integrity constraint violation" during customer creation for Magento Enterprise Edition
+* Fix: [Amazon] Tax percent was calculated incorrectly if order contains promotion discount
+* Fix: [Amazon] Quantity was reserved for FBA orders even if "Manage Stock" set to "No" in account settings
+* Fix: [Amazon] Wrong Status is shown for Amazon Parent Product based on Child Products Statuses
+* Fix: [Rakuten.com] Expedited Shipping doesn't work for some reasons
+* Fix: [Rakuten.com] Sometimes QTY/Price values can be wrong on Listings Grid
+
+* 6.3.5 (r9311) (09/08/2015)
+
+* Added: Hyperlinks to the certain documentation part into Help Block at the top of each Page Content
+* Added: "Get help for this page" (in magento admin panel header) redirects to appropriate documentations page
+* Added: Ability to send Tracking Number to the Channel by saving track model in programmatic way
+* Added: Ability to disable sending of Order Emails in Account settings for customers created by M2E Pro
+* Added: [eBay] Strike Through Price feature for all Canadian Marketplaces
+* Added: [eBay] Amount of Bids for auction Items and the bidding history
+* Added: [eBay] Ability to set Magento Attribute as source for Country/Postal Code/City in Shipping Policy
+* Added: [eBay] "Unbranded" or "Does not Apply" as value of Catalog Identifier (Brand/MPN/UPC/EAN/ISBN)
+* Added: [eBay] Status column in Manage Variations Pop-up for each Variation
+* Added: [Amazon] Settings view mode of Listing (management of Description Policy, Moving, etc.)
+* Added: [Amazon] Swatch image for Child Products in images block of Description Policy
+* Added: [Amazon] Ability to manage associations of Attributes/Options which were saved manually
+* Added: [Amazon] A lot of Categories which were not supported earlier (almost all of them)
+* Added: [Amazon] Ability to select any Product Type regardless of selected Category
+* Improvement: Fast navigation to the Magento Child Product(s) from Manage Variations Popup
+* Improvement: "Not Listed" label instead of "N/A" for Items/Products if their status is "Not Listed"
+* Improvement: [eBay] Replacement of Variation Attribute Label by Item Specific Label for Configurable Products
+* Improvement: [eBay] Automatic Mapping of 3rd party item if manual mapping for Order Item is performed
+* Improvement: [eBay] Added Validators for EAN/UPC/ISBN values in Manage Variations Pop-up
+* Improvement: [Amazon] AFN offers are not relisted and stopped (prevention of switching to MFN by revise of QTY)
+* Improvement: [Amazon] Warning if some Child Products are not matched to certain Magento Variation
+* Improvement: [Amazon] Manually selected Variations Themes will have priority for automatic matching in future
+* Improvement: [Amazon] Assigning ASIN/ISBN for products during Products adding process
+* Improvement: [Rakuten.com] Ability to revise QTY and Price separately (earlier only together)
+* Fix: "Access Denied" message on the some pages after applying a magento security patch
+* Fix: Notice ob_end_clean(): failed to delete buffer in the error_log during of synchronization
+* Fix: [eBay] Additional prevention of Marketplace Items duplicating
+* Fix: [eBay] Constant "This call resulted in [number] records, but on ..." error message
+* Fix: [eBay] Duplicate of Magento Products can be created during Magento Order Creation process
+* Fix: [Amazon] Ability to remember Variations Options association when Child Product Options are saved/changed
+* Fix: [Amazon] CAD currency instead of USD for Canada Marketplace (right usage of conversion tool)
+* Fix: [Amazon] Space at the beginning of some values in Description Policy (bullet point etc.)
+
 * 6.3.4 (r9154) (16/07/2015)
 
 * Added: Min-Max intervals for Variational Products Prices

@@ -1,6 +1,6 @@
 <?php
 
-//#############################################
+//########################################
 
 /** @var $installer Ess_M2ePro_Model_Upgrade_MySqlSetup */
 $installer = $this;
@@ -8,7 +8,7 @@ $installer->startSetup();
 
 $connection = $installer->getConnection();
 
-//#############################################
+//########################################
 
 $tempTable = $installer->getTable('m2epro_primary_config');
 $tempQuery = <<<SQL
@@ -23,14 +23,14 @@ if ($tempRow === false) {
     $installer->run(<<<SQL
 
 INSERT INTO `m2epro_primary_config` (`group`,`key`,`value`,`notice`,`update_date`,`create_date`) VALUES
-('/M2ePro/server/', 'installation_key', '{$installer->generateHash()}', 'Unique identifier of M2E instance',
+('/M2ePro/server/', 'installation_key', '{$installer->generateRandomHash()}', 'Unique identifier of M2E instance',
  '2013-05-08 00:00:00', '2013-05-08 00:00:00');
 
 SQL
 );
 }
 
-//#############################################
+//########################################
 
 $tempTable = $installer->getTable('m2epro_config');
 $tempQuery = <<<SQL
@@ -58,7 +58,7 @@ SQL
 );
 }
 
-//#############################################
+//########################################
 
 $installer->run(<<<SQL
 
@@ -73,8 +73,8 @@ AND   `key` = 'video_tutorials_url';
 SQL
 );
 
-//#############################################
+//########################################
 
 $installer->endSetup();
 
-//#############################################
+//########################################

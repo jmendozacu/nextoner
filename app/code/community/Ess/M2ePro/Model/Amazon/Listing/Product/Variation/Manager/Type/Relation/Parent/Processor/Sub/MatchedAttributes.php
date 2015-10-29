@@ -1,13 +1,15 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2014 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2EPro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Parent_Processor_Sub_MatchedAttributes
     extends Ess_M2ePro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Parent_Processor_Sub_Abstract
 {
-    // ##########################################################
+    //########################################
 
     protected function check()
     {
@@ -26,7 +28,7 @@ class Ess_M2EPro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Pa
         }
 
         if ($this->getProcessor()->isGeneralIdSet()) {
-            $channelAttributes = array_keys($this->getProcessor()->getTypeModel()->getChannelAttributesSets());
+            $channelAttributes = $this->getProcessor()->getTypeModel()->getChannelAttributes();
 
             if (count($channelAttributes) != count($matchedAttributes) ||
                 array_diff($channelAttributes, array_values($matchedAttributes))
@@ -51,9 +53,16 @@ class Ess_M2EPro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Pa
         $possibleThemes = $this->getProcessor()->getPossibleThemes();
         $themeAttributes = $possibleThemes[$channelTheme]['attributes'];
 
-        if (count($themeAttributes) != count($matchedAttributes) ||
-            array_diff($themeAttributes, array_values($matchedAttributes))
-        ) {
+        if ($this->getProcessor()->getTypeModel()->getVirtualChannelAttributes()) {
+            $matchedAttributes = $this->getProcessor()->getTypeModel()->getRealMatchedAttributes();
+        }
+
+        $channelMatchedAttributes = array_values($matchedAttributes);
+
+        sort($themeAttributes);
+        sort($channelMatchedAttributes);
+
+        if ($themeAttributes != $channelMatchedAttributes) {
             $this->getProcessor()->getTypeModel()->setMatchedAttributes(array(), false);
         }
     }
@@ -80,13 +89,11 @@ class Ess_M2EPro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Pa
         $this->processNewProduct();
     }
 
-    // ##########################################################
+    //########################################
 
     private function processExistProduct()
     {
-        $channelAttributes = array_keys(
-            $this->getProcessor()->getTypeModel()->getChannelAttributesSets()
-        );
+        $channelAttributes = $this->getProcessor()->getTypeModel()->getChannelAttributes();
 
         $this->getProcessor()
             ->getTypeModel()
@@ -103,7 +110,7 @@ class Ess_M2EPro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Pa
             ->setMatchedAttributes($this->matchAttributes($themeAttributes), true);
     }
 
-    // ----------------------------------------------------------
+    // ---------------------------------------
 
     private function matchAttributes($channelAttributes, $canUseDictionary = true)
     {
@@ -120,5 +127,5 @@ class Ess_M2EPro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Pa
         return $attributeMatcher->getMatchedAttributes();
     }
 
-    // ##########################################################
+    //########################################
 }

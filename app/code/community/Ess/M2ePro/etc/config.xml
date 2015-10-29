@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Ess_M2ePro>
-            <version>6.3.4</version>
+            <version>6.3.7</version>
         </Ess_M2ePro>
     </modules>
     <default>
@@ -28,22 +28,19 @@
                 <group>offline</group>
             </m2epropayment>
         </payment>
+        <web>
+            <routers>
+                <m2epro_router>
+                    <area>admin</area>
+                    <class>Ess_M2ePro_Controller_Router</class>
+                </m2epro_router>
+            </routers>
+        </web>
     </default>
-    <frontend>
-        <routers>
-            <M2ePro>
-                <use>m2epro_custom</use>
-                <args>
-                    <module>Ess_M2ePro</module>
-                    <frontName>M2ePro</frontName>
-                </args>
-            </M2ePro>
-        </routers>
-    </frontend>
     <admin>
         <routers>
             <M2ePro>
-                <use>admin</use>
+                <use>m2epro_router</use>
                 <args>
                     <module>Ess_M2ePro</module>
                     <frontName>M2ePro</frontName>
@@ -380,6 +377,16 @@
                 </observers>
             </sales_order_shipment_save_after>
 
+            <sales_order_shipment_track_save_after>
+                <observers>
+                    <M2ePro_observer>
+                        <type>singleton</type>
+                        <class>Ess_M2ePro_Model_Observer_Dispatcher</class>
+                        <method>salesOrderShipmentTrackSaveAfter</method>
+                    </M2ePro_observer>
+                </observers>
+            </sales_order_shipment_track_save_after>
+
             <sales_order_creditmemo_refund>
                 <observers>
                     <M2ePro_observer>
@@ -499,6 +506,10 @@
                     <Synchronization_Log>
                         <table>m2epro_synchronization_log</table>
                     </Synchronization_Log>
+
+                    <Log_System>
+                        <table>m2epro_system_log</table>
+                    </Log_System>
 
                     <StopQueue>
                         <table>m2epro_stop_queue</table>
@@ -672,9 +683,9 @@
                     <Order_Change>
                         <table>m2epro_order_change</table>
                     </Order_Change>
-                    <Order_Repair>
-                        <table>m2epro_order_repair</table>
-                    </Order_Repair>
+                    <Order_Matching>
+                        <table>m2epro_order_matching</table>
+                    </Order_Matching>
 
                     <Order>
                         <table>m2epro_order</table>
@@ -747,11 +758,25 @@
                         <table>m2epro_ebay_template_other_category</table>
                     </Ebay_Template_OtherCategory>
 
+                    <Ebay_Motor_Filter>
+                        <table>m2epro_ebay_motor_filter</table>
+                    </Ebay_Motor_Filter>
+                    <Ebay_Motor_Group>
+                        <table>m2epro_ebay_motor_group</table>
+                    </Ebay_Motor_Group>
+
                     <!-- AMAZON -->
 
                     <Amazon_Item>
                         <table>m2epro_amazon_item</table>
                     </Amazon_Item>
+
+                    <Amazon_Template_ShippingOverride>
+                        <table>m2epro_amazon_template_shipping_override</table>
+                    </Amazon_Template_ShippingOverride>
+                    <Amazon_Template_ShippingOverride_Service>
+                        <table>m2epro_amazon_template_shipping_override_service</table>
+                    </Amazon_Template_ShippingOverride_Service>
 
                     <Amazon_Template_Description_Definition>
                         <table>m2epro_amazon_template_description_definition</table>
@@ -824,7 +849,7 @@
                     <cron_expr>*/1 * * * *</cron_expr>
                 </schedule>
                 <run>
-                    <model>M2ePro/Cron_Type_Magento::process</model>
+                    <model>M2ePro/Cron_Runner_Magento::process</model>
                 </run>
             </M2ePro_cron>
         </jobs>

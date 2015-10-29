@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2014 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Validator_Sku_Search
@@ -11,22 +13,34 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Validator_Sku_Sea
 
     private $queueOfSkus = array();
 
-    // ########################################
+    //########################################
 
+    /**
+     * @param array $skus
+     * @return $this
+     */
     public function setRequestSkus(array $skus)
     {
         $this->requestSkus = $skus;
         return $this;
     }
 
+    /**
+     * @param array $skus
+     * @return $this
+     */
     public function setQueueOfSkus(array $skus)
     {
         $this->queueOfSkus = $skus;
         return $this;
     }
 
-    // ########################################
+    //########################################
 
+    /**
+     * @return bool
+     * @throws Ess_M2ePro_Model_Exception
+     */
     public function validate()
     {
         $sku = $this->getSku();
@@ -69,17 +83,19 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Validator_Sku_Sea
             return true;
         }
 
+        // M2ePro_TRANSLATIONS
+        // SKU generating is not successful.
         $this->addMessage('SKU generating is not successful.');
 
         return false;
     }
 
-    // ########################################
+    //########################################
 
     private function getSku()
     {
         if (empty($this->data['sku'])) {
-            throw new Exception('SKU is not defined.');
+            throw new Ess_M2ePro_Model_Exception('SKU is not defined.');
         }
 
         return $this->data['sku'];
@@ -96,7 +112,7 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Validator_Sku_Sea
         return $this->getUnifiedSku().'_'.substr($hash, 0, 10);
     }
 
-    // ########################################
+    //########################################
 
     private function checkSkuRequirements($sku)
     {
@@ -111,7 +127,7 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Validator_Sku_Sea
         return true;
     }
 
-    // ########################################
+    //########################################
 
     private function isExistInM2ePro($sku, $addMessages = false)
     {
@@ -134,10 +150,10 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Validator_Sku_Sea
 
         if ($this->isExistInM2eProListings($sku)) {
 // M2ePro_TRANSLATIONS
-// Product with the same SKU is found in other M2E Pro Listing that is created from the same Seller ID for the same Marketplace.
+// Product with the same SKU is found in other M2E Pro Listing that is created from the same Merchant ID for the same Marketplace.
             $addMessages && $this->addMessage(
                 'Product with the same SKU is found in other M2E Pro Listing that is created
-                 from the same Seller ID for the same Marketplace.'
+                 from the same Merchant ID for the same Marketplace.'
             );
             return true;
         }
@@ -153,7 +169,7 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Validator_Sku_Sea
         return false;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     private function isExistInRequestSkus($sku)
     {
@@ -194,5 +210,5 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Validator_Sku_Sea
         return $collection->getSize() > 0;
     }
 
-    // ########################################
+    //########################################
 }

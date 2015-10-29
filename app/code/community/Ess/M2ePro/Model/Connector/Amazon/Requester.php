@@ -1,20 +1,22 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 abstract class Ess_M2ePro_Model_Connector_Amazon_Requester extends Ess_M2ePro_Model_Connector_Requester
 {
     const COMPONENT = 'Amazon';
-    const COMPONENT_VERSION = 6;
+    const COMPONENT_VERSION = 7;
 
     /**
      * @var Ess_M2ePro_Model_Account|null
      */
     protected $account = NULL;
 
-    // ########################################
+    //########################################
 
     public function __construct(array $params = array(),
                                 Ess_M2ePro_Model_Account $account = NULL)
@@ -23,19 +25,25 @@ abstract class Ess_M2ePro_Model_Connector_Amazon_Requester extends Ess_M2ePro_Mo
         parent::__construct($params);
     }
 
-    // ########################################
+    //########################################
 
+    /**
+     * @return string
+     */
     protected function getComponent()
     {
         return self::COMPONENT;
     }
 
+    /**
+     * @return int
+     */
     protected function getComponentVersion()
     {
         return self::COMPONENT_VERSION;
     }
 
-    // ########################################
+    //########################################
 
     public function process()
     {
@@ -46,5 +54,5 @@ abstract class Ess_M2ePro_Model_Connector_Amazon_Requester extends Ess_M2ePro_Mo
         return parent::process();
     }
 
-    // ########################################
+    //########################################
 }

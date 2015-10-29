@@ -1,37 +1,51 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 final class Ess_M2ePro_Model_Ebay_Synchronization_Templates_List
     extends Ess_M2ePro_Model_Ebay_Synchronization_Templates_Abstract
 {
-    //####################################
+    //########################################
 
+    /**
+     * @return string
+     */
     protected function getNick()
     {
         return '/list/';
     }
 
+    /**
+     * @return string
+     */
     protected function getTitle()
     {
         return 'List';
     }
 
-    // -----------------------------------
+    // ---------------------------------------
 
+    /**
+     * @return int
+     */
     protected function getPercentsStart()
     {
         return 0;
     }
 
+    /**
+     * @return int
+     */
     protected function getPercentsEnd()
     {
         return 5;
     }
 
-    //####################################
+    //########################################
 
     protected function performActions()
     {
@@ -40,7 +54,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Templates_List
         $this->executeScheduled();
     }
 
-    //####################################
+    //########################################
 
     private function immediatelyChangedProducts()
     {
@@ -53,6 +67,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Templates_List
 
         foreach ($changedListingsProducts as $listingProduct) {
 
+            /** @var $configurator Ess_M2ePro_Model_Ebay_Listing_Product_Action_Configurator */
             $configurator = Mage::getModel('M2ePro/Ebay_Listing_Product_Action_Configurator');
 
             $isExistInRunner = $this->getRunner()->isExistProduct(
@@ -64,6 +79,32 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Templates_List
             }
 
             if (!$this->getInspector()->isMeetListRequirements($listingProduct)) {
+                continue;
+            }
+
+            /** @var $synchronizationTemplate Ess_M2ePro_Model_Ebay_Template_Synchronization */
+            $synchronizationTemplate = $listingProduct->getChildObject()->getEbaySynchronizationTemplate();
+            if ($synchronizationTemplate->isScheduleEnabled() &&
+                (!$synchronizationTemplate->isScheduleIntervalNow() ||
+                 !$synchronizationTemplate->isScheduleWeekNow())
+            ) {
+                $additionalData = $listingProduct->getAdditionalData();
+
+                // M2ePro_TRANSLATIONS
+                // Product was not automatically Listed according to the Schedule Settings in Synchronization Policy.
+                $note = Mage::getSingleton('M2ePro/Log_Abstract')->encodeDescription(
+                    'Product was not automatically Listed according to the Schedule Settings in
+                    Synchronization Policy.',
+                    array('date' => Mage::helper('M2ePro')->getCurrentGmtDate())
+                );
+                $additionalData['synch_template_list_rules_note'] = $note;
+
+                if (!isset($additionalData['add_to_schedule'])) {
+                    $additionalData['add_to_schedule'] = true;
+                }
+
+                $listingProduct->setSettings('additional_data', $additionalData)->save();
+
                 continue;
             }
 
@@ -95,6 +136,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Templates_List
             $listingProduct->getMagentoProduct()->enableCache();
             $listingProduct->setData('tried_to_list',1)->save();
 
+            /** @var $configurator Ess_M2ePro_Model_Ebay_Listing_Product_Action_Configurator */
             $configurator = Mage::getModel('M2ePro/Ebay_Listing_Product_Action_Configurator');
 
             $isExistInRunner = $this->getRunner()->isExistProduct(
@@ -109,6 +151,34 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Templates_List
                 continue;
             }
 
+            /**
+             * @var $synchronizationTemplate Ess_M2ePro_Model_Ebay_Template_Synchronization
+             */
+            $synchronizationTemplate = $listingProduct->getChildObject()->getEbaySynchronizationTemplate();
+            if ($synchronizationTemplate->isScheduleEnabled() &&
+                (!$synchronizationTemplate->isScheduleIntervalNow() ||
+                 !$synchronizationTemplate->isScheduleWeekNow())
+            ) {
+                $additionalData = $listingProduct->getAdditionalData();
+
+                // M2ePro_TRANSLATIONS
+                // Product was not automatically Listed according to the Schedule Settings in Synchronization Policy.
+                $note = Mage::getSingleton('M2ePro/Log_Abstract')->encodeDescription(
+                    'Product was not automatically Listed according to the Schedule Settings in
+                    Synchronization Policy.',
+                    array('date' => Mage::helper('M2ePro')->getCurrentGmtDate())
+                );
+                $additionalData['synch_template_list_rules_note'] = $note;
+
+                if (!isset($additionalData['add_to_schedule'])) {
+                    $additionalData['add_to_schedule'] = true;
+                }
+
+                $listingProduct->setSettings('additional_data', $additionalData)->save();
+
+                continue;
+            }
+
             $this->getRunner()->addProduct(
                 $listingProduct, Ess_M2ePro_Model_Listing_Product::ACTION_LIST, $configurator
             );
@@ -119,7 +189,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Templates_List
         $this->getActualOperationHistory()->saveTimePoint(__METHOD__);
     }
 
-    //####################################
+    //########################################
 
     private function executeScheduled()
     {
@@ -185,6 +255,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Templates_List
                 /* @var $listingProduct Ess_M2ePro_Model_Listing_Product */
                 $listingProduct->getMagentoProduct()->enableCache();
 
+                /** @var $configurator Ess_M2ePro_Model_Ebay_Listing_Product_Action_Configurator */
                 $configurator = Mage::getModel('M2ePro/Ebay_Listing_Product_Action_Configurator');
 
                 $isExistInRunner = $this->getRunner()->isExistProduct(
@@ -233,7 +304,8 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Templates_List
         $collection = Mage::helper('M2ePro/Component_Ebay')->getCollection('Listing_Product');
         $collection->addFieldToFilter('main_table.id',array('gt'=>$lastListingProductId));
         $collection->addFieldToFilter('main_table.status',Ess_M2ePro_Model_Listing_Product::STATUS_NOT_LISTED);
-        $collection->getSelect()->order('main_table.id', Zend_Db_Select::SQL_ASC);
+        $collection->addFieldToFilter('main_table.additional_data',array('like'=>'%"add_to_schedule":true%'));
+        $collection->getSelect()->order('main_table.id ASC');
         $collection->getSelect()->limit(100);
 
         $lastItem = $collection->getLastItem();
@@ -247,7 +319,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Templates_List
         return $collection->getItems();
     }
 
-    //####################################
+    //########################################
 
     private function setListAttemptData(Ess_M2ePro_Model_Listing_Product $listingProduct)
     {
@@ -258,5 +330,5 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_Templates_List
         $listingProduct->save();
     }
 
-    //####################################
+    //########################################
 }

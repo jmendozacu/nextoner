@@ -1,12 +1,14 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Adminhtml_Ebay_Listing_OtherController extends Ess_M2ePro_Controller_Adminhtml_Ebay_MainController
 {
-    //#############################################
+    //########################################
 
     protected function _initAction()
     {
@@ -36,6 +38,8 @@ class Ess_M2ePro_Adminhtml_Ebay_Listing_OtherController extends Ess_M2ePro_Contr
 
         $this->_initPopUp();
 
+        $this->setPageHelpLink(NULL, 'pages/viewpage.action?pageId=17367069');
+
         return $this;
     }
 
@@ -44,7 +48,7 @@ class Ess_M2ePro_Adminhtml_Ebay_Listing_OtherController extends Ess_M2ePro_Contr
         return Mage::getSingleton('admin/session')->isAllowed('m2epro_ebay/listings');
     }
 
-    //#############################################
+    //########################################
 
     public function viewAction()
     {
@@ -53,7 +57,7 @@ class Ess_M2ePro_Adminhtml_Ebay_Listing_OtherController extends Ess_M2ePro_Contr
              ->renderLayout();
     }
 
-    //#############################################
+    //########################################
 
     public function viewGridAction()
     {
@@ -61,7 +65,7 @@ class Ess_M2ePro_Adminhtml_Ebay_Listing_OtherController extends Ess_M2ePro_Contr
         $this->getResponse()->setBody($block->toHtml());
     }
 
-    //#############################################
+    //########################################
 
     protected function processConnector($action, array $params = array())
     {
@@ -92,7 +96,7 @@ class Ess_M2ePro_Adminhtml_Ebay_Listing_OtherController extends Ess_M2ePro_Contr
         return $this->getResponse()->setBody(json_encode(array('result'=>'error','action_id'=>$actionId)));
     }
 
-    //-------------------------------------------
+    // ---------------------------------------
 
     public function runReviseProductsAction()
     {
@@ -109,7 +113,7 @@ class Ess_M2ePro_Adminhtml_Ebay_Listing_OtherController extends Ess_M2ePro_Contr
         $this->processConnector(Ess_M2ePro_Model_Listing_Product::ACTION_STOP,array());
     }
 
-    //#############################################
+    //########################################
 
     public function removingAction()
     {
@@ -142,5 +146,5 @@ class Ess_M2ePro_Adminhtml_Ebay_Listing_OtherController extends Ess_M2ePro_Contr
         return $this->getResponse()->setBody('1');
     }
 
-    //#############################################
+    //########################################
 }

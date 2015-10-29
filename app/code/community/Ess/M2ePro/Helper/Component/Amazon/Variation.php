@@ -1,12 +1,16 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Helper_Component_Amazon_Variation extends Mage_Core_Helper_Abstract
 {
-    // #############################################
+    const DATA_REGISTRY_KEY  = 'amazon_variation_themes_usage';
+
+    //########################################
 
     public function filterProductsNotMatchingForNewAsin($productsIds)
     {
@@ -19,7 +23,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Variation extends Mage_Core_Helper_Abst
         return $productsIds;
     }
 
-    // #############################################
+    //########################################
 
     public function filterProductsByGeneralId($productsIds)
     {
@@ -155,7 +159,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Variation extends Mage_Core_Helper_Abst
         return $listingProductsIds;
     }
 
-    // #############################################
+    //########################################
 
     public function filterProductsByDescriptionTemplate($productsIds)
     {
@@ -210,19 +214,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Variation extends Mage_Core_Helper_Abst
                 $amazonListingProduct->getAmazonDescriptionTemplate()->getProductDataNick()
             );
 
-            $productAttributes = $amazonListingProduct->getVariationManager()
-                ->getTypeModel()
-                ->getProductAttributes();
-
-            $isCountEqual = false;
-            foreach ($themes as $theme) {
-                if (count($theme['attributes']) == count($productAttributes)) {
-                    $isCountEqual = true;
-                    break;
-                }
-            }
-
-            if (!$isCountEqual) {
+            if (empty($themes)) {
                 unset($productsIds[$key]);
             }
         }
@@ -230,5 +222,69 @@ class Ess_M2ePro_Helper_Component_Amazon_Variation extends Mage_Core_Helper_Abst
         return $productsIds;
     }
 
-    // #############################################
+    //########################################
+
+    public function increaseThemeUsageCount($theme, $marketplaceId)
+    {
+        /** @var Ess_M2ePro_Model_Registry $registry */
+        $registry = Mage::getModel('M2ePro/Registry')->load(self::DATA_REGISTRY_KEY, 'key');
+
+        $data = $registry->getSettings('value');
+
+        if (empty($data[$marketplaceId][$theme])) {
+            $data[$marketplaceId][$theme] = 0;
+        }
+        $data[$marketplaceId][$theme]++;
+
+        arsort($data[$marketplaceId]);
+
+        $registry->setData('key', self::DATA_REGISTRY_KEY);
+        $registry->setSettings('value', $data)->save();
+
+        $this->removeThemeUsageDataCache();
+    }
+
+    // ---------------------------------------
+
+    public function getThemesUsageData()
+    {
+        $cacheData = $this->getThemeUsageDataCache();
+        if (is_array($cacheData)) {
+            return $cacheData;
+        }
+
+        /** @var Ess_M2ePro_Model_Registry $registry */
+        $registry = Mage::getModel('M2ePro/Registry')->load(self::DATA_REGISTRY_KEY, 'key');
+        $data = $registry->getSettings('value');
+
+        $this->setThemeUsageDataCache($data);
+
+        return $data;
+    }
+
+    //########################################
+
+    private function getThemeUsageDataCache()
+    {
+        $cacheKey = __CLASS__.self::DATA_REGISTRY_KEY;
+        return Mage::helper('M2ePro/Data_Cache_Permanent')->getValue($cacheKey);
+    }
+
+    // ---------------------------------------
+
+    private function setThemeUsageDataCache(array $data)
+    {
+        $cacheKey = __CLASS__.self::DATA_REGISTRY_KEY;
+        Mage::helper('M2ePro/Data_Cache_Permanent')->setValue($cacheKey, $data);
+    }
+
+    // ---------------------------------------
+
+    private function removeThemeUsageDataCache()
+    {
+        $cacheKey = __CLASS__.self::DATA_REGISTRY_KEY;
+        Mage::helper('M2ePro/Data_Cache_Permanent')->removeValue($cacheKey);
+    }
+
+    //########################################
 }

@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 Class Ess_M2ePro_Model_Magento_Product_Rule extends Ess_M2ePro_Model_Abstract
@@ -14,7 +16,7 @@ Class Ess_M2ePro_Model_Magento_Product_Rule extends Ess_M2ePro_Model_Abstract
 
     protected $_collectedAttributes = array();
 
-    // ####################################
+    //########################################
 
     public function _construct()
     {
@@ -22,20 +24,20 @@ Class Ess_M2ePro_Model_Magento_Product_Rule extends Ess_M2ePro_Model_Abstract
         $this->_init('M2ePro/Magento_Product_Rule');
     }
 
-    //####################################
+    //########################################
 
     /**
      * Create rule instance from serialized array
      *
      * @param string $serialized
-     * @throws Exception
+     * @throws Ess_M2ePro_Model_Exception
      *
      */
     public function loadFromSerialized($serialized)
     {
         $prefix = $this->getPrefix();
         if (is_null($prefix)) {
-            throw new Exception('Prefix must be specified before.');
+            throw new Ess_M2ePro_Model_Exception('Prefix must be specified before.');
         }
 
         $this->_conditions = $this->getConditionInstance($prefix);
@@ -52,34 +54,34 @@ Class Ess_M2ePro_Model_Magento_Product_Rule extends Ess_M2ePro_Model_Abstract
      * Create rule instance form post array
      *
      * @param array $post
-     * @throws Exception
+     * @throws Ess_M2ePro_Model_Exception
      *
      */
     public function loadFromPost(array $post)
     {
         $prefix = $this->getPrefix();
         if (is_null($prefix)) {
-            throw new Exception('Prefix must be specified before.');
+            throw new Ess_M2ePro_Model_Exception('Prefix must be specified before.');
         }
 
         $this->loadFromSerialized($this->getSerializedFromPost($post, $prefix));
     }
 
-    // ####################################
+    //########################################
 
     /**
      * Get serialized array from post array
      *
      * @param array $post
      * @return string
-     * @throws Exception
+     * @throws Ess_M2ePro_Model_Exception
      *
      */
     public function getSerializedFromPost(array $post)
     {
         $prefix = $this->getPrefix();
         if (is_null($prefix)) {
-            throw new Exception('Prefix must be specified before.');
+            throw new Ess_M2ePro_Model_Exception('Prefix must be specified before.');
         }
 
         $conditionsArray = $this->_convertFlatToRecursive($post['rule'][$prefix], $prefix);
@@ -87,7 +89,7 @@ Class Ess_M2ePro_Model_Magento_Product_Rule extends Ess_M2ePro_Model_Abstract
         return serialize($conditionsArray[$prefix][1]);
     }
 
-    // ####################################
+    //########################################
 
     public function getTitle()
     {
@@ -118,27 +120,34 @@ Class Ess_M2ePro_Model_Magento_Product_Rule extends Ess_M2ePro_Model_Abstract
         return $this->getData('attribute_sets');
     }
 
-    // ------------------------------------
+    // ---------------------------------------
 
+    /**
+     * @return array
+     */
     public function getCollectedAttributes()
     {
         return $this->_collectedAttributes;
     }
 
+    /**
+     * @param array $attributes
+     * @return $this
+     */
     public function setCollectedAttributes(array $attributes)
     {
         $this->_collectedAttributes = $attributes;
         return $this;
     }
 
-    // ------------------------------------
+    // ---------------------------------------
 
     public function getCustomOptionsFlag()
     {
         return $this->getData('use_custom_options');
     }
 
-    // ------------------------------------
+    // ---------------------------------------
 
     public function getForm()
     {
@@ -148,20 +157,20 @@ Class Ess_M2ePro_Model_Magento_Product_Rule extends Ess_M2ePro_Model_Abstract
         return $this->_form;
     }
 
-    // ------------------------------------
+    // ---------------------------------------
 
     /**
      * Get condition instance
      *
      * @return Ess_M2ePro_Model_Magento_Product_Rule_Condition_Combine
-     * @throws Exception
+     * @throws Ess_M2ePro_Model_Exception
      *
      */
     public function getConditions()
     {
         $prefix = $this->getPrefix();
         if (is_null($prefix)) {
-            throw new Exception('Prefix must be specified before.');
+            throw new Ess_M2ePro_Model_Exception('Prefix must be specified before.');
         }
 
         if (!is_null($this->_conditions)) {
@@ -177,8 +186,11 @@ Class Ess_M2ePro_Model_Magento_Product_Rule extends Ess_M2ePro_Model_Abstract
         return $this->_conditions->setJsFormObject($prefix)->setStoreId($this->getStoreId());
     }
 
-    // ####################################
+    //########################################
 
+    /**
+     * @return bool
+     */
     public function isEmpty()
     {
         if (is_null($this->_conditions)) {
@@ -222,7 +234,7 @@ Class Ess_M2ePro_Model_Magento_Product_Rule extends Ess_M2ePro_Model_Abstract
         $this->getConditions()->collectValidatedAttributes($collection);
 
         $idFieldName = $collection->getIdFieldName();
-        if(empty($idFieldName)) {
+        if (empty($idFieldName)) {
             $idFieldName = Mage::getModel('catalog/product')->getIdFieldName();
         }
 
@@ -240,7 +252,7 @@ Class Ess_M2ePro_Model_Magento_Product_Rule extends Ess_M2ePro_Model_Abstract
         $collection->addFieldToFilter($idFieldName, array('in' => $this->_productIds));
     }
 
-    // ####################################
+    //########################################
 
     public function callbackValidateProduct($args)
     {
@@ -253,6 +265,9 @@ Class Ess_M2ePro_Model_Magento_Product_Rule extends Ess_M2ePro_Model_Abstract
         }
     }
 
+    /**
+     * @return string
+     */
     public function getConditionClassName()
     {
         return 'M2ePro/Magento_Product_Rule_Condition_Combine';
@@ -294,7 +309,7 @@ Class Ess_M2ePro_Model_Magento_Product_Rule extends Ess_M2ePro_Model_Abstract
         return $arr;
     }
 
-    // ####################################
+    //########################################
 
     protected function _beforeSave()
     {
@@ -304,7 +319,7 @@ Class Ess_M2ePro_Model_Magento_Product_Rule extends Ess_M2ePro_Model_Abstract
         return parent::_beforeSave();
     }
 
-    // ####################################
+    //########################################
 
     /**
      * Using model from controller

@@ -1,81 +1,138 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2015 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Upgrade_Modifier_Abstract
 {
-    /** @var Varien_Db_Adapter_Interface */
-    protected $connection = null;
-    /** @var Mage_Core_Model_Resource_Setup */
-    protected $installer = null;
-    protected $tableName = '';
-    protected $queryLog = array();
+    /** @var Ess_M2ePro_Model_Upgrade_MySqlSetup */
+    private $installer = NULL;
 
-    //####################################
-    public function getConnection()
-    {
-        return $this->connection;
-    }
+    /** @var Varien_Db_Adapter_Pdo_Mysql */
+    private $connection = NULL;
 
-    public function setConnection(Varien_Db_Adapter_Interface $connection)
+    /** @var Ess_M2ePro_Model_Upgrade_Tables */
+    private $tablesObject = NULL;
+
+    protected $tableName = NULL;
+    protected $queriesLog = array();
+
+    //########################################
+
+    /**
+     * @param Ess_M2ePro_Model_Upgrade_MySqlSetup $installer
+     * @return $this
+     */
+    public function setInstaller(Ess_M2ePro_Model_Upgrade_MySqlSetup $installer)
     {
-        $this->connection = $connection;
+        $this->installer = $installer;
+        $this->connection = $installer->getConnection();
+        $this->tablesObject = $installer->getTablesObject();
         return $this;
     }
 
-    //####################################
+    /**
+     * @param string $tableName
+     * @return $this
+     * @throws Ess_M2ePro_Model_Exception_Setup
+     */
+    public function setTableName($tableName)
+    {
+        if (!$this->getTablesObject()->isExists($tableName)) {
+            throw new Ess_M2ePro_Model_Exception_Setup("Table Name does not exist.");
+        }
 
+        $this->tableName = $this->getTablesObject()->getFullName($tableName);
+        return $this;
+    }
+
+    // ---------------------------------------
+
+    /**
+     * @return Ess_M2ePro_Model_Upgrade_MySqlSetup
+     * @throws Ess_M2ePro_Model_Exception_Setup
+     */
     public function getInstaller()
     {
+        if (is_null($this->installer)) {
+            throw new Ess_M2ePro_Model_Exception_Setup("Installer does not exist.");
+        }
+
         return $this->installer;
     }
 
-    public function setInstaller(Mage_Core_Model_Resource_Setup $installer)
+    /**
+     * @return Varien_Db_Adapter_Pdo_Mysql
+     * @throws Ess_M2ePro_Model_Exception_Setup
+     */
+    public function getConnection()
     {
-        $this->installer = $installer;
-        return $this;
+        if (is_null($this->connection)) {
+            throw new Ess_M2ePro_Model_Exception_Setup("Connection does not exist.");
+        }
+
+        return $this->connection;
     }
 
-    //####################################
+    /**
+     * @return Ess_M2ePro_Model_Upgrade_Tables
+     * @throws Ess_M2ePro_Model_Exception_Setup
+     */
+    public function getTablesObject()
+    {
+        if (is_null($this->tablesObject)) {
+            throw new Ess_M2ePro_Model_Exception_Setup("Tables Object does not exist.");
+        }
 
+        return $this->tablesObject;
+    }
+
+    /**
+     * @return string
+     * @throws Ess_M2ePro_Model_Exception_Setup
+     */
     public function getTableName()
     {
+        if (is_null($this->tableName)) {
+            throw new Ess_M2ePro_Model_Exception_Setup("Table Name does not exist.");
+        }
+
         return $this->tableName;
     }
 
-    public function setTableName($tableName)
+    //########################################
+
+    public function runQuery($query)
     {
-        if (!$this->getConnection()->isTableExists($tableName)) {
-            throw new Zend_Db_Exception("Table \"{$tableName}\" is not exists");
-        }
-        $this->tableName = $this->getInstaller()->getTable($tableName);
+        $this->addQueryToLog($query);
+
+        $this->getConnection()->query($query);
+        $this->getConnection()->resetDdlCache();
 
         return $this;
     }
 
-    //####################################
-
-    protected function runQuery($query)
+    public function addQueryToLog($query)
     {
-        $this->setQueryLog($query);
-        $this->getInstaller()->run($query);
+        $this->queriesLog[] = $query;
         return $this;
     }
 
-    //####################################
+    // ---------------------------------------
 
-    public function getQueryLog()
+    public function setQueriesLog(array $queriesLog = array())
     {
-        return $this->queryLog;
-    }
-
-    public function setQueryLog($query)
-    {
-        $this->queryLog[] = $query;
+        $this->queriesLog = $queriesLog;
         return $this;
     }
 
-    //####################################
+    public function getQueriesLog()
+    {
+        return $this->queriesLog;
+    }
+
+    //########################################
 }

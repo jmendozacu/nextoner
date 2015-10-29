@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 abstract class Ess_M2ePro_Model_Connector_Ebay_Item_SingleAbstract
@@ -27,7 +29,7 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_Item_SingleAbstract
      */
     protected $requestDataObject = NULL;
 
-    // ########################################
+    //########################################
 
     public function __construct(array $params = array(), Ess_M2ePro_Model_Listing_Product $listingProduct)
     {
@@ -43,7 +45,7 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_Item_SingleAbstract
         parent::__construct($params,$this->listingProduct->getMarketplace(),$this->listingProduct->getAccount());
     }
 
-    // ########################################
+    //########################################
 
     public function process()
     {
@@ -63,14 +65,14 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_Item_SingleAbstract
         return $result;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     protected function eventAfterProcess()
     {
         $this->unlockListingProduct();
     }
 
-    // ########################################
+    //########################################
 
     protected function isNeedSendRequest()
     {
@@ -99,7 +101,23 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_Item_SingleAbstract
         return $this->filterManualListingProduct();
     }
 
-    // -----------------------------------------
+    protected function getRequestTimeout()
+    {
+        $requestDataObject = $this->getRequestDataObject($this->listingProduct);
+        $requestData = $requestDataObject->getData();
+
+        if ($requestData['is_eps_ebay_images_mode'] === false ||
+            (is_null($requestData['is_eps_ebay_images_mode']) &&
+                $requestData['upload_images_mode'] ==
+                    Ess_M2ePro_Model_Ebay_Listing_Product_Action_Request_Description::UPLOAD_IMAGES_MODE_SELF)) {
+            return parent::getRequestTimeout();
+        }
+
+        $imagesTimeout = self::TIMEOUT_INCREMENT_FOR_ONE_IMAGE * $requestDataObject->getTotalImagesCount();
+        return parent::getRequestTimeout() + $imagesTimeout;
+    }
+
+    // ---------------------------------------
 
     protected function lockListingProduct()
     {
@@ -117,11 +135,11 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_Item_SingleAbstract
         $lockItem->remove();
     }
 
-    // -----------------------------------------
+    // ---------------------------------------
 
     abstract protected function filterManualListingProduct();
 
-    // ########################################
+    //########################################
 
     protected function logRequestMessages()
     {
@@ -138,7 +156,7 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_Item_SingleAbstract
         }
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @return Ess_M2ePro_Model_Ebay_Listing_Product_Action_Type_Request
@@ -162,7 +180,7 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_Item_SingleAbstract
         return $this->responseObject;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     /**
      * @param array $data
@@ -184,5 +202,5 @@ abstract class Ess_M2ePro_Model_Connector_Ebay_Item_SingleAbstract
         return $this->requestDataObject;
     }
 
-    // ########################################
+    //########################################
 }

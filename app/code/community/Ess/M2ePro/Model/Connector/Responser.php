@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 abstract class Ess_M2ePro_Model_Connector_Responser
@@ -13,14 +15,14 @@ abstract class Ess_M2ePro_Model_Connector_Responser
 
     protected $parsedResponseData = array();
 
-    // ########################################
+    //########################################
 
     public function __construct(array $params = array())
     {
         $this->params = $params;
     }
 
-    // ########################################
+    //########################################
 
     public function process(array $responseBody = array(), array $messages = array())
     {
@@ -31,33 +33,39 @@ abstract class Ess_M2ePro_Model_Connector_Responser
         }
 
         if (!$this->validateResponseData($responseBody)) {
-            throw new Exception('Validation Failed. The Server response data is not valid.');
+            throw new Ess_M2ePro_Model_Exception('Validation Failed. The Server response data is not valid.');
         }
 
         $this->parsedResponseData = $this->prepareResponseData($responseBody);
         $this->processResponseData($this->parsedResponseData);
     }
 
-    // ########################################
+    //########################################
 
+    /**
+     * @return array
+     */
     public function getParsedResponseData()
     {
         return $this->parsedResponseData;
     }
 
-    // ########################################
+    //########################################
 
+    /**
+     * @param Ess_M2ePro_Model_Processing_Request $processingRequest
+     */
     public function unsetProcessingLocks(Ess_M2ePro_Model_Processing_Request $processingRequest) {}
 
     public function eventAfterProcessing() {}
 
-    //-----------------------------------------
+    // ---------------------------------------
 
     public function eventFailedExecuting($message) {}
 
     public function eventAfterExecuting() {}
 
-    //-----------------------------------------
+    // ---------------------------------------
 
     protected function isNeedToParseResponseData($responseBody)
     {
@@ -73,7 +81,7 @@ abstract class Ess_M2ePro_Model_Connector_Responser
 
     abstract protected function processResponseData($response);
 
-    // ########################################
+    //########################################
 
     protected function processResponseMessages(array $messages = array())
     {
@@ -92,12 +100,16 @@ abstract class Ess_M2ePro_Model_Connector_Responser
         }
 
         if (!empty($internalServerErrorMessage)) {
-            throw new Exception(Mage::helper('M2ePro')->__(
+            throw new Ess_M2ePro_Model_Exception(Mage::helper('M2ePro')->__(
                 "Internal Server Error(s) [%error_message%]", implode(', ', $internalServerErrorMessage)
             ));
         }
     }
 
+    /**
+     * @param array $messages
+     * @return string
+     */
     public function getResultType(array $messages = array())
     {
         $types = array();
@@ -116,34 +128,53 @@ abstract class Ess_M2ePro_Model_Connector_Responser
         return Ess_M2ePro_Model_Connector_Protocol::MESSAGE_TYPE_SUCCESS;
     }
 
-    // ########################################
+    //########################################
 
+    /**
+     * @param array $message
+     * @return bool
+     */
     public function isMessageError($message)
     {
         $type = $message[Ess_M2ePro_Model_Connector_Protocol::MESSAGE_TYPE_KEY];
         return $type == Ess_M2ePro_Model_Connector_Protocol::MESSAGE_TYPE_ERROR;
     }
 
+    /**
+     * @param array $message
+     * @return bool
+     */
     public function isMessageWarning($message)
     {
         $type = $message[Ess_M2ePro_Model_Connector_Protocol::MESSAGE_TYPE_KEY];
         return $type == Ess_M2ePro_Model_Connector_Protocol::MESSAGE_TYPE_WARNING;
     }
 
+    /**
+     * @param array $message
+     * @return bool
+     */
     public function isMessageSenderSystem($message)
     {
         $sender = $message[Ess_M2ePro_Model_Connector_Protocol::MESSAGE_TYPE_KEY];
         return $sender == Ess_M2ePro_Model_Connector_Protocol::MESSAGE_SENDER_SYSTEM;
     }
 
+    /**
+     * @param array $message
+     * @return bool
+     */
     public function isMessageSenderComponent($message)
     {
         $sender = $message[Ess_M2ePro_Model_Connector_Protocol::MESSAGE_SENDER_KEY];
         return $sender == Ess_M2ePro_Model_Connector_Protocol::MESSAGE_SENDER_COMPONENT;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
+    /**
+     * @return array
+     */
     public function getErrorMessages()
     {
         $messages = array();
@@ -155,6 +186,9 @@ abstract class Ess_M2ePro_Model_Connector_Responser
         return $messages;
     }
 
+    /**
+     * @return array
+     */
     public function getWarningMessages()
     {
         $messages = array();
@@ -166,20 +200,29 @@ abstract class Ess_M2ePro_Model_Connector_Responser
         return $messages;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
+    /**
+     * @return bool
+     */
     public function hasErrorMessages()
     {
         return count($this->getErrorMessages()) > 0;
     }
 
+    /**
+     * @return bool
+     */
     public function hasWarningMessages()
     {
         return count($this->getWarningMessages()) > 0;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
+    /**
+     * @return null|string
+     */
     public function getCombinedErrorMessage()
     {
         $messages = array();
@@ -191,5 +234,5 @@ abstract class Ess_M2ePro_Model_Connector_Responser
         return !empty($messages) ? implode(', ', $messages) : null;
     }
 
-    // ########################################
+    //########################################
 }

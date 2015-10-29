@@ -1,20 +1,28 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Servicing_Task_Settings extends Ess_M2ePro_Model_Servicing_Task
 {
-    // ########################################
+    //########################################
 
+    /**
+     * @return string
+     */
     public function getPublicNick()
     {
         return 'settings';
     }
 
-    // ########################################
+    //########################################
 
+    /**
+     * @return array
+     */
     public function getRequestData()
     {
         $requestData = array();
@@ -38,9 +46,10 @@ class Ess_M2ePro_Model_Servicing_Task_Settings extends Ess_M2ePro_Model_Servicin
         $this->updateServersBaseUrls($data);
         $this->updateDefaultServerBaseUrlIndex($data);
         $this->updateLastVersion($data);
+        $this->updateSendLogs($data);
     }
 
-    // ########################################
+    //########################################
 
     private function updateLockData(array $data)
     {
@@ -120,5 +129,16 @@ class Ess_M2ePro_Model_Servicing_Task_Settings extends Ess_M2ePro_Model_Servicin
         );
     }
 
-    // ########################################
+    private function updateSendLogs(array $data)
+    {
+        if (!isset($data['send_logs'])) {
+            return;
+        }
+
+        Mage::helper('M2ePro/Module')->getConfig()->setGroupValue(
+            '/debug/logging/', 'send_to_server', (int)$data['send_logs']
+        );
+    }
+
+    //########################################
 }

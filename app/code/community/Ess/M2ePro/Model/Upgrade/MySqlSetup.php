@@ -1,501 +1,322 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Upgrade_MySqlSetup extends Mage_Core_Model_Resource_Setup
 {
-    private $moduleTables = array();
-    private $modifiersCache = array();
+    const LOCK_FILE_LIFETIME = 300;
 
-    //####################################
+    private $lockId;
+    private $cache = array();
 
-    public function __construct($resourceName)
+    //########################################
+
+    /**
+     * @return Ess_M2ePro_Model_Upgrade_Tables
+     */
+    public function getTablesObject()
     {
-        // Get needed mysql tables
-        $tempTables = Mage::helper('M2ePro/Module_Database_Structure')->getMySqlTables();
-        $tempTables = array_merge($this->getMySqlTablesV4(),$tempTables);
-        $tempTables = array_merge($this->getMySqlTablesV5(),$tempTables);
-        $tempTables = array_merge($this->getRemovedMySqlTables(),$tempTables);
-        $tempTables = array_values(array_unique($tempTables));
+        $cacheKey = 'tablesObject';
 
-        // Sort by length tables
-        do {
-            $hasChanges = false;
-            for ($i=0;$i<count($tempTables)-1; $i++) {
-                if (strlen($tempTables[$i]) < strlen($tempTables[$i+1])) {
-                    $temp = $tempTables[$i];
-                    $tempTables[$i] = $tempTables[$i+1];
-                    $tempTables[$i+1] = $temp;
-                    $hasChanges = true;
-                }
-            }
-        } while ($hasChanges);
-
-        // Prepare sql tables
-        //--------------------
-        foreach ($tempTables as $table) {
-            $this->moduleTables[$table] = $this->getTable($table);
+        if (isset($this->cache[$cacheKey])) {
+            return $this->cache[$cacheKey];
         }
-        //--------------------
 
-        parent::__construct($resourceName);
+        /** @var Ess_M2ePro_Model_Upgrade_Tables $object */
+        $object = Mage::getModel('M2ePro/Upgrade_Tables');
+        $object->setInstaller($this)->initialize();
+
+        return $this->cache[$cacheKey] = $object;
     }
 
-    //####################################
+    // ---------------------------------------
 
-    public function startSetup()
+    /**
+     * @param string $tableName
+     * @return Ess_M2ePro_Model_Upgrade_Modifier_Table
+     */
+    public function getTableModifier($tableName)
     {
-        return parent::startSetup();
+        return $this->getModifier($tableName, 'table');
     }
 
-    public function endSetup()
+    /**
+     * @param string $tableName
+     * @return Ess_M2ePro_Model_Upgrade_Modifier_Config
+     */
+    public function getConfigModifier($tableName)
     {
-        $this->removeConfigDuplicates();
-        Mage::helper('M2ePro/Module')->clearCache();
-        return parent::endSetup();
+        return $this->getModifier($tableName, 'config');
     }
 
-    // ----------------------------------
+    // ---------------------------------------
 
-    protected function _upgradeResourceDb($oldVersion, $newVersion)
+    /**
+     * @return Ess_M2ePro_Model_Upgrade_Modifier_Config
+     */
+    public function getPrimaryConfigModifier()
     {
-        parent::_upgradeResourceDb($oldVersion, $newVersion);
-
-        $this->updateInstallationVersionHistory($oldVersion, $newVersion);
-        $this->updateCompilation();
-
-        return $this;
+        return $this->getModifier('primary_config', 'config');
     }
 
-    protected function _installResourceDb($newVersion)
+    /**
+     * @return Ess_M2ePro_Model_Upgrade_Modifier_Config
+     */
+    public function getMainConfigModifier()
     {
-        parent::_installResourceDb($newVersion);
-
-        $this->updateInstallationVersionHistory(null, $newVersion);
-        $this->updateCompilation();
-
-        return $this;
+        return $this->getModifier('config', 'config');
     }
 
-    //####################################
+    /**
+     * @return Ess_M2ePro_Model_Upgrade_Modifier_Config
+     */
+    public function getCacheConfigModifier()
+    {
+        return $this->getModifier('cache_config', 'config');
+    }
+
+    /**
+     * @return Ess_M2ePro_Model_Upgrade_Modifier_Config
+     */
+    public function getSynchConfigModifier()
+    {
+        return $this->getModifier('synchronization_config', 'config');
+    }
+
+    // ---------------------------------------
+
+    /**
+     * @param string $tableName
+     * @param string $modelName
+     * @return Ess_M2ePro_Model_Upgrade_Modifier_Abstract
+     */
+    private function getModifier($tableName, $modelName)
+    {
+        $cacheKey = $tableName . '_' . $modelName;
+
+        if (isset($this->cache[$cacheKey])) {
+            return $this->cache[$cacheKey];
+        }
+
+        /** @var Ess_M2ePro_Model_Upgrade_Modifier_Abstract $object */
+        $object = Mage::getModel('M2ePro/Upgrade_Modifier_' . ucfirst($modelName));
+        $object->setInstaller($this)->setTableName($tableName);
+
+        return $this->cache[$cacheKey] = $object;
+    }
+
+    //########################################
 
     public function run($sql)
     {
         if (trim($sql) == '') {
             return $this;
         }
-        $sql = $this->prepareSql($sql);
+
+        foreach ($this->getTablesObject()->getAllHistoryEntities() as $tableNameFrom => $tableNameTo) {
+            $tableNameFrom = ($tableNameFrom == 'ess_config') ?
+                                $tableNameFrom :
+                                Ess_M2ePro_Model_Upgrade_Tables::M2E_PRO_TABLE_PREFIX . $tableNameFrom;
+            $sql = str_replace(' `'.$tableNameFrom.'`',' `'.$tableNameTo.'`',$sql);
+            $sql = str_replace(' '.$tableNameFrom,' `'.$tableNameTo.'`',$sql);
+        }
+
         return parent::run($sql);
     }
 
-    public function runSqlFile($path)
+    public function generateRandomHash()
     {
-        if (!is_file($path)) {
-            return $this;
-        }
-        $sql = file_get_contents($path);
-        return $this->run($sql);
+        return sha1(microtime(1));
     }
 
-    //####################################
+    //########################################
 
-    public function getModuleTables()
+    protected function beforeModuleDbModification()
     {
-        return $this->moduleTables;
-    }
-
-    public function getRelatedSqlFilePath($pathPhpFile)
-    {
-        return dirname($pathPhpFile).DS.basename($pathPhpFile,'.php').'.sql';
-    }
-
-    //####################################
-
-    public function getTableModifier($tableName)
-    {
-        /** @var Ess_M2ePro_Model_Upgrade_Modifier_Table|false $tableModifier */
-        $tableModifier = $this->getModifier($tableName, 'table', 'modifier_table');
-        return $tableModifier;
-    }
-
-    public function getConfigUpdater($tableName)
-    {
-        /** @var Ess_M2ePro_Model_Upgrade_Modifier_ConfigUpdater|false $configUpdater */
-        $configUpdater = $this->getModifier($tableName, 'configUpdater', 'modifier_config_updater');
-        return $configUpdater;
-    }
-
-    private function getModifier($tableName, $modifierModelName, $cacheKey = NULL)
-    {
-        $cacheKey = !is_null($cacheKey) ? $cacheKey . $tableName : $tableName;
-        if (isset($this->modifiersCache[$cacheKey])) {
-            return $this->modifiersCache[$cacheKey];
+        if (extension_loaded('apc') && ini_get('apc.enabled')) {
+            apc_clear_cache('system');
         }
 
-        $modifierModelName = 'M2ePro/Upgrade_Modifier_' . ucfirst($modifierModelName);
-        /** @var Ess_M2ePro_Model_Upgrade_Modifier_Abstract $tableModifier */
-        $tableModifier = Mage::getModel($modifierModelName);
-        $tableModifier->setInstaller($this);
-        $tableModifier->setConnection($this->getConnection());
-        $tableModifier->setTableName($tableName);
+        if (function_exists('opcache_get_status')) {
+            opcache_reset();
+        }
 
-        $this->modifiersCache[$cacheKey] = $tableModifier;
-        return $tableModifier;
-    }
-
-    //####################################
-
-    public function removeConfigDuplicates()
-    {
-        $tables = $this->getConfigTablesV5();
-        $tables = array_merge($this->getConfigTablesV6(),$tables);
-        $tables = array_values(array_unique($tables));
-
-        foreach ($tables as $table) {
-            $this->removeConfigDuplicatesByTable($table);
+        if (defined('COMPILER_INCLUDE_PATH')) {
+            Mage::getModel('compiler/process')->run();
         }
     }
 
-    private function removeConfigDuplicatesByTable($tableName)
+    protected function afterModuleDbModification()
     {
-        $connection = $this->getConnection();
-        $tableName = $this->getTable($tableName);
+        $this->resetServicingStatus();
+        $this->removeConfigsDuplicates();
 
-        if (!in_array($tableName, $connection->listTables())) {
+        Mage::helper('M2ePro/Module')->clearCache();
+    }
+
+    // ---------------------------------------
+
+    protected function beforeInstall($newVersion)
+    {
+        $this->updateInstallationVersionHistory(null, $newVersion);
+    }
+
+    protected function afterInstall($newVersion) {}
+
+    // ---------------------------------------
+
+    protected function beforeUpgrade($oldVersion, $newVersion)
+    {
+        $this->updateInstallationVersionHistory($oldVersion, $newVersion);
+    }
+
+    protected function afterUpgrade($oldVersion, $newVersion) {}
+
+    // ---------------------------------------
+
+    protected function beforeFileExecution() {}
+
+    protected function afterFileExecution() {}
+
+    //########################################
+
+    public function applyUpdates()
+    {
+        // double running protection
+        usleep(1000000); // 1 sec
+
+        if ($this->isLocked()) {
             return;
         }
 
-        $configRows = $connection->query("SELECT `id`, `group`, `key`
-                                          FROM `{$tableName}`
-                                          ORDER BY `id` ASC")
-                                 ->fetchAll();
+        $this->lock();
 
-        $tempData = array();
-        $deleteData = array();
+        try {
 
-        foreach ($configRows as $configRow) {
+            $this->beforeModuleDbModification();
+            parent::applyUpdates();
+            $this->afterModuleDbModification();
 
-            $tempName = strtolower($configRow['group'] .'|'. $configRow['key']);
+        } catch (Exception $e) {
 
-            if (in_array($tempName, $tempData)) {
-                $deleteData[] = (int)$configRow['id'];
-            } else {
-                $tempData[] = $tempName;
+            $this->unlock();
+            throw $e;
+        }
+
+        $this->unlock();
+    }
+
+    // ---------------------------------------
+
+    protected function _installResourceDb($newVersion)
+    {
+        $this->beforeInstall($newVersion);
+        parent::_installResourceDb($newVersion);
+        $this->afterInstall($newVersion);
+    }
+
+    protected function _upgradeResourceDb($oldVersion, $newVersion)
+    {
+        $this->beforeUpgrade($oldVersion, $newVersion);
+        parent::_upgradeResourceDb($oldVersion, $newVersion);
+        $this->afterUpgrade($oldVersion, $newVersion);
+    }
+
+    // ---------------------------------------
+
+    public function startSetup()
+    {
+        $this->lock();
+
+        $this->beforeFileExecution();
+        return parent::startSetup();
+    }
+
+    public function endSetup()
+    {
+        parent::endSetup();
+        $this->afterFileExecution();
+
+        if ($this->isLockFileExists() &&
+            @file_get_contents($this->getLockFilePath()) != $this->lockId) {
+            exit();
+        }
+
+        return $this;
+    }
+
+    //########################################
+
+    protected function resetServicingStatus()
+    {
+        $tableName = 'cache_config';
+
+        if (!$this->getTablesObject()->isExists($tableName)) {
+            return;
+        }
+
+        $this->getConnection()->update(
+            $this->getTablesObject()->getFullName($tableName),
+            array('value' => NULL),
+            array(
+                '`group` = ?' => '/servicing/',
+                '`key` = ?' => 'last_update_time'
+            )
+        );
+    }
+
+    protected function removeConfigsDuplicates()
+    {
+        foreach ($this->getTablesObject()->getAllHistoryConfigEntities() as $tableName => $tableFullName) {
+
+            if (!$this->getTablesObject()->isExists($tableName)) {
+                continue;
             }
-        }
 
-        if (!empty($deleteData)) {
-            $connection->query("DELETE FROM `{$tableName}`
-                                WHERE `id` IN (".implode(',', $deleteData).')');
+            $this->getConfigModifier($tableName)->removeDuplicates();
         }
     }
 
-    //####################################
-
-    private function prepareSql($sql)
+    protected function updateInstallationVersionHistory($oldVersion, $newVersion)
     {
-        foreach ($this->moduleTables as $tableFrom=>$tableTo) {
-            $sql = str_replace(' `'.$tableFrom.'`',' `'.$tableTo.'`',$sql);
-            $sql = str_replace(' '.$tableFrom,' `'.$tableTo.'`',$sql);
-        }
-        return $sql;
-    }
+        $tableName = 'registry';
 
-    //------------------------------------
-
-    private function getMySqlTablesV4()
-    {
-        return array(
-            'ess_config',
-            'm2epro_config',
-
-            'm2epro_lock_item',
-            'm2epro_locked_object',
-            'm2epro_product_change',
-            'm2epro_processing_request',
-
-            'm2epro_account',
-            'm2epro_marketplace',
-            'm2epro_attribute_set',
-
-            'm2epro_order',
-            'm2epro_order_item',
-            'm2epro_order_log',
-
-            'm2epro_synchronization_log',
-            'm2epro_synchronization_run',
-
-            'm2epro_listing',
-            'm2epro_listing_category',
-            'm2epro_listing_log',
-            'm2epro_listing_other',
-            'm2epro_listing_other_log',
-            'm2epro_listing_product',
-            'm2epro_listing_product_variation',
-            'm2epro_listing_product_variation_option',
-
-            'm2epro_template_description',
-            'm2epro_template_general',
-            'm2epro_template_selling_format',
-            'm2epro_template_synchronization',
-
-            'm2epro_translation_custom_suggestion',
-            'm2epro_translation_language',
-            'm2epro_translation_text',
-
-            'm2epro_amazon_account',
-            'm2epro_amazon_category',
-            'm2epro_amazon_category_description',
-            'm2epro_amazon_category_specific',
-            'm2epro_amazon_dictionary_category',
-            'm2epro_amazon_dictionary_marketplace',
-            'm2epro_amazon_dictionary_specific',
-            'm2epro_amazon_item',
-            'm2epro_amazon_listing',
-            'm2epro_amazon_listing_other',
-            'm2epro_amazon_listing_product',
-            'm2epro_amazon_listing_product_variation',
-            'm2epro_amazon_listing_product_variation_option',
-            'm2epro_amazon_marketplace',
-            'm2epro_amazon_order',
-            'm2epro_amazon_order_item',
-            'm2epro_amazon_processed_inventory',
-            'm2epro_amazon_template_description',
-            'm2epro_amazon_template_general',
-            'm2epro_amazon_template_selling_format',
-            'm2epro_amazon_template_synchronization',
-
-            'm2epro_ebay_account',
-            'm2epro_ebay_account_store_category',
-            'm2epro_ebay_dictionary_category',
-            'm2epro_ebay_dictionary_marketplace',
-            'm2epro_ebay_dictionary_shipping',
-            'm2epro_ebay_dictionary_shipping_category',
-            'm2epro_ebay_feedback',
-            'm2epro_ebay_feedback_template',
-            'm2epro_ebay_item',
-            'm2epro_ebay_listing',
-            'm2epro_ebay_listing_other',
-            'm2epro_ebay_listing_product',
-            'm2epro_ebay_listing_product_variation',
-            'm2epro_ebay_listing_product_variation_option',
-            'm2epro_ebay_marketplace',
-            'm2epro_ebay_message',
-            'm2epro_ebay_motor_specific',
-            'm2epro_ebay_order',
-            'm2epro_ebay_order_item',
-            'm2epro_ebay_order_external_transaction',
-            'm2epro_ebay_template_description',
-            'm2epro_ebay_template_general',
-            'm2epro_ebay_template_general_calculated_shipping',
-            'm2epro_ebay_template_general_payment',
-            'm2epro_ebay_template_general_shipping',
-            'm2epro_ebay_template_general_specific',
-            'm2epro_ebay_template_selling_format',
-            'm2epro_ebay_template_synchronization'
-        );
-    }
-
-    private function getMySqlTablesV5()
-    {
-        return array(
-            'ess_config',
-            'm2epro_config',
-            'm2epro_exceptions_filters',
-
-            'm2epro_lock_item',
-            'm2epro_locked_object',
-            'm2epro_product_change',
-            'm2epro_processing_request',
-
-            'm2epro_account',
-            'm2epro_marketplace',
-            'm2epro_attribute_set',
-
-            'm2epro_order',
-            'm2epro_order_change',
-            'm2epro_order_item',
-            'm2epro_order_log',
-            'm2epro_order_repair',
-
-            'm2epro_synchronization_log',
-            'm2epro_synchronization_run',
-
-            'm2epro_listing',
-            'm2epro_listing_category',
-            'm2epro_listing_log',
-            'm2epro_listing_other',
-            'm2epro_listing_other_log',
-            'm2epro_listing_product',
-            'm2epro_listing_product_variation',
-            'm2epro_listing_product_variation_option',
-
-            'm2epro_template_description',
-            'm2epro_template_general',
-            'm2epro_template_selling_format',
-            'm2epro_template_synchronization',
-
-            'm2epro_translation_custom_suggestion',
-            'm2epro_translation_language',
-            'm2epro_translation_text',
-
-            'm2epro_amazon_account',
-            'm2epro_amazon_dictionary_category',
-            'm2epro_amazon_dictionary_marketplace',
-            'm2epro_amazon_dictionary_specific',
-            'm2epro_amazon_item',
-            'm2epro_amazon_listing',
-            'm2epro_amazon_listing_other',
-            'm2epro_amazon_listing_product',
-            'm2epro_amazon_listing_product_variation',
-            'm2epro_amazon_listing_product_variation_option',
-            'm2epro_amazon_marketplace',
-            'm2epro_amazon_order',
-            'm2epro_amazon_order_item',
-            'm2epro_amazon_processed_inventory',
-            'm2epro_amazon_template_description',
-            'm2epro_amazon_template_general',
-            'm2epro_amazon_template_new_product',
-            'm2epro_amazon_template_new_product_description',
-            'm2epro_amazon_template_new_product_specific',
-            'm2epro_amazon_template_selling_format',
-            'm2epro_amazon_template_synchronization',
-
-            'm2epro_ebay_account',
-            'm2epro_ebay_account_store_category',
-            'm2epro_ebay_dictionary_category',
-            'm2epro_ebay_dictionary_marketplace',
-            'm2epro_ebay_dictionary_shipping',
-            'm2epro_ebay_dictionary_shipping_category',
-            'm2epro_ebay_feedback',
-            'm2epro_ebay_feedback_template',
-            'm2epro_ebay_item',
-            'm2epro_ebay_listing',
-            'm2epro_ebay_listing_other',
-            'm2epro_ebay_listing_product',
-            'm2epro_ebay_listing_product_variation',
-            'm2epro_ebay_listing_product_variation_option',
-            'm2epro_ebay_marketplace',
-            'm2epro_ebay_message',
-            'm2epro_ebay_motor_specific',
-            'm2epro_ebay_order',
-            'm2epro_ebay_order_item',
-            'm2epro_ebay_order_external_transaction',
-            'm2epro_ebay_template_description',
-            'm2epro_ebay_template_general',
-            'm2epro_ebay_template_general_calculated_shipping',
-            'm2epro_ebay_template_general_payment',
-            'm2epro_ebay_template_general_shipping',
-            'm2epro_ebay_template_general_specific',
-            'm2epro_ebay_template_selling_format',
-            'm2epro_ebay_template_synchronization',
-
-            'm2epro_buy_account',
-            'm2epro_buy_dictionary_category',
-            'm2epro_buy_item',
-            'm2epro_buy_listing',
-            'm2epro_buy_listing_other',
-            'm2epro_buy_listing_product',
-            'm2epro_buy_listing_product_variation',
-            'm2epro_buy_listing_product_variation_option',
-            'm2epro_buy_marketplace',
-            'm2epro_buy_order',
-            'm2epro_buy_order_item',
-            'm2epro_buy_template_description',
-            'm2epro_buy_template_general',
-            'm2epro_buy_template_new_product',
-            'm2epro_buy_template_new_product_core',
-            'm2epro_buy_template_new_product_attribute',
-            'm2epro_buy_template_selling_format',
-            'm2epro_buy_template_synchronization',
-
-            'm2epro_play_account',
-            'm2epro_play_item',
-            'm2epro_play_listing',
-            'm2epro_play_listing_other',
-            'm2epro_play_listing_product',
-            'm2epro_play_listing_product_variation',
-            'm2epro_play_listing_product_variation_option',
-            'm2epro_play_marketplace',
-            'm2epro_play_order',
-            'm2epro_play_order_item',
-            'm2epro_play_processed_inventory',
-            'm2epro_play_template_description',
-            'm2epro_play_template_general',
-            'm2epro_play_template_selling_format',
-            'm2epro_play_template_synchronization'
-        );
-    }
-
-    private function getRemovedMySqlTables()
-    {
-        return array(
-            'm2epro_ebay_listing_auto_filter',
-            'm2epro_synchronization_run',
-            'm2epro_ebay_listing_auto_category',
-            'm2epro_ebay_dictionary_policy',
-            'm2epro_ebay_template_policy',
-            'm2epro_ebay_account_policy',
-            'm2epro_play_listing_auto_category_group'
-        );
-    }
-
-    //------------------------------------
-
-    private function getConfigTablesV5()
-    {
-        return array(
-            'ess_config',
-            'm2epro_config'
-        );
-    }
-
-    private function getConfigTablesV6()
-    {
-        return array(
-            'm2epro_primary_config',
-            'm2epro_config',
-            'm2epro_cache_config',
-            'm2epro_synchronization_config'
-        );
-    }
-
-    //####################################
-
-    private function updateInstallationVersionHistory($oldVersion, $newVersion)
-    {
-        $connection = $this->getConnection();
-        $tableName = $this->getTable('m2epro_registry');
-
-        if (!in_array($tableName, $connection->listTables())) {
+        if (!$this->getTablesObject()->isExists($tableName)) {
             return;
         }
 
         $currentGmtDate = Mage::getModel('core/date')->gmtDate();
-        $versionsHistory = $connection->select()
-                                      ->from($tableName, array('key', 'value'))
-                                      ->where('`key` = ?', '/installation/versions_history/')
-                                      ->query()
-                                      ->fetch();
+        $fullTableName = $this->getTablesObject()->getFullName($tableName);
+
         $versionData = array(
             'from' => $oldVersion,
             'to'   => $newVersion,
             'date' => $currentGmtDate
         );
 
+        $versionsHistory = $this->getConnection()->select()
+                                                 ->from($fullTableName, array('key', 'value'))
+                                                 ->where('`key` = ?', '/installation/versions_history/')
+                                                 ->query()
+                                                 ->fetch();
         if (!empty($versionsHistory)) {
 
             $versionsHistory = @json_decode($versionsHistory['value'], true);
             $versionsHistory[] = $versionData;
+
             $mysqlData = array(
                 'value'       => @json_encode($versionsHistory),
                 'update_date' => $currentGmtDate,
                 'create_date' => $currentGmtDate
             );
 
-            $connection->update($tableName, $mysqlData, array('`key` = ?' => '/installation/versions_history/'));
+            $this->getConnection()
+                 ->update($fullTableName, $mysqlData, array('`key` = ?' => '/installation/versions_history/'));
+
         } else {
 
             $mysqlData = array(
@@ -506,21 +327,62 @@ class Ess_M2ePro_Model_Upgrade_MySqlSetup extends Mage_Core_Model_Resource_Setup
             );
             $mysqlColumns = array('key','value','update_date','create_date');
 
-            $connection->insertArray($tableName, $mysqlColumns, array($mysqlData));
+            $this->getConnection()->insertArray($fullTableName, $mysqlColumns, array($mysqlData));
         }
     }
 
-    private function updateCompilation()
+    //########################################
+
+    private function getLocksDirPath()
     {
-        defined('COMPILER_INCLUDE_PATH') && Mage::getModel('compiler/process')->run();
+        return Mage::getBaseDir('var') . DS . 'locks';
     }
 
-    //####################################
-
-    public function generateHash()
+    private function getLockFilePath()
     {
-        return sha1(microtime(1));
+        return rtrim($this->getLocksDirPath(), DS) . DS . 'm2epro_setup.lock';
     }
 
-    //####################################
+    private function isLockFileExists()
+    {
+        return @file_exists($this->getLockFilePath());
+    }
+
+    // ---------------------------------------
+
+    private function isLocked()
+    {
+        if (!$this->isLockFileExists()) {
+            return false;
+        }
+
+        if (@filemtime($this->getLockFilePath()) > ((int)gmdate('U') - self::LOCK_FILE_LIFETIME)) {
+            return true;
+        }
+
+        $this->unlock();
+        return false;
+    }
+
+    private function lock()
+    {
+        $this->lockId = $this->generateRandomHash();
+
+        if (!@is_dir($this->getLocksDirPath())) {
+            @mkdir($this->getLocksDirPath(), 0777, true);
+        }
+
+        @file_put_contents($this->getLockFilePath(), $this->lockId);
+
+        register_shutdown_function(function () {
+            @unlink(Mage::getBaseDir('var').DS.'locks'.DS.'m2epro_setup.lock');
+        });
+    }
+
+    private function unlock()
+    {
+        $this->isLockFileExists() && @unlink($this->getLockFilePath());
+    }
+
+    //########################################
 }

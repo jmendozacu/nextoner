@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 final class Ess_M2ePro_Model_Ebay_Synchronization_OtherListings_Templates
@@ -19,31 +21,43 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_OtherListings_Templates
 
     private $cache = array();
 
-    //####################################
+    //########################################
 
+    /**
+     * @return string
+     */
     protected function getNick()
     {
         return '/templates/';
     }
 
+    /**
+     * @return string
+     */
     protected function getTitle()
     {
         return 'Inventory';
     }
 
-    // -----------------------------------
+    // ---------------------------------------
 
+    /**
+     * @return int
+     */
     protected function getPercentsStart()
     {
         return 50;
     }
 
+    /**
+     * @return int
+     */
     protected function getPercentsEnd()
     {
         return 100;
     }
 
-    //####################################
+    //########################################
 
     protected function beforeStart()
     {
@@ -69,7 +83,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_OtherListings_Templates
         parent::afterEnd();
     }
 
-    // -----------------------------------
+    // ---------------------------------------
 
     protected function performActions()
     {
@@ -93,7 +107,7 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_OtherListings_Templates
         return $task;
     }
 
-    //####################################
+    //########################################
 
     private function executeRunner()
     {
@@ -123,6 +137,8 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_OtherListings_Templates
             return;
         }
 
+        // M2ePro_TRANSLATIONS
+        // Task "Update 3rd Party Listings" has completed with %result%. View Listings Log for details.
         $this->getLog()->addMessage(
             Mage::getModel('M2ePro/Log_Abstract')->encodeDescription(
                 'Task "Update 3rd Party Listings" has completed with %result%. View Listings Log for details.',
@@ -133,5 +149,5 @@ final class Ess_M2ePro_Model_Ebay_Synchronization_OtherListings_Templates
         $this->getActualOperationHistory()->addText('Updating Products on eBay ended with '.$resultString.'.');
     }
 
-    //####################################
+    //########################################
 }

@@ -1,13 +1,15 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Adminhtml_Common_Amazon_Template_SynchronizationController
     extends Ess_M2ePro_Controller_Adminhtml_Common_MainController
 {
-    //#############################################
+    //########################################
 
     protected function _initAction()
     {
@@ -20,6 +22,8 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_Template_SynchronizationController
 
         $this->_initPopUp();
 
+        $this->setPageHelpLink(Ess_M2ePro_Helper_Component_Amazon::NICK, 'Synchronization+Policy');
+
         return $this;
     }
 
@@ -28,7 +32,7 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_Template_SynchronizationController
         return Mage::getSingleton('admin/session')->isAllowed('m2epro_common/configuration');
     }
 
-    //#############################################
+    //########################################
 
     public function indexAction()
     {
@@ -37,7 +41,7 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_Template_SynchronizationController
         ));
     }
 
-    //#############################################
+    //########################################
 
     public function newAction()
     {
@@ -68,7 +72,7 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_Template_SynchronizationController
              ->renderLayout();
     }
 
-    //#############################################
+    //########################################
 
     public function saveAction()
     {
@@ -79,12 +83,12 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_Template_SynchronizationController
         $id = $this->getRequest()->getParam('id');
 
         // Base prepare
-        //--------------------
+        // ---------------------------------------
         $data = array();
-        //--------------------
+        // ---------------------------------------
 
         // tab: list
-        //--------------------
+        // ---------------------------------------
         $keys = array(
             'title',
             'list_mode',
@@ -104,10 +108,10 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_Template_SynchronizationController
         }
 
         $data['title'] = strip_tags($data['title']);
-        //--------------------
+        // ---------------------------------------
 
         // tab: revise
-        //--------------------
+        // ---------------------------------------
         $keys = array(
             'revise_update_qty',
             'revise_update_qty_max_applied_value_mode',
@@ -119,6 +123,7 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_Template_SynchronizationController
             'revise_update_images',
             'revise_change_selling_format_template',
             'revise_change_description_template',
+            'revise_change_shipping_override_template',
             'revise_change_listing'
         );
         foreach ($keys as $key) {
@@ -126,10 +131,10 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_Template_SynchronizationController
                 $data[$key] = $post[$key];
             }
         }
-        //--------------------
+        // ---------------------------------------
 
         // tab: relist
-        //--------------------
+        // ---------------------------------------
         $keys = array(
             'relist_mode',
             'relist_filter_user_lock',
@@ -148,10 +153,10 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_Template_SynchronizationController
                 $data[$key] = $post[$key];
             }
         }
-        //--------------------
+        // ---------------------------------------
 
         // tab: stop
-        //--------------------
+        // ---------------------------------------
         $keys = array(
             'stop_status_disabled',
             'stop_out_off_stock',
@@ -167,10 +172,10 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_Template_SynchronizationController
                 $data[$key] = $post[$key];
             }
         }
-        //--------------------
+        // ---------------------------------------
 
         // Add or update model
-        //--------------------
+        // ---------------------------------------
         $model = Mage::helper('M2ePro/Component_Amazon')->getModel('Template_Synchronization');
         $model->load($id);
 
@@ -181,7 +186,7 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_Template_SynchronizationController
         $model->getChildObject()->setSynchStatusNeed($newData,$oldData);
 
         $id = $model->getId();
-        //--------------------
+        // ---------------------------------------
 
         $this->_getSession()->addSuccess(Mage::helper('M2ePro')->__('Policy was successfully saved'));
         $this->_redirectUrl(Mage::helper('M2ePro')->getBackUrl('*/adminhtml_common_template/index', array(), array(
@@ -190,5 +195,5 @@ class Ess_M2ePro_Adminhtml_Common_Amazon_Template_SynchronizationController
         )));
     }
 
-    //#############################################
+    //########################################
 }

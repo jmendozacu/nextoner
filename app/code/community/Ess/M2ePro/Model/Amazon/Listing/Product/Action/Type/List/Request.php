@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Request
@@ -13,7 +15,7 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Request
     const PARENTAGE_PARENT = 'parent';
     const PARENTAGE_CHILD  = 'child';
 
-    // ########################################
+    //########################################
 
     protected function getActionData()
     {
@@ -22,12 +24,10 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Request
             'type_mode' => $this->validatorsData['list_type'],
         );
 
-        if ($this->validatorsData['list_type'] == self::LIST_TYPE_NEW) {
-            $data = array_merge($data, $this->getNewProductAdditionalData());
+        if ($this->validatorsData['list_type'] == self::LIST_TYPE_NEW &&
+            $this->getVariationManager()->isRelationMode()) {
 
-            if ($this->getVariationManager()->isRelationMode()) {
                 $data = array_merge($data, $this->getRelationData());
-            }
         }
 
         $data = array_merge(
@@ -49,13 +49,14 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Request
         $data = array_merge(
             $data,
             $this->getRequestQty()->getData(),
-            $this->getRequestPrice()->getData()
+            $this->getRequestPrice()->getData(),
+            $this->getRequestShippingOverride()->getData()
         );
 
         return $data;
     }
 
-    // ########################################
+    //########################################
 
     private function getExistProductIdentifierData()
     {
@@ -87,7 +88,7 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Request
         return $data;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     private function getRelationData()
     {
@@ -118,8 +119,14 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Request
             ->getTypeModel()
             ->getMatchedAttributes();
 
+        $virtualChannelAttributes = $typeModel->getParentTypeModel()->getVirtualChannelAttributes();
+
         $attributes = array();
         foreach ($typeModel->getProductOptions() as $attribute => $value) {
+            if (isset($virtualChannelAttributes[$attribute])) {
+                continue;
+            }
+
             $attributes[$matchedAttributes[$attribute]] = $value;
         }
 
@@ -132,23 +139,7 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Request
         return $data;
     }
 
-    private function getNewProductAdditionalData()
-    {
-        $data = array();
-
-        if ($this->getVariationManager()->isLogicalUnit()) {
-            return $data;
-        }
-
-        $descriptionTemplateSource = $this->getAmazonListingProduct()->getDescriptionTemplateSource();
-
-        return array(
-            'number_of_items'       => $descriptionTemplateSource->getNumberOfItems(),
-            'item_package_quantity' => $descriptionTemplateSource->getItemPackageQuantity(),
-        );
-    }
-
-    // ########################################
+    //########################################
 
     private function getChannelTheme()
     {
@@ -170,5 +161,5 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Type_List_Request
         return $parentVariationManager->getTypeModel()->getChannelTheme();
     }
 
-    // ########################################
+    //########################################
 }

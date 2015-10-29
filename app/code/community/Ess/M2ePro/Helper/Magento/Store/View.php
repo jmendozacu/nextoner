@@ -1,14 +1,16 @@
 <?php
 
 /*
-* @copyright  Copyright (c) 2014 by  ESS-UA.
-*/
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
+ */
 
 class Ess_M2ePro_Helper_Magento_Store_View
 {
     private $defaultStore = NULL;
 
-    // ########################################
+    //########################################
 
     public function isExits($entity)
     {
@@ -32,7 +34,7 @@ class Ess_M2ePro_Helper_Magento_Store_View
         return ($store->getGroup()->getId() == $groupId);
     }
 
-    // ########################################
+    //########################################
 
     public function isSingleMode()
     {
@@ -44,7 +46,7 @@ class Ess_M2ePro_Helper_Magento_Store_View
         return !$this->isSingleMode();
     }
 
-    // ########################################
+    //########################################
 
     public function getDefault()
     {
@@ -57,7 +59,7 @@ class Ess_M2ePro_Helper_Magento_Store_View
                 $this->defaultStore = Mage::getModel('core/store')->load(0);
 
                 if (is_null($this->defaultStore->getId())) {
-                    throw new Exception('Getting default store is failed.');
+                    throw new Ess_M2ePro_Model_Exception('Getting default store is failed.');
                 }
             }
         }
@@ -70,7 +72,7 @@ class Ess_M2ePro_Helper_Magento_Store_View
         return (int)$this->getDefault()->getId();
     }
 
-    // ########################################
+    //########################################
 
     public function getPath($storeId)
     {
@@ -81,8 +83,8 @@ class Ess_M2ePro_Helper_Magento_Store_View
         try {
             $store = Mage::app()->getStore($storeId);
         } catch (Mage_Core_Model_Store_Exception $e) {
-            $error = Mage::helper('M2ePro')->__("Store with %store_id% doesn't exist.", $storeId );
-            throw new Exception($error);
+            $error = Mage::helper('M2ePro')->__("Store with %store_id% doesn't exist.", $storeId);
+            throw new Ess_M2ePro_Model_Exception($error);
         }
 
         $path = $store->getWebsite()->getName();
@@ -92,20 +94,20 @@ class Ess_M2ePro_Helper_Magento_Store_View
         return $path;
     }
 
-    // ########################################
+    //########################################
 
     public function addStore($name, $code, $websiteId, $groupId = null)
     {
         if (!Mage::helper('M2ePro/Magento_Store_Website')->isExists($websiteId)) {
             $error = Mage::helper('M2ePro')->__('Website with id %value% does not exists.',
-                $websiteId );
-            throw new Exception($error);
+                $websiteId);
+            throw new Ess_M2ePro_Model_Exception($error);
         }
 
         try {
             $store = Mage::app()->getStore($code, 'code');
             $error = Mage::helper('M2ePro')->__('Store with %code% already exists.', $code);
-            throw new Exception($error);
+            throw new Ess_M2ePro_Model_Exception($error);
 
         } catch (Exception $e) {
             // M2ePro_TRANSLATIONS
@@ -115,7 +117,7 @@ class Ess_M2ePro_Helper_Magento_Store_View
                 if (!Mage::helper('M2ePro/Magento_Store_Group')->isChildOfWebsite($groupId, $websiteId)) {
                     $error = Mage::helper('M2ePro')->__('Group with id %group_id% doesn\'t belong to'.
                         'website with %site_id%.',$groupId, $websiteId);
-                    throw new Exception($error);
+                    throw new Ess_M2ePro_Model_Exception($error);
                 }
             } else {
                 $groupId = Mage::app()->getWebsite($websiteId)->getDefaultGroupId();
@@ -140,5 +142,5 @@ class Ess_M2ePro_Helper_Magento_Store_View
         }
     }
 
-    // ########################################
+    //########################################
 }

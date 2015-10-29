@@ -1,14 +1,16 @@
 <?php
 
 /*
- * @copyright Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Helper_Component_Amazon_Category extends Mage_Core_Helper_Abstract
 {
     const RECENT_MAX_COUNT = 20;
 
-    // ########################################
+    //########################################
 
     public function getRecent($marketplaceId, array $excludedCategory = array())
     {
@@ -24,27 +26,24 @@ class Ess_M2ePro_Helper_Component_Amazon_Category extends Mage_Core_Helper_Abstr
 
         foreach ($recentCategories as $index => $recentCategoryValue) {
 
-            $isRecentCategoryExists = isset($recentCategoryValue['product_data_nick'],
-                                            $recentCategoryValue['browsenode_id'],
-                                            $recentCategoryValue['path']);
+            $isRecentCategoryExists = isset($recentCategoryValue['browsenode_id'], $recentCategoryValue['path']);
 
             $isCategoryEqualExcludedCategory = !empty($excludedCategory) &&
-                ($excludedCategory['product_data_nick'] == $recentCategoryValue['product_data_nick'] &&
-                 $excludedCategory['browsenode_id']     == $recentCategoryValue['browsenode_id'] &&
-                 $excludedCategory['path']              == $recentCategoryValue['path']);
+                ($excludedCategory['browsenode_id'] == $recentCategoryValue['browsenode_id'] &&
+                 $excludedCategory['path']          == $recentCategoryValue['path']);
 
             if (!$isRecentCategoryExists || $isCategoryEqualExcludedCategory) {
                 unset($recentCategories[$index]);
             }
         }
 
-        // -- some categories can be not accessible in the current marketplaces build
+        // some categories can be not accessible in the current marketplaces build
         $this->removeNotAccessibleCategories($marketplaceId, $recentCategories);
 
         return array_reverse($recentCategories);
     }
 
-    public function addRecent($marketplaceId, $productDataNick, $browseNodeId, $categoryPath)
+    public function addRecent($marketplaceId, $browseNodeId, $categoryPath)
     {
         $key = $this->getConfigGroup();
 
@@ -57,14 +56,11 @@ class Ess_M2ePro_Helper_Component_Amazon_Category extends Mage_Core_Helper_Abstr
         $recentCategories = $allRecentCategories[$marketplaceId];
         foreach ($recentCategories as $recentCategoryValue) {
 
-            if (!isset($recentCategoryValue['product_data_nick'],
-                $recentCategoryValue['browsenode_id'],
-                $recentCategoryValue['path'])) {
+            if (!isset($recentCategoryValue['browsenode_id'], $recentCategoryValue['path'])) {
                 continue;
             }
 
-            if ($recentCategoryValue['product_data_nick'] == $productDataNick &&
-                $recentCategoryValue['browsenode_id'] == $browseNodeId &&
+            if ($recentCategoryValue['browsenode_id'] == $browseNodeId &&
                 $recentCategoryValue['path'] == $categoryPath) {
                 return;
             }
@@ -75,21 +71,20 @@ class Ess_M2ePro_Helper_Component_Amazon_Category extends Mage_Core_Helper_Abstr
         }
 
         $categoryInfo = array(
-            'product_data_nick' => $productDataNick,
-            'browsenode_id'     => $browseNodeId,
-            'path'              => $categoryPath
+            'browsenode_id' => $browseNodeId,
+            'path'          => $categoryPath
         );
 
         $recentCategories[] = $categoryInfo;
         $allRecentCategories[$marketplaceId] = $recentCategories;
 
         $registryModel->addData(array(
-            'key' => $key,
+            'key'   => $key,
             'value' => json_encode($allRecentCategories)
         ))->save();
     }
 
-    // ########################################
+    //########################################
 
     private function getConfigGroup()
     {
@@ -117,14 +112,15 @@ class Ess_M2ePro_Helper_Component_Amazon_Category extends Mage_Core_Helper_Abstr
         $tempCategories = array();
 
         while ($row = $queryStmt->fetch()) {
-            $key = $row['product_data_nick'] .'##'. $row['browsenode_id'] .'##'. $row['path'].'>'.$row['title'];
+            $path = $row['path'] ? $row['path'] .'>'. $row['title'] : $row['title'];
+            $key = $row['browsenode_id'] .'##'. $path;
             $tempCategories[$key] = $row;
         }
 
         foreach ($recentCategories as $categoryKey => &$categoryData) {
 
             $categoryPath = str_replace(' > ', '>', $categoryData['path']);
-            $key = $categoryData['product_data_nick'] .'##'. $categoryData['browsenode_id'] .'##'. $categoryPath;
+            $key = $categoryData['browsenode_id'] .'##'. $categoryPath;
 
             if (!array_key_exists($key, $tempCategories)) {
                 $this->removeRecentCategory($categoryData, $marketplaceId);
@@ -141,9 +137,8 @@ class Ess_M2ePro_Helper_Component_Amazon_Category extends Mage_Core_Helper_Abstr
         $currentRecentCategories = $allRecentCategories[$marketplaceId];
 
         foreach ($currentRecentCategories as $index => $recentCategory) {
-            if ($category['product_data_nick'] == $recentCategory['product_data_nick'] &&
-                $category['browsenode_id']     == $recentCategory['browsenode_id'] &&
-                $category['path']              == $recentCategory['path']) {
+            if ($category['browsenode_id'] == $recentCategory['browsenode_id'] &&
+                $category['path']          == $recentCategory['path']) {
 
                 unset($allRecentCategories[$marketplaceId][$index]);
                 break;
@@ -156,5 +151,5 @@ class Ess_M2ePro_Helper_Component_Amazon_Category extends Mage_Core_Helper_Abstr
         ))->save();
     }
 
-    // ########################################
+    //########################################
 }

@@ -1,35 +1,45 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Buy_Listing_Product_Action_Request_Selling
     extends Ess_M2ePro_Model_Buy_Listing_Product_Action_Request_Abstract
 {
-    // ########################################
+    //########################################
 
+    /**
+     * @return array
+     */
     public function getData()
     {
-        if (!$this->getConfigurator()->isSellingAllowed()) {
-            return array();
+        $data = array();
+
+        if ($this->getConfigurator()->isQtyAllowed()) {
+            if (!isset($this->validatorsData['qty'])) {
+                $this->validatorsData['qty'] = $this->getBuyListingProduct()->getQty();
+            }
+
+            $data['qty'] = $this->validatorsData['qty'];
+
+            $this->checkQtyWarnings();
         }
 
-        if (!isset($this->validatorsData['qty'])) {
-            $this->validatorsData['qty'] = $this->getBuyListingProduct()->getQty();
+        if ($this->getConfigurator()->isPriceAllowed()) {
+            if (!isset($this->validatorsData['price'])) {
+                $this->validatorsData['price'] = $this->getBuyListingProduct()->getPrice();
+            }
+
+            $data['price'] = $this->validatorsData['price'];
         }
 
-        if (!isset($this->validatorsData['price'])) {
-            $this->validatorsData['price'] = $this->getBuyListingProduct()->getPrice();
-        }
-
-        return array(
-            'qty'   => $this->validatorsData['qty'],
-            'price' => $this->validatorsData['price'],
-        );
+        return $data;
     }
 
-    // ########################################
+    //########################################
 
     public function checkQtyWarnings()
     {
@@ -41,7 +51,7 @@ class Ess_M2ePro_Model_Buy_Listing_Product_Action_Request_Selling
             $productId = $this->getBuyListingProduct()->getActualMagentoProduct()->getProductId();
             $storeId = $this->getListing()->getStoreId();
 
-            if(!empty(Ess_M2ePro_Model_Magento_Product::$statistics[$listingProductId][$productId][$storeId]['qty'])) {
+            if (!empty(Ess_M2ePro_Model_Magento_Product::$statistics[$listingProductId][$productId][$storeId]['qty'])) {
 
                 $qtys = Ess_M2ePro_Model_Magento_Product::$statistics[$listingProductId][$productId][$storeId]['qty'];
                 foreach ($qtys as $type => $override) {
@@ -68,5 +78,5 @@ class Ess_M2ePro_Model_Buy_Listing_Product_Action_Request_Selling
         }
     }
 
-    // ########################################
+    //########################################
 }

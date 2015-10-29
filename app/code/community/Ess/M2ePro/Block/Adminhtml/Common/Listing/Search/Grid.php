@@ -1,51 +1,51 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Block_Adminhtml_Common_Listing_Search_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
-    // ####################################
+    //########################################
 
     public function __construct()
     {
         parent::__construct();
 
         // Initialization block
-        //------------------------------
+        // ---------------------------------------
         $this->setId('listingSearchGrid');
-        //------------------------------
+        // ---------------------------------------
 
         // Set default values
-        //------------------------------
+        // ---------------------------------------
         $this->setDefaultSort('id');
         $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(true);
         $this->setUseAjax(true);
-        //------------------------------
+        // ---------------------------------------
     }
 
-    // ####################################
+    //########################################
 
     protected function _prepareCollection()
     {
         // Get collection products in listing
-        //--------------------------------
+        // ---------------------------------------
         $activeComponents = Mage::helper('M2ePro/View_Common_Component')->getActiveComponents();
 
         /** @var Ess_M2ePro_Model_Mysql4_Listing_Product_Collection $listingProductCollection */
         $listingProductCollection = Mage::getModel('M2ePro/Listing_Product')->getCollection();
-        $listingProductCollection->addFieldToFilter(
-            '`main_table`.`component_mode`', array('in' => $activeComponents)
-        );
+        $listingProductCollection->addFieldToFilter('main_table.component_mode', array('in' => $activeComponents));
         $listingProductCollection->getSelect()->distinct();
         $listingProductCollection->getSelect()->join(
             array('l'=>Mage::getResourceModel('M2ePro/Listing')->getMainTable()),
             '(`l`.`id` = `main_table`.`listing_id`)',
             array('listing_title'=>'title','store_id')
         );
-        //--------------------------------
+        // ---------------------------------------
 
         $listingProductCollection->getSelect()->joinLeft(
             array('alp' => Mage::getResourceModel('M2ePro/Amazon_Listing_Product')->getMainTable()),
@@ -60,7 +60,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Search_Grid extends Mage_Adminht
         )');
 
         // Communicate with magento product table
-        //--------------------------------
+        // ---------------------------------------
         $table = Mage::getSingleton('core/resource')->getTableName('catalog_product_entity_varchar');
         $dbSelect = Mage::getResourceModel('core/config')->getReadConnection()
                                      ->select()
@@ -90,17 +90,19 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Search_Grid extends Mage_Adminht
             array()
         );
         $listingProductCollection->getSelect()->where('`cpev`.`store_id` = ('.$dbSelect->__toString().')');
-        //--------------------------------
+        // ---------------------------------------
 
         $listingProductCollection->getSelect()->joinLeft(
             new Zend_Db_Expr('(
                 SELECT
                     lp.listing_product_id,
+                    lp.general_id_owner,
                     lp.general_id,
                     lp.sku
                 FROM (
                     SELECT
                         listing_product_id,
+                        is_general_id_owner as general_id_owner,
                         general_id,
                         sku
                     FROM ' . Mage::getResourceModel('M2ePro/Amazon_Listing_Product')->getMainTable() . '
@@ -108,6 +110,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Search_Grid extends Mage_Adminht
                     UNION
                     SELECT
                         listing_product_id,
+                        template_new_product_id as general_id_owner,
                         general_id,
                         sku
                     FROM ' . Mage::getResourceModel('M2ePro/Buy_Listing_Product')->getMainTable() . '
@@ -136,20 +139,19 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Search_Grid extends Mage_Adminht
                 'product_id'                    => 'main_table.product_id',
                 'listing_id'                    => 'main_table.listing_id',
                 'status'                        => 'main_table.status',
+                'general_id_owner'              => 't.general_id_owner',
                 'general_id'                    => 't.general_id',
                 'online_sku'                    => 't.sku'
             )
         );
 
-        //------------------------------
+        // ---------------------------------------
         $listingOtherCollection = Mage::getModel('M2ePro/Listing_Other')->getCollection();
-        $listingOtherCollection->addFieldToFilter(
-            '`main_table`.`component_mode`', array('in' => $activeComponents)
-        );
+        $listingOtherCollection->addFieldToFilter('main_table.component_mode', array('in' => $activeComponents));
         $listingOtherCollection->getSelect()->distinct();
 
         // add stock availability, type id, status & visibility to select
-        //------------------------------
+        // ---------------------------------------
         $listingOtherCollection->getSelect()
             ->joinLeft(
                 array('cisi' => Mage::getResourceModel('cataloginventory/stock_item')->getMainTable()),
@@ -158,7 +160,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Search_Grid extends Mage_Adminht
             ->joinLeft(array('cpe'=>Mage::getSingleton('core/resource')->getTableName('catalog_product_entity')),
                 '(cpe.entity_id = `main_table`.product_id)',
                 array('magento_sku'=>'sku'));
-        //------------------------------
+        // ---------------------------------------
 
         $listingOtherCollection->getSelect()->joinLeft(
             new Zend_Db_Expr('(
@@ -207,13 +209,14 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Search_Grid extends Mage_Adminht
                 'product_id'                    => 'main_table.product_id',
                 'listing_id'                    => new Zend_Db_Expr('NULL'),
                 'status'                        => 'main_table.status',
+                'general_id_owner'              => new Zend_Db_Expr('NULL'),
                 'general_id'                    => 't.general_id',
                 'online_sku'                    => 't.sku'
             )
         );
-        //------------------------------
+        // ---------------------------------------
 
-        //------------------------------
+        // ---------------------------------------
         $selects = array(
             $listingProductCollection->getSelect(),
             $listingOtherCollection->getSelect()
@@ -239,12 +242,11 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Search_Grid extends Mage_Adminht
                 'product_id',
                 'listing_id',
                 'status',
+                'general_id_owner',
                 'general_id',
                 'online_sku',
             )
         );
-
-//        exit($resultCollection->getSelect()->__toString());
 
         // Set collection to grid
         $this->setCollection($resultCollection);
@@ -267,7 +269,6 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Search_Grid extends Mage_Adminht
         $this->addColumn('name', array(
             'header'    => Mage::helper('M2ePro')->__('Product Title / Listing / Product SKU'),
             'align'     => 'left',
-            //'width'     => '300px',
             'type'      => 'text',
             'index'     => 'product_name',
             'filter_index' => 'product_name',
@@ -334,7 +335,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Search_Grid extends Mage_Adminht
         $this->addColumn('general_id', array(
             'header' => Mage::helper('M2ePro')->__('Identifier'),
             'align' => 'left',
-            'width' => '90px',
+            'width' => '100px',
             'type' => 'text',
             'index' => 'general_id',
             'filter_index' => 'general_id',
@@ -373,7 +374,7 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Search_Grid extends Mage_Adminht
         return parent::_prepareColumns();
     }
 
-    // ####################################
+    //########################################
 
     public function callbackColumnProductId($value, $row, $column, $isExport)
     {
@@ -453,19 +454,48 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Search_Grid extends Mage_Adminht
         $productOptions = array();
 
         if ($listingProduct->isComponentModeAmazon()) {
-            if (!$listingProduct->getChildObject()->getVariationManager()->isIndividualType()) {
-                if ($listingProduct->getChildObject()->getVariationManager()->isVariationParent()) {
-                    $productOptions = $listingProduct->getChildObject()->getVariationManager()
+
+            $variationManager = $listingProduct->getChildObject()->getVariationManager();
+
+            if (!$variationManager->isIndividualType()) {
+
+                if ($variationManager->isVariationParent()) {
+
+                    $productAttributes = $listingProduct->getChildObject()->getVariationManager()
                         ->getTypeModel()->getProductAttributes();
 
+                    $virtualProductAttributes = $variationManager->getTypeModel()->getVirtualProductAttributes();
+                    $virtualChannelAttributes = $variationManager->getTypeModel()->getVirtualChannelAttributes();
+
                     $value .= '<div style="font-size: 11px; font-weight: bold; color: grey;"><br/>';
-                    $value .= implode(', ', $productOptions);
+                    $attributesStr = '';
+                    if (empty($virtualProductAttributes) && empty($virtualChannelAttributes)) {
+                        $attributesStr = implode(', ', $productAttributes);
+                    } else {
+                        foreach ($productAttributes as $attribute) {
+                            if (in_array($attribute, array_keys($virtualProductAttributes))) {
+
+                                $attributesStr .= '<span style="border-bottom: 2px dotted grey">' . $attribute .
+                                    ' (' . $virtualProductAttributes[$attribute] . ')</span>, ';
+
+                            } else if (in_array($attribute, array_keys($virtualChannelAttributes))) {
+
+                                $attributesStr .= '<span>' . $attribute .
+                                    ' (' . $virtualChannelAttributes[$attribute] . ')</span>, ';
+
+                            } else {
+                                $attributesStr .= $attribute . ', ';
+                            }
+                        }
+                        $attributesStr = rtrim($attributesStr, ', ');
+                    }
+                    $value .= $attributesStr;
                     $value .= '</div>';
                 }
                 return $value;
             }
 
-            if ($listingProduct->getChildObject()->getVariationManager()->getTypeModel()->isVariationProductMatched()) {
+            if ($variationManager->getTypeModel()->isVariationProductMatched()) {
                 $productOptions = $listingProduct->getChildObject()->
                     getVariationManager()->getTypeModel()->getProductOptions();
             }
@@ -505,28 +535,43 @@ class Ess_M2ePro_Block_Adminhtml_Common_Listing_Search_Grid extends Mage_Adminht
 
     public function callbackColumnSku($value, $row, $column, $isExport)
     {
+        if ($row->getData('status') == Ess_M2ePro_Model_Listing_Product::STATUS_NOT_LISTED) {
+            return '<span style="color: gray;">' . Mage::helper('M2ePro')->__('Not Listed') . '</span>';
+        }
+
         if (is_null($value) || $value === '') {
             return Mage::helper('M2ePro')->__('N/A');
         }
+
         return $value;
     }
 
     public function callbackColumnGeneralId($value, $row, $column, $isExport)
     {
-        if ((int)$row->getData('status') == Ess_M2ePro_Model_Listing_Product::STATUS_NOT_LISTED) {
-            if (is_null($value) || $value === '') {
-                return Mage::helper('M2ePro')->__('N/A');
-            }
-        } else {
-            if (is_null($value) || $value === '') {
+        if (empty($value)) {
+
+            if ($row->getData('status') != Ess_M2ePro_Model_Listing_Product::STATUS_NOT_LISTED) {
                 return '<i style="color:gray;">receiving...</i>';
             }
+
+            if ($row->getData('general_id_owner')) {
+
+                switch ($row->getData('component_mode')) {
+
+                    case Ess_M2ePro_Helper_Component_Amazon::NICK:
+                        return Mage::helper('M2ePro')->__('New ASIN/ISBN');
+                    case Ess_M2ePro_Helper_Component_Buy::NICK:
+                        return Mage::helper('M2ePro')->__('New SKU');
+                }
+            }
+
+            return Mage::helper('M2ePro')->__('N/A');
         }
 
         $url = '';
         if ($row->getData('component_mode') == Ess_M2ePro_Helper_Component_Amazon::NICK) {
             $url = Mage::helper('M2ePro/Component_Amazon')->getItemUrl($value, $row->getData('marketplace_id'));
-        } else if($row->getData('component_mode') == Ess_M2ePro_Helper_Component_Buy::NICK) {
+        } else if ($row->getData('component_mode') == Ess_M2ePro_Helper_Component_Buy::NICK) {
             $url = Mage::helper('M2ePro/Component_Buy')->getItemUrl($value);
         }
 
@@ -601,7 +646,7 @@ HTML;
         return $html;
     }
 
-    //-------------------------------------
+    // ---------------------------------------
 
     protected function callbackFilterTitle($collection, $column)
     {
@@ -615,7 +660,7 @@ HTML;
             ->where('product_name LIKE ? OR magento_sku LIKE ? OR listing_title LIKE ?', '%'.$value.'%');
     }
 
-    // ####################################
+    //########################################
 
     public function getGridUrl()
     {
@@ -627,5 +672,5 @@ HTML;
         return false;
     }
 
-    // ####################################
+    //########################################
 }

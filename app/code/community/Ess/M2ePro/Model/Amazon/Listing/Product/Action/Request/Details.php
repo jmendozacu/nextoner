@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Details
@@ -22,8 +24,11 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Details
      */
     private $definitionSource = NULL;
 
-    // ########################################
+    //########################################
 
+    /**
+     * @return array
+     */
     public function getData()
     {
         $data = array();
@@ -74,6 +79,11 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Details
 
         $data = array_merge($data, $this->getDescriptionData());
 
+        $data['number_of_items'] = $this->getAmazonListingProduct()
+                                        ->getDescriptionTemplateSource()->getNumberOfItems();
+        $data['item_package_quantity'] = $this->getAmazonListingProduct()
+                                              ->getDescriptionTemplateSource()->getItemPackageQuantity();
+
         $browsenodeId = $this->getDescriptionTemplate()->getBrowsenodeId();
         if (empty($browsenodeId)) {
             return $data;
@@ -88,8 +98,11 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Details
         );
     }
 
-    // ########################################
+    //########################################
 
+    /**
+     * @return array
+     */
     private function getConditionData()
     {
         $this->searchNotFoundAttributes();
@@ -102,6 +115,9 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Details
         );
     }
 
+    /**
+     * @return array
+     */
     private function getGiftData()
     {
         $data = array();
@@ -122,6 +138,9 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Details
 
     // ---------------------------------------
 
+    /**
+     * @return array
+     */
     private function getDescriptionData()
     {
         $source = $this->getDefinitionSource();
@@ -193,14 +212,18 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Details
         $data['shipping_weight_unit_of_measure'] = $source->getShippingWeightUnitOfMeasure();
         $this->processNotFoundAttributes('Shipping Weight Units');
 
-        if (is_null($data['package_weight'])) {
+        if (is_null($data['package_weight']) || $data['package_weight'] === '' ||
+            $data['package_weight_unit_of_measure'] === ''
+        ) {
             unset(
                 $data['package_weight'],
                 $data['package_weight_unit_of_measure']
             );
         }
 
-        if (is_null($data['shipping_weight'])) {
+        if (is_null($data['shipping_weight']) || $data['shipping_weight'] === '' ||
+            $data['shipping_weight_unit_of_measure'] === ''
+        ) {
             unset(
                 $data['shipping_weight'],
                 $data['shipping_weight_unit_of_measure']
@@ -236,20 +259,6 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Details
             );
         }
 
-        if ($data['package_weight'] === '' || $data['package_weight_unit_of_measure'] === '') {
-            unset(
-                $data['package_weight'],
-                $data['package_weight_unit_of_measure']
-            );
-        }
-
-        if ($data['shipping_weight'] === '' || $data['shipping_weight_unit_of_measure'] === '') {
-            unset(
-                $data['shipping_weight'],
-                $data['shipping_weight_unit_of_measure']
-            );
-        }
-
         return array(
             'description_data' => $data
         );
@@ -257,6 +266,9 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Details
 
     // ---------------------------------------
 
+    /**
+     * @return array
+     */
     private function getProductData()
     {
         $data = array();
@@ -282,7 +294,7 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Details
         );
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @return Ess_M2ePro_Model_Amazon_Template_Description
@@ -295,7 +307,7 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Details
         return $this->descriptionTemplate;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     /**
      * @return Ess_M2ePro_Model_Amazon_Template_Description_Definition
@@ -320,5 +332,5 @@ class Ess_M2ePro_Model_Amazon_Listing_Product_Action_Request_Details
         return $this->definitionSource;
     }
 
-    // ########################################
+    //########################################
 }

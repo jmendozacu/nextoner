@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2015 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 abstract class Ess_M2ePro_Model_Listing_Auto_Actions_Mode_Abstract
@@ -11,7 +13,7 @@ abstract class Ess_M2ePro_Model_Listing_Auto_Actions_Mode_Abstract
      */
     private $product = NULL;
 
-    //####################################
+    //########################################
 
     /**
      * @param Mage_Catalog_Model_Product $product
@@ -23,18 +25,18 @@ abstract class Ess_M2ePro_Model_Listing_Auto_Actions_Mode_Abstract
 
     /**
      * @return Mage_Catalog_Model_Product
-     * @throws LogicException
+     * @throws Ess_M2ePro_Model_Exception_Logic
      */
     protected function getProduct()
     {
         if (!($this->product instanceof Mage_Catalog_Model_Product)) {
-            throw new LogicException('Property "Product" should be set first.');
+            throw new Ess_M2ePro_Model_Exception_Logic('Property "Product" should be set first.');
         }
 
         return $this->product;
     }
 
-    //####################################
+    //########################################
 
     /**
      * @param Ess_M2ePro_Model_Listing $listing
@@ -51,5 +53,5 @@ abstract class Ess_M2ePro_Model_Listing_Auto_Actions_Mode_Abstract
         return $object;
     }
 
-    //####################################
+    //########################################
 }

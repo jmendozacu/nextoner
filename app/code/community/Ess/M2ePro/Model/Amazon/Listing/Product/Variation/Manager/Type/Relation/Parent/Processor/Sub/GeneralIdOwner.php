@@ -1,13 +1,15 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2014 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2EPro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Parent_Processor_Sub_GeneralIdOwner
     extends Ess_M2ePro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Parent_Processor_Sub_Abstract
 {
-    // ##########################################################
+    //########################################
 
     protected function check()
     {
@@ -19,7 +21,6 @@ class Ess_M2EPro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Pa
     protected function execute()
     {
         $isGeneralIdOwner = $this->getProcessor()->getAmazonListingProduct()->isGeneralIdOwner();
-        $descriptionTemplateId = $this->getProcessor()->getAmazonListingProduct()->getTemplateDescriptionId();
 
         foreach ($this->getProcessor()->getTypeModel()->getChildListingsProducts() as $listingProduct) {
 
@@ -33,14 +34,9 @@ class Ess_M2EPro_Model_Amazon_Listing_Product_Variation_Manager_Type_Relation_Pa
                 $needSave = true;
             }
 
-            if ($amazonListingProduct->getTemplateDescriptionId() != $descriptionTemplateId) {
-                $listingProduct->setData('template_description_id', $descriptionTemplateId);
-                $needSave = true;
-            }
-
             $needSave && $listingProduct->save();
         }
     }
 
-    // ##########################################################
+    //########################################
 }

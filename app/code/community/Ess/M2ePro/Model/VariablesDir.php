@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_VariablesDir
@@ -12,7 +14,7 @@ class Ess_M2ePro_Model_VariablesDir
     private $_pathVariablesDirBase = NULL;
     private $_pathVariablesDirChildFolder = NULL;
 
-    //####################################
+    //########################################
 
     public function __construct()
     {
@@ -22,12 +24,7 @@ class Ess_M2ePro_Model_VariablesDir
 
         !isset($params['child_folder']) && $params['child_folder'] = NULL;
         $params['child_folder'] === '' && $params['child_folder'] = NULL;
-
-        if (Mage::helper('M2ePro/Magento')->isGoEdition()) {
-            $this->_pathVariablesDirBase = Mage::getBaseDir('media').DS.self::BASE_NAME;
-        } else {
-            $this->_pathVariablesDirBase = Mage::getBaseDir('var').DS.self::BASE_NAME;
-        }
+        $this->_pathVariablesDirBase = Mage::getBaseDir('var').DS.self::BASE_NAME;
 
         if (!is_null($params['child_folder'])) {
 
@@ -54,7 +51,7 @@ class Ess_M2ePro_Model_VariablesDir
         $this->_childFolder = str_replace(array('/','\\'),DS,$this->_childFolder);
     }
 
-    //####################################
+    //########################################
 
     public function getBasePath()
     {
@@ -66,19 +63,25 @@ class Ess_M2ePro_Model_VariablesDir
         return $this->_pathVariablesDirChildFolder;
     }
 
-    //---------------------
+    // ---------------------------------------
 
+    /**
+     * @return bool
+     */
     public function isBaseExist()
     {
         return @is_dir($this->getBasePath());
     }
 
+    /**
+     * @return bool
+     */
     public function isExist()
     {
         return @is_dir($this->getPath());
     }
 
-    //---------------------
+    // ---------------------------------------
 
     public function createBase()
     {
@@ -87,7 +90,7 @@ class Ess_M2ePro_Model_VariablesDir
         }
 
         if (!@mkdir($this->getBasePath(), 0777, true)) {
-            throw new Exception('M2ePro base var dir creation is failed.');
+            throw new Ess_M2ePro_Model_Exception('M2ePro base var dir creation is failed.');
         }
     }
 
@@ -107,19 +110,19 @@ class Ess_M2ePro_Model_VariablesDir
             foreach ($tempChildFolders as $key=>$value) {
                 if (!is_dir($tempPath.$value.DS)) {
                     if (!@mkdir($tempPath.$value.DS, 0777, true)) {
-                        throw new Exception('Custom var dir creation is failed.');
+                        throw new Ess_M2ePro_Model_Exception('Custom var dir creation is failed.');
                     }
                 }
                 $tempPath = $tempPath.$value.DS;
             }
         } else {
             if (!@mkdir($this->getPath(), 0777, true)) {
-                throw new Exception('Custom var dir creation is failed.');
+                throw new Ess_M2ePro_Model_Exception('Custom var dir creation is failed.');
             }
         }
     }
 
-    //---------------------
+    // ---------------------------------------
 
     public function removeBase()
     {
@@ -128,7 +131,7 @@ class Ess_M2ePro_Model_VariablesDir
         }
 
         if (!@rmdir($this->getBasePath())) {
-            throw new Exception('M2ePro base var dir removing is failed.');
+            throw new Ess_M2ePro_Model_Exception('M2ePro base var dir removing is failed.');
         }
     }
 
@@ -141,12 +144,12 @@ class Ess_M2ePro_Model_VariablesDir
         $directoryIterator = new RecursiveDirectoryIterator($this->getBasePath(), FilesystemIterator::SKIP_DOTS);
         $iterator = new RecursiveIteratorIterator($directoryIterator, RecursiveIteratorIterator::CHILD_FIRST);
 
-        foreach($iterator as $path) {
+        foreach ($iterator as $path) {
             $path->isFile() ? unlink($path->getPathname()) : rmdir($path->getPathname());
         }
 
         if (!@rmdir($this->getBasePath())) {
-            throw new Exception('M2ePro base var dir removing is failed.');
+            throw new Ess_M2ePro_Model_Exception('M2ePro base var dir removing is failed.');
         }
     }
 
@@ -157,9 +160,9 @@ class Ess_M2ePro_Model_VariablesDir
         }
 
         if (!@rmdir($this->getPath())) {
-            throw new Exception('Custom var dir removing is failed.');
+            throw new Ess_M2ePro_Model_Exception('Custom var dir removing is failed.');
         }
     }
 
-    //####################################
+    //########################################
 }

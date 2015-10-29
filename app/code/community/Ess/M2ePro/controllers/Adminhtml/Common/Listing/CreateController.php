@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2014 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Adminhtml_Common_Listing_CreateController
@@ -10,7 +12,7 @@ class Ess_M2ePro_Adminhtml_Common_Listing_CreateController
     protected $component;
     protected $sessionKeyPostfix = '_listing_create';
 
-    //#############################################
+    //########################################
 
     protected function _initAction()
     {
@@ -35,19 +37,19 @@ class Ess_M2ePro_Adminhtml_Common_Listing_CreateController
         return $this;
     }
 
-    // ####################################
+    //########################################
 
     public function indexAction()
     {
         // Check clear param
-        //----------------------------
+        // ---------------------------------------
         if ($this->getRequest()->getParam('clear')) {
             $this->clearSession();
             $this->getRequest()->setParam('clear',null);
             $this->_redirect('*/*/index',array('_current' => true, 'step' => 1));
             return;
         }
-        //----------------------------
+        // ---------------------------------------
 
         $step = (int)$this->getRequest()->getParam('step');
 
@@ -74,7 +76,7 @@ class Ess_M2ePro_Adminhtml_Common_Listing_CreateController
 
             // save data
             $post = $this->getRequest()->getPost();
-            //------------------------------
+            // ---------------------------------------
 
             $this->setSessionValue('title', strip_tags($post['title']));
             $this->setSessionValue('account_id', (int)$post['account_id']);
@@ -85,16 +87,24 @@ class Ess_M2ePro_Adminhtml_Common_Listing_CreateController
         }
 
         $this->_initAction();
+
+        $component = $this->getComponent();
+        if (!$component) {
+            $this->setComponentPageHelpLink('Step+1%3A+General+Settings');
+        } else {
+            $this->setPageHelpLink($component, 'Step+1%3A+General+Settings');
+        }
+
         $this->_addContent($this->getLayout()->createBlock('M2ePro/adminhtml_common_listing_add_stepOne', '',
             array(
-                'component' => $this->getComponent()
+                'component' => $component
             )
         ));
 
         $this->renderLayout();
     }
 
-    // ------------------------------------
+    // ---------------------------------------
 
     protected function stepTwo()
     {
@@ -120,15 +130,23 @@ class Ess_M2ePro_Adminhtml_Common_Listing_CreateController
         }
 
         $this->_initAction();
+
+        $component = $this->getComponent();
+        if (!$component) {
+            $this->setComponentPageHelpLink('Step+2%3A+Selling+Settings');
+        } else {
+            $this->setPageHelpLink($component, 'Step+2%3A+Selling+Settings');
+        }
+
         $this->_addContent($this->getLayout()->createBlock('M2ePro/adminhtml_common_listing_add_stepTwo', '',
             array(
-                'component' => $this->getComponent()
+                'component' => $component
             )
         ));
         $this->renderLayout();
     }
 
-    protected function getStepTwoFields(){
+    protected function getStepTwoFields() {
 
         switch ($this->getComponent()) {
             case Ess_M2ePro_Helper_Component_Amazon::NICK:
@@ -145,7 +163,7 @@ class Ess_M2ePro_Adminhtml_Common_Listing_CreateController
         return array_keys($vals);
     }
 
-    // ------------------------------------
+    // ---------------------------------------
 
     protected function stepThree()
     {
@@ -167,7 +185,7 @@ class Ess_M2ePro_Adminhtml_Common_Listing_CreateController
             $listing = $this->createListing();
             $this->clearSession();
 
-            if($this->isCreationModeListingOnly()) {
+            if ($this->isCreationModeListingOnly()) {
                 // closing window for 3rd party products moving in new listing creation
                 echo "<script>window.close();</script>";
                 return;
@@ -180,19 +198,26 @@ class Ess_M2ePro_Adminhtml_Common_Listing_CreateController
                     'new_listing' => 1
                 )
             );
-            return;
         }
 
         $this->_initAction();
+
+        $component = $this->getComponent();
+        if (!$component) {
+            $this->setComponentPageHelpLink('Step+3%3A+Search+Settings');
+        } else {
+            $this->setPageHelpLink($component, 'Step+3%3A+Search+Settings');
+        }
+
         $this->_addContent($this->getLayout()->createBlock('M2ePro/adminhtml_common_listing_add_stepThree', '',
             array(
-                'component' => $this->getComponent()
+                'component' => $component
             )
         ));
         $this->renderLayout();
     }
 
-    protected function getStepThreeFields(){
+    protected function getStepThreeFields() {
 
         switch ($this->getComponent()) {
             case Ess_M2ePro_Helper_Component_Amazon::NICK:
@@ -209,22 +234,22 @@ class Ess_M2ePro_Adminhtml_Common_Listing_CreateController
         return array_keys($vals);
     }
 
-    // ####################################
+    //########################################
 
     protected function createListing()
     {
         $sessionData = $this->getSessionValue();
 
         // Add new Listing
-        //---------------
+        // ---------------------------------------
         $listing = Mage::helper('M2ePro/Component')
             ->getComponentModel($this->getComponent(), 'Listing')
             ->addData($sessionData)
             ->save();
-        //---------------
+        // ---------------------------------------
 
         // Set message to log
-        //---------------
+        // ---------------------------------------
         $tempLog = Mage::getModel('M2ePro/Listing_Log');
         $tempLog->setComponentMode($listing->getComponentMode());
         $tempLog->addListingMessage(
@@ -238,12 +263,12 @@ class Ess_M2ePro_Adminhtml_Common_Listing_CreateController
             Ess_M2ePro_Model_Log_Abstract::TYPE_NOTICE,
             Ess_M2ePro_Model_Log_Abstract::PRIORITY_HIGH
         );
-        //---------------
+        // ---------------------------------------
 
         return $listing;
     }
 
-    // ####################################
+    //########################################
 
     protected function getComponent()
     {
@@ -255,7 +280,7 @@ class Ess_M2ePro_Adminhtml_Common_Listing_CreateController
         return $this->getComponent().$this->sessionKeyPostfix;
     }
 
-    // ####################################
+    //########################################
 
     protected function getMarketplaceId()
     {
@@ -273,7 +298,7 @@ class Ess_M2ePro_Adminhtml_Common_Listing_CreateController
         }
     }
 
-    // ####################################
+    //########################################
 
     protected function setSessionValue($key, $value)
     {
@@ -300,14 +325,14 @@ class Ess_M2ePro_Adminhtml_Common_Listing_CreateController
         return isset($sessionData[$key]) ? $sessionData[$key] : NULL;
     }
 
-    // ------------------------------------
+    // ---------------------------------------
 
     private function clearSession()
     {
         Mage::helper('M2ePro/Data_Session')->setValue($this->getSessionKey(), NULL);
     }
 
-    //#############################################
+    //########################################
 
     private function isCreationModeListingOnly()
     {
@@ -315,5 +340,5 @@ class Ess_M2ePro_Adminhtml_Common_Listing_CreateController
             Ess_M2ePro_Helper_View::LISTING_CREATION_MODE_LISTING_ONLY;
     }
 
-    //#############################################
+    //########################################
 }

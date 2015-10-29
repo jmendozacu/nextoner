@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Mysql4_Buy_Listing
@@ -9,7 +11,7 @@ class Ess_M2ePro_Model_Mysql4_Buy_Listing
 {
     protected $_isPkAutoIncrement = false;
 
-    // ########################################
+    //########################################
 
     public function _construct()
     {
@@ -17,7 +19,7 @@ class Ess_M2ePro_Model_Mysql4_Buy_Listing
         $this->_isPkAutoIncrement = false;
     }
 
-    // ########################################
+    //########################################
 
     public function updateStatisticColumns()
     {
@@ -46,7 +48,7 @@ class Ess_M2ePro_Model_Mysql4_Buy_Listing
         $this->_getWriteAdapter()->query($query);
     }
 
-    // ########################################
+    //########################################
 
     public function setSynchStatusNeed($newData, $oldData, $listingProducts)
     {
@@ -55,7 +57,7 @@ class Ess_M2ePro_Model_Mysql4_Buy_Listing
         $this->setSynchStatusNeedBySynchronizationTemplate($newData,$oldData,$listingProducts);
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function setSynchStatusNeedByListing($newData, $oldData, $listingsProducts)
     {
@@ -96,18 +98,12 @@ class Ess_M2ePro_Model_Mysql4_Buy_Listing
 
     public function setSynchStatusNeedBySellingFormatTemplate($newData, $oldData, $listingsProducts)
     {
-        $newSellingFormatTemplate = Mage::helper('M2ePro/Component')->getCachedComponentObject(
-            Ess_M2ePro_Helper_Component_Buy::NICK,
-            'Template_SellingFormat',
-            $newData['template_selling_format_id'],
-            NULL, array('template')
+        $newSellingFormatTemplate = Mage::helper('M2ePro/Component_Buy')->getCachedObject(
+            'Template_SellingFormat', $newData['template_selling_format_id'], NULL, array('template')
         );
 
-        $oldSellingFormatTemplate = Mage::helper('M2ePro/Component')->getCachedComponentObject(
-            Ess_M2ePro_Helper_Component_Buy::NICK,
-            'Template_SellingFormat',
-            $oldData['template_selling_format_id'],
-            NULL, array('template')
+        $oldSellingFormatTemplate = Mage::helper('M2ePro/Component_Buy')->getCachedObject(
+            'Template_SellingFormat', $oldData['template_selling_format_id'], NULL, array('template')
         );
 
         Mage::getResourceModel('M2ePro/Buy_Template_SellingFormat')->setSynchStatusNeed(
@@ -119,18 +115,12 @@ class Ess_M2ePro_Model_Mysql4_Buy_Listing
 
     public function setSynchStatusNeedBySynchronizationTemplate($newData, $oldData, $listingsProducts)
     {
-        $newSynchTemplate = Mage::helper('M2ePro/Component')->getCachedComponentObject(
-            Ess_M2ePro_Helper_Component_Buy::NICK,
-            'Template_Synchronization',
-            $newData['template_synchronization_id'],
-            NULL, array('template')
+        $newSynchTemplate = Mage::helper('M2ePro/Component_Buy')->getCachedObject(
+            'Template_Synchronization', $newData['template_synchronization_id'], NULL, array('template')
         );
 
-        $oldSynchTemplate = Mage::helper('M2ePro/Component')->getCachedComponentObject(
-            Ess_M2ePro_Helper_Component_Buy::NICK,
-            'Template_Synchronization',
-            $oldData['template_synchronization_id'],
-            NULL, array('template')
+        $oldSynchTemplate = Mage::helper('M2ePro/Component_Buy')->getCachedObject(
+            'Template_Synchronization', $oldData['template_synchronization_id'], NULL, array('template')
         );
 
         Mage::getResourceModel('M2ePro/Buy_Template_Synchronization')->setSynchStatusNeed(
@@ -140,7 +130,7 @@ class Ess_M2ePro_Model_Mysql4_Buy_Listing
         );
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function isDifferent($newData, $oldData)
     {
@@ -172,5 +162,5 @@ class Ess_M2ePro_Model_Mysql4_Buy_Listing
         return (count(array_diff_assoc($newData,$oldData)) > 0);
     }
 
-    // ########################################
+    //########################################
 }

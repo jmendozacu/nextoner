@@ -1,12 +1,14 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2015 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Model_Observer_Indexes_Enable extends Ess_M2ePro_Model_Observer_Abstract
 {
-    //####################################
+    //########################################
 
     public function process()
     {
@@ -38,6 +40,8 @@ class Ess_M2ePro_Model_Observer_Indexes_Enable extends Ess_M2ePro_Model_Observer
             return;
         }
 
+        // M2ePro_TRANSLATIONS
+        // Product reindex was executed.
         Mage::getModel('M2ePro/Synchronization_Log')->addMessage(
             Mage::helper('M2ePro')->__('Product reindex was executed.'),
             Ess_M2ePro_Model_Log_Abstract::TYPE_NOTICE,
@@ -45,5 +49,5 @@ class Ess_M2ePro_Model_Observer_Indexes_Enable extends Ess_M2ePro_Model_Observer
         );
     }
 
-    //####################################
+    //########################################
 }

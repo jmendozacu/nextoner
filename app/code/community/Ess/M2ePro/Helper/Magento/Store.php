@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Helper_Magento_Store extends Mage_Core_Helper_Abstract
@@ -10,7 +12,7 @@ class Ess_M2ePro_Helper_Magento_Store extends Mage_Core_Helper_Abstract
     private $defaultStoreGroup = NULL;
     private $defaultStore = NULL;
 
-    // ########################################
+    //########################################
 
     public function isSingleStoreMode()
     {
@@ -22,7 +24,7 @@ class Ess_M2ePro_Helper_Magento_Store extends Mage_Core_Helper_Abstract
         return !$this->isSingleStoreMode();
     }
 
-    // ########################################
+    //########################################
 
     public function getDefaultWebsite()
     {
@@ -31,7 +33,7 @@ class Ess_M2ePro_Helper_Magento_Store extends Mage_Core_Helper_Abstract
             if (is_null($this->defaultWebsite->getId())) {
                 $this->defaultWebsite = Mage::getModel('core/website')->load(0);
                 if (is_null($this->defaultWebsite->getId())) {
-                    throw new Exception('Getting default website is failed');
+                    throw new Ess_M2ePro_Model_Exception('Getting default website is failed');
                 }
             }
         }
@@ -49,7 +51,7 @@ class Ess_M2ePro_Helper_Magento_Store extends Mage_Core_Helper_Abstract
             if (is_null($this->defaultStoreGroup->getId())) {
                 $this->defaultStoreGroup = Mage::getModel('core/store_group')->load(0);
                 if (is_null($this->defaultStoreGroup->getId())) {
-                    throw new Exception('Getting default store group is failed');
+                    throw new Ess_M2ePro_Model_Exception('Getting default store group is failed');
                 }
             }
         }
@@ -67,14 +69,14 @@ class Ess_M2ePro_Helper_Magento_Store extends Mage_Core_Helper_Abstract
             if (is_null($this->defaultStore->getId())) {
                 $this->defaultStore = Mage::getModel('core/store')->load(0);
                 if (is_null($this->defaultStore->getId())) {
-                    throw new Exception('Getting default store is failed');
+                    throw new Ess_M2ePro_Model_Exception('Getting default store is failed');
                 }
             }
         }
         return $this->defaultStore;
     }
 
-    //------------------------------------------
+    // ---------------------------------------
 
     public function getDefaultWebsiteId()
     {
@@ -91,7 +93,7 @@ class Ess_M2ePro_Helper_Magento_Store extends Mage_Core_Helper_Abstract
         return (int)$this->getDefaultStore()->getId();
     }
 
-    // ########################################
+    //########################################
 
     public function getStorePath($storeId)
     {
@@ -112,7 +114,7 @@ class Ess_M2ePro_Helper_Magento_Store extends Mage_Core_Helper_Abstract
         return $path;
     }
 
-    // ########################################
+    //########################################
 
     public function getWebsite($storeId)
     {
@@ -132,5 +134,5 @@ class Ess_M2ePro_Helper_Magento_Store extends Mage_Core_Helper_Abstract
         return $website ? $website->getName() : '';
     }
 
-    // ########################################
+    //########################################
 }

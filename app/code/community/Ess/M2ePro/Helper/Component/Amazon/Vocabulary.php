@@ -1,18 +1,24 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abstract
 {
+    const VOCABULARY_AUTO_ACTION_NOT_SET = 0;
+    const VOCABULARY_AUTO_ACTION_YES = 1;
+    const VOCABULARY_AUTO_ACTION_NO = 2;
+
     const VALUE_TYPE_ATTRIBUTE = 'attribute';
     const VALUE_TYPE_OPTION    = 'option';
 
     const LOCAL_DATA_REGISTRY_KEY  = 'amazon_vocabulary_local';
     const SERVER_DATA_REGISTRY_KEY = 'amazon_vocabulary_server';
 
-    // ########################################
+    //########################################
 
     public function addAttribute($productAttribute, $channelAttribute)
     {
@@ -50,7 +56,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         $massProcessor->execute();
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function addAttributeToLocalStorage($productAttribute, $channelAttribute)
     {
@@ -59,6 +65,10 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
 
         $vocabularyData = $registry->getSettings('value');
         $vocabularyData[$channelAttribute]['names'][] = $productAttribute;
+
+        if (!isset($vocabularyData[$channelAttribute]['options'])) {
+            $vocabularyData[$channelAttribute]['options'] = array();
+        }
 
         $registry->setData('key', self::LOCAL_DATA_REGISTRY_KEY);
         $registry->setSettings('value', $vocabularyData)->save();
@@ -88,7 +98,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         }
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function removeAttributeFromLocalStorage($productAttribute, $channelAttribute)
     {
@@ -106,13 +116,15 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
 
         unset($vocabularyData[$channelAttribute]['names'][$nameKey]);
 
+        $vocabularyData[$channelAttribute]['names'] = array_values($vocabularyData[$channelAttribute]['names']);
+
         $registry->setData('key', self::LOCAL_DATA_REGISTRY_KEY);
         $registry->setSettings('value', $vocabularyData)->save();
 
         $this->removeLocalDataCache();
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function isAttributeExistsInLocalStorage($productAttribute, $channelAttribute)
     {
@@ -128,7 +140,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         );
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function isAttributeExists($productAttribute, $channelAttribute, $vocabularyData)
     {
@@ -143,7 +155,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         return true;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function isAttributeAutoActionNotSet()
     {
@@ -170,7 +182,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         return !(bool)$configValue;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function enableAttributeAutoAction()
     {
@@ -187,7 +199,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         return $this->unsetConfigValue('/amazon/vocabulary/attribute/auto_action/', 'enabled');
     }
 
-    // ########################################
+    //########################################
 
     public function addOption($productOption, $channelOption, $channelAttribute)
     {
@@ -228,7 +240,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         $massProcessor->execute();
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function addOptionToLocalStorage($productOption, $channelOption, $channelAttribute)
     {
@@ -236,6 +248,10 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         $registry = Mage::getModel('M2ePro/Registry')->load(self::LOCAL_DATA_REGISTRY_KEY, 'key');
 
         $vocabularyData = $registry->getSettings('value');
+
+        if (!isset($vocabularyData[$channelAttribute]['names'])) {
+            $vocabularyData[$channelAttribute]['names'] = array();
+        }
 
         if (!isset($vocabularyData[$channelAttribute]['options'])) {
             $vocabularyData[$channelAttribute]['options'] = array();
@@ -287,7 +303,43 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         }
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
+
+    public function removeOptionFromLocalStorage($productOption, $productOptionsGroup, $channelAttribute)
+    {
+        /** @var Ess_M2ePro_Model_Registry $registry */
+        $registry = Mage::getModel('M2ePro/Registry')->load(self::LOCAL_DATA_REGISTRY_KEY, 'key');
+
+        $vocabularyData = $registry->getSettings('value');
+        if (empty($vocabularyData[$channelAttribute]['options'])) {
+            return;
+        }
+
+        foreach ($vocabularyData[$channelAttribute]['options'] as $optionsGroupKey => &$options) {
+
+            $comparedOptions = array_diff($productOptionsGroup, $options);
+            $nameKey = array_search($productOption, $options);
+
+            if (empty($comparedOptions) && $nameKey !== false) {
+
+                unset($options[$nameKey]);
+
+                $vocabularyData[$channelAttribute]['options'][$optionsGroupKey] = array_values($options);
+
+                if (count($options) == 1) {
+                    unset($vocabularyData[$channelAttribute]['options'][$optionsGroupKey]);
+                }
+                break;
+            }
+        }
+
+        $registry->setData('key', self::LOCAL_DATA_REGISTRY_KEY);
+        $registry->setSettings('value', $vocabularyData)->save();
+
+        $this->removeLocalDataCache();
+    }
+
+    // ---------------------------------------
 
     public function isOptionExistsInLocalStorage($productOption, $channelOption, $channelAttribute)
     {
@@ -303,7 +355,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         );
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function isOptionExists($productOption, $channelOption, $channelAttribute, $vocabularyData)
     {
@@ -325,7 +377,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         return false;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function isOptionAutoActionNotSet()
     {
@@ -352,7 +404,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         return !(bool)$configValue;
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function enableOptionAutoAction()
     {
@@ -369,7 +421,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         return $this->unsetConfigValue('/amazon/vocabulary/option/auto_action/', 'enabled');
     }
 
-    // ########################################
+    //########################################
 
     public function getLocalData()
     {
@@ -397,7 +449,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         return $this->getOptionNames($attribute, $option, $this->getLocalData());
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function getServerData()
     {
@@ -425,7 +477,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         return $this->getOptionNames($attribute, $option, $this->getServerData());
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function getAttributeNames($attribute, $vocabularyData)
     {
@@ -458,7 +510,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         return $resultNames;
     }
 
-    // ########################################
+    //########################################
 
     public function setLocalData(array $data)
     {
@@ -482,7 +534,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         $this->removeServerDataCache();
     }
 
-    // ########################################
+    //########################################
 
     public function getParentListingsProductsAffectedToAttribute($channelAttribute)
     {
@@ -582,7 +634,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         return $listingProductCollection->getItems();
     }
 
-    // ########################################
+    //########################################
 
     private function getLocalDataCache()
     {
@@ -596,7 +648,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         return Mage::helper('M2ePro/Data_Cache_Permanent')->getValue($cacheKey);
     }
 
-    // -----------------------------------------
+    // ---------------------------------------
 
     private function setLocalDataCache(array $data)
     {
@@ -610,7 +662,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         Mage::helper('M2ePro/Data_Cache_Permanent')->setValue($cacheKey, $data);
     }
 
-    // -----------------------------------------
+    // ---------------------------------------
 
     private function removeLocalDataCache()
     {
@@ -624,7 +676,7 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         Mage::helper('M2ePro/Data_Cache_Permanent')->removeValue($cacheKey);
     }
 
-    // ########################################
+    //########################################
 
     private function getConfigValue($group, $key)
     {
@@ -641,5 +693,5 @@ class Ess_M2ePro_Helper_Component_Amazon_Vocabulary extends Mage_Core_Helper_Abs
         return Mage::helper('M2ePro/Module')->getConfig()->deleteGroupValue($group, $key);
     }
 
-    // ########################################
+    //########################################
 }

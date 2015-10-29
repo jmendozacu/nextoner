@@ -1,7 +1,9 @@
 <?php
 
 /*
- * @copyright  Copyright (c) 2013 by  ESS-UA.
+ * @author     M2E Pro Developers Team
+ * @copyright  2011-2015 ESS-UA [M2E Pro]
+ * @license    Commercial use is forbidden
  */
 
 abstract class Ess_M2ePro_Model_Connector_Buy_Product_Responser
@@ -43,7 +45,7 @@ abstract class Ess_M2ePro_Model_Connector_Buy_Product_Responser
 
     protected $isResponseFailed = false;
 
-    // ########################################
+    //########################################
 
     public function __construct(array $params = array())
     {
@@ -57,7 +59,7 @@ abstract class Ess_M2ePro_Model_Connector_Buy_Product_Responser
         }
     }
 
-    // ########################################
+    //########################################
 
     protected function processResponseMessages(array $messages = array())
     {
@@ -81,8 +83,12 @@ abstract class Ess_M2ePro_Model_Connector_Buy_Product_Responser
         return true;
     }
 
-    // ########################################
+    //########################################
 
+    /**
+     * @param Ess_M2ePro_Model_Processing_Request $processingRequest
+     * @throws Ess_M2ePro_Model_Exception_Logic
+     */
     public function unsetProcessingLocks(Ess_M2ePro_Model_Processing_Request $processingRequest)
     {
         parent::unsetProcessingLocks($processingRequest);
@@ -124,7 +130,7 @@ abstract class Ess_M2ePro_Model_Connector_Buy_Product_Responser
         }
     }
 
-    // ----------------------------------------
+    // ---------------------------------------
 
     public function eventAfterExecuting()
     {
@@ -166,18 +172,23 @@ abstract class Ess_M2ePro_Model_Connector_Buy_Product_Responser
                 continue;
             }
 
-            if (!$inspector->isMeetReviseQtyRequirements($listingProduct) &&
-                !$inspector->isMeetRevisePriceRequirements($listingProduct)
-            ) {
-                continue;
+            if ($inspector->isMeetReviseQtyRequirements($listingProduct)) {
+                $configurator->setPartialMode();
+                $configurator->allowQty();
+
+                $runner->addProduct(
+                    $listingProduct, Ess_M2ePro_Model_Listing_Product::ACTION_REVISE, $configurator
+                );
             }
 
-            $configurator->setPartialMode();
-            $configurator->allowSelling();
+            if ($inspector->isMeetRevisePriceRequirements($listingProduct)) {
+                $configurator->setPartialMode();
+                $configurator->allowPrice();
 
-            $runner->addProduct(
-                $listingProduct, Ess_M2ePro_Model_Listing_Product::ACTION_REVISE, $configurator
-            );
+                $runner->addProduct(
+                    $listingProduct, Ess_M2ePro_Model_Listing_Product::ACTION_REVISE, $configurator
+                );
+            }
         }
 
         foreach ($listingsProductsByStatus[Ess_M2ePro_Model_Listing_Product::STATUS_STOPPED] as $listingProduct) {
@@ -195,7 +206,7 @@ abstract class Ess_M2ePro_Model_Connector_Buy_Product_Responser
         $runner->execute();
     }
 
-    // ########################################
+    //########################################
 
     protected function validateResponseData($response)
     {
@@ -237,7 +248,7 @@ abstract class Ess_M2ePro_Model_Connector_Buy_Product_Responser
         }
     }
 
-    //----------------------------------------
+    // ---------------------------------------
 
     protected function processMessages(Ess_M2ePro_Model_Listing_Product $listingProduct, array $messages = array())
     {
@@ -271,14 +282,14 @@ abstract class Ess_M2ePro_Model_Connector_Buy_Product_Responser
         );
     }
 
-    //----------------------------------------
+    // ---------------------------------------
 
     protected function getSuccessfulParams(Ess_M2ePro_Model_Listing_Product $listingProduct, $response)
     {
         return array();
     }
 
-    //----------------------------------------
+    // ---------------------------------------
 
     /**
      * @param Ess_M2ePro_Model_Listing_Product $listingProduct
@@ -286,7 +297,7 @@ abstract class Ess_M2ePro_Model_Connector_Buy_Product_Responser
      */
     abstract protected function getSuccessfulMessage(Ess_M2ePro_Model_Listing_Product $listingProduct);
 
-    // ########################################
+    //########################################
 
     /**
      * @return Ess_M2ePro_Model_Buy_Listing_Product_Action_Logger
@@ -335,7 +346,7 @@ abstract class Ess_M2ePro_Model_Connector_Buy_Product_Responser
         return $this->configurators[$listingProduct->getId()];
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @param Ess_M2ePro_Model_Listing_Product $listingProduct
@@ -381,7 +392,7 @@ abstract class Ess_M2ePro_Model_Connector_Buy_Product_Responser
         return $this->requestsDataObjects[$listingProduct->getId()];
     }
 
-    // ########################################
+    //########################################
 
     /**
      * @return Ess_M2ePro_Model_Account
@@ -399,7 +410,7 @@ abstract class Ess_M2ePro_Model_Connector_Buy_Product_Responser
         return Mage::helper('M2ePro/Component_Buy')->getMarketplace();
     }
 
-    //---------------------------------------
+    // ---------------------------------------
 
     protected function getActionType()
     {
@@ -411,7 +422,7 @@ abstract class Ess_M2ePro_Model_Connector_Buy_Product_Responser
         return $this->params['lock_identifier'];
     }
 
-    //---------------------------------------
+    // ---------------------------------------
 
     protected function getLogsAction()
     {
@@ -423,14 +434,14 @@ abstract class Ess_M2ePro_Model_Connector_Buy_Product_Responser
         return (int)$this->params['logs_action_id'];
     }
 
-    //---------------------------------------
+    // ---------------------------------------
 
     protected function getStatusChanger()
     {
         return (int)$this->params['status_changer'];
     }
 
-    // ########################################
+    //########################################
 
     protected function getOrmActionType()
     {
@@ -447,8 +458,8 @@ abstract class Ess_M2ePro_Model_Connector_Buy_Product_Responser
                 return 'Delete';
         }
 
-        throw new Exception('Wrong Action type');
+        throw new Ess_M2ePro_Model_Exception('Wrong Action type');
     }
 
-    // ########################################
+    //########################################
 }
